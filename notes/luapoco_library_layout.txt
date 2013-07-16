@@ -1,0 +1,50 @@
+lua-poco (library/repo name)
+
+* lua-poco struct from lua's prespective
+----------------------------------------
+poco (similar to apr.lua, aka the parent container for the module, needed? perhaps to load all submodules)
+poco.Foundation (table containing constructors/static functions for Foundation)
+poco.Net (same as above)
+poco.Net.hostByAddress() (function taking an IPAddress userdata or a hostname string)
+poco.Net.StreamSocket() (a constructor taking nothing, a SocketAddress userdata, string containing a family?)
+
+* component loading
+----------------------------------------
+each component should create the module table with constructors/functions.
+each component should register its metatable in the state for each class. (or on first use?)
+
+* userdata representation
+----------------------------------------
+to be allocated via lua_newuserdata/lua_setmetatable.
+a specific subclass of the userdata should be allocated via placement new
+	and collected on __gc.
+
+class UserData
+{
+public:
+	UserData();
+	virtual ~UserData();
+	// virtual destructor allows a singular GC function to clean up all
+	// subclasses, some of which may have to release references to other
+	// userdata in the registry or other things.
+	
+	enum BaseType getBaseClassType();
+	enum UserDataType getType();
+	setType(enum UserDataType);
+	void* getPocoObject();
+	void setPocoObject(void*);
+};
+
+* Threading issues
+----------------------------------------
+threading / thread pools / notifications / events / etc.
+need to do some serialization mechanism.
+perhaps creating threads based on lua_load() (file/string) or string.dump(),
+	and a table that represents the runnable/task interface.
+		class LuaThreadTask to run inside of a TaskManager (no way to intra-thread-com?)
+		via Pipes like stdin/stdout on a process
+		via SharedMemory and some abstraction on top of it (rwlocks and a notification/event or something?)
+		
+
+* Poco binding source file layout
+----------------------------------------
