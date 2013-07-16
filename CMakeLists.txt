@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 2.6)
 project(luapoco)
 
+# lua5.1 // hack for now
+find_path(LUA_INCLUDE_DIR lua5.1/lua.h)
+include_directories(${LUA_INCLUDE_DIR}/lua5.1)
+find_library(LIBLUA51 lua5.1)
+
 # include POCO library
 find_path(POCO_INCLUDE_DIR Poco/File.h)
 include_directories(${POCO_INCLUDE_DIR}/Poco)
