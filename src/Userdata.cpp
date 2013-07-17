@@ -1,17 +1,7 @@
+#include "Userdata.h"
+
 namespace LuaPoco
 {
-
-enum UserdataType
-{
-	Userdata_None = 0,
-	Userdata_File
-};
-
-enum BaseType
-{
-	BaseType_None = 0,
-	BaseType_File
-};
 
 // public member functions
 Userdata::Userdata() : 
@@ -27,23 +17,23 @@ Userdata::~Userdata()
 
 UserdataType Userdata::getType()
 {
-	return mUserdataType
+	return mUserdataType;
 }
 
-BaseType getBaseType()
+BaseType Userdata::getBaseType()
 {
 	return mBaseType;
 }
 
-// inherited member functions
-void Userdata::setType(enum UserdataType userdataType)
+
+void Userdata::setType(UserdataType type)
 {
-	mUserdataType = userdataType;
+	mUserdataType = type;
 }
 
-void Userdata::setBaseType(BaseType baseType)
+void Userdata::setBaseType(BaseType type)
 {
-	mBaseType = baseType;
+	mBaseType = type;
 }
 
 } // LuaPoco

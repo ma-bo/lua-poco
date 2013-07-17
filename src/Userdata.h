@@ -28,14 +28,14 @@ public:
 	BaseType getBaseType();
 
 protected:
-	void setType(enum UserdataType);
-	void setBaseType(enum UserdataType);
+	void setType(UserdataType type);
+	void setBaseType(BaseType type);
 	
 private:
 	Userdata(const Userdata& disabledCopy);
 	Userdata& operator=(const Userdata& disabledAssignment);
 	
-	UserBaseType mBaseType;
+	BaseType mBaseType;
 	UserdataType mUserdataType;
 };
 
