@@ -18,6 +18,10 @@ enum BaseType
 	BaseType_File
 };
 
+// base class for all userdata
+// the idea is that it will be possible to pass a userdata to another 
+// userdata's method, and these types this will enable base class 
+// compatability testing.
 class Userdata
 {
 public:

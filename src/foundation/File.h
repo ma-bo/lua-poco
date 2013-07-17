@@ -13,14 +13,20 @@ class FileUserdata : public Userdata
 public:
 	FileUserdata(const char *path);
 	virtual ~FileUserdata();
-	// constructor
+	// register metatable for this class
 	static bool registerFile(lua_State* L);
 private:
+	// constructor function 
+	// Foundation.File(string) -> userdata
 	static int File(lua_State* L);
-	// member functions
+	
+	// userdata methods
+	// File:exists() -> boolean
 	static int exists(lua_State* L);
+	// File:getSize -> boolean
 	static int getSize(lua_State* L);
-	// metamethods
+	
+	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);
 	static int metamethod__index(lua_State* L);
 	static int metamethod__newindex(lua_State* L);
