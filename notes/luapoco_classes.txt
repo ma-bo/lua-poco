@@ -1,0 +1,19 @@
+* DirectoryWatcher
+----------------------------------------
+1. There are events which require a Poco::Delegate() to be operator+='d
+	onto the Event but the Delegate is dispatched from the thread 
+	spawned by the DirectoryWatcher, so the FileEvent structure will 
+	need to be copied to the Lua thread, then a syncronization method
+	used to block the Delegate from returning until the Lua thread returns.
+2. DirectoryWatcher can be constructed with a table of lua Functions that
+	correspond to each event Delegate callback.
+
+* NotificationCenter
+----------------------------------------
+PocoNote: In a multithreaded scenario, notifications are always delivered in 
+	the thread in which the notification was posted, which may not be 
+	the same thread in which an observer registered itself.
+1. Lua doesn't have a concept of thread interruption, so Notifications 
+	will need to be delivered to a lua state that is either blocked on a
+	run() call and the callbacks are dispatched, or perhaps there would
+	be a function that polls for new notifications.

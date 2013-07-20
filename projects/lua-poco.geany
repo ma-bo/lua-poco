@@ -22,5 +22,14 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=0
-FILE_NAME_0=0;CMake;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Flua-poco%2FCMakeLists.txt;0;4
+current_page=9
+FILE_NAME_0=0;CMake;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2FCMakeLists.txt;0;4
+FILE_NAME_1=0;CMake;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2FCMakeLists.txt;0;4
+FILE_NAME_2=0;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2FLuaPoco.h;0;4
+FILE_NAME_3=0;C++;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2FUserdata.cpp;0;4
+FILE_NAME_4=0;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2FUserdata.h;0;4
+FILE_NAME_5=0;CMake;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2Ffoundation%2FCMakeLists.txt;0;4
+FILE_NAME_6=0;C++;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2Ffoundation%2FFile.cpp;0;4
+FILE_NAME_7=0;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2Ffoundation%2FFile.h;0;4
+FILE_NAME_8=0;C++;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2Ffoundation%2FLoader.cpp;0;4
+FILE_NAME_9=184;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2Ffoundation%2Ftest.file.lua;0;4
