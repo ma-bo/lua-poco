@@ -17,3 +17,28 @@ PocoNote: In a multithreaded scenario, notifications are always delivered in
 	will need to be delivered to a lua state that is either blocked on a
 	run() call and the callbacks are dispatched, or perhaps there would
 	be a function that polls for new notifications.
+
+* NotificationQueue
+----------------------------------------
+PocoNote 1: Special care must be taken when shutting down a queue with worker threads waiting for notifications. The recommended sequence to shut down and destroy the queue is to
+	set a termination flag for every worker thread
+	call the wakeUpAll() method
+	join each worker thread
+	destroy the notification queue.
+
+PocoNote 2: How to tell worker threads they are done?
+	1. Post a special QuitNotification for every worker thread;
+	2. Set a (global) stop flag and use waitDequeueNotification() with a timeout;
+	3. Use wakeUpAll(): every call to waitDequeueNotification() will immediately return null.
+
+* TaskManager
+----------------------------------------
+1.  It makes sense to funnel NotificationCenter messages to the lua_State that owns the TaskManager
+	object via a NotificationQueue.  That thread could then use the dequeue mechanism with a timeout or whatever
+	to acquire notifications.
+2.  Using the mechanism above, it would be possible to employ a run() method to dispatch to some callbacks in the
+	owning lua_State, with some locking around the lua_State itself.
+	
+* Task
+----------------------------------------
+1. 
