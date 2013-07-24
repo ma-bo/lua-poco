@@ -1,9 +1,19 @@
-* Threading issues
+* Threading
 ----------------------------------------
-threading / thread pools / notifications / events / etc.
-need to do some serialization mechanism.
-perhaps creating threads based on lua_load() (file/string) or string.dump(),
-	and a table that represents the runnable/task interface.
-		class LuaThreadTask to run inside of a TaskManager (no way to intra-thread-com?)
-		via Pipes like stdin/stdout on a process
-		via SharedMemory and some abstraction on top of it (rwlocks and a notification/event or something?)
+1. Threads can be constructed with either a Poco::File or a lua-function/closure.
+2. If a Poco::File is passed, values can be placed into the lua_State via a table parameter.
+	Table parameters would be required to have a basic lua type (no-coroutines) or a copyable
+	lua-poco userdata value.  Closures would be string.dump()ed into the lua_State that will run
+	on the native thread.  Upvalues will be migrated to the new lua_State and also 
+	have the requirement that they be a basic type or a copyable lua-poco userdata.
+	
+	Dependency handling of require()'d modules could be done via a table value comparison on upvalues.
+	ie:
+		local foundation = require("foundation")
+		if poco-libs[upvalue] then
+			upvalue = require_in_new_state("foundation")
+		end
+3. Task's would send messages to their TaskManager via a NotificationQueue that could handle a basic
+	lua type, or a copyable lua-poco value. (or perhaps multiple values via a proxy/state
+4. Threads would synchronize with their parents basic poco types like Events/Conditions/Semaphores?
+

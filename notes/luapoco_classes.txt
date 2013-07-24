@@ -41,4 +41,6 @@ PocoNote 2: How to tell worker threads they are done?
 	
 * Task
 ----------------------------------------
-1. 
+1. Task needs to have a userdata with protected side accessible interface 
+	in order to check isCancelled/sleep, etc.  Userdata registered as self or 
+	_self in the global environment of the new lua_State/native thread.
