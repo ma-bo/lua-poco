@@ -22,8 +22,8 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=9
-FILE_NAME_0=0;CMake;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2FCMakeLists.txt;0;4
+current_page=18
+FILE_NAME_0=717;CMake;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2FCMakeLists.txt;0;4
 FILE_NAME_1=0;CMake;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2FCMakeLists.txt;0;4
 FILE_NAME_2=0;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2FLuaPoco.h;0;4
 FILE_NAME_3=0;C++;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2FUserdata.cpp;0;4
@@ -33,3 +33,12 @@ FILE_NAME_6=0;C++;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2Ffoundat
 FILE_NAME_7=0;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2Ffoundation%2FFile.h;0;4
 FILE_NAME_8=0;C++;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2Ffoundation%2FLoader.cpp;0;4
 FILE_NAME_9=184;Lua;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fsrc%2Ffoundation%2Ftest.file.lua;0;4
+FILE_NAME_10=1048;None;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fnotes%2Fluapoco_classes.txt;0;4
+FILE_NAME_11=333;None;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2Fsrc%2Flua-poco%2Fnotes%2Fluapoco_library_layout.txt;0;4
+FILE_NAME_12=4021;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2FAUR%2Fpoco%2Fpkg%2Fpoco%2Fusr%2Finclude%2FPoco%2FTaskNotification.h;0;4
+FILE_NAME_13=5641;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2FAUR%2Fpoco%2Fpkg%2Fpoco%2Fusr%2Finclude%2FPoco%2FNotificationCenter.h;0;4
+FILE_NAME_14=4085;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2FAUR%2Fpoco%2Fpkg%2Fpoco%2Fusr%2Finclude%2FPoco%2FNotificationQueue.h;0;4
+FILE_NAME_15=0;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2FAUR%2Fpoco%2Fpkg%2Fpoco%2Fusr%2Finclude%2FPoco%2FNotificationStrategy.h;0;4
+FILE_NAME_16=1740;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2FAUR%2Fpoco%2Fpkg%2Fpoco%2Fusr%2Finclude%2FPoco%2FNotification.h;0;4
+FILE_NAME_17=5191;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2FAUR%2Fpoco%2Fpkg%2Fpoco%2Fusr%2Finclude%2FPoco%2FTask.h;0;4
+FILE_NAME_18=3068;C;0;EUTF-8;1;1;0;%2Fhome%2Fmatt%2FAUR%2Fpoco%2Fpkg%2Fpoco%2Fusr%2Finclude%2FPoco%2FTaskManager.h;0;4
