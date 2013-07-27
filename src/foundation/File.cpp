@@ -1,6 +1,7 @@
 #include "File.h"
 #include <Poco/Exception.h>
 #include <iostream>
+#include <string>
 
 namespace LuaPoco
 {
@@ -178,12 +179,19 @@ int FileUserdata::metamethod__index(lua_State* L)
 	if (!lua_isnil(L, -1))
 		return 1;
 	
-	// else return value for property or nil if not found
+	// else return value for property
 	luaL_getmetatable(L, "LuaPoco.File.properties.read");
+	int preCall = lua_gettop(L);
 	lua_pushvalue(L, 2);
-	lua_rawget(L, 1);
-	
-	return 1;
+	lua_rawget(L, -2);
+	int rv = 0;
+	if (lua_isfunction(L, -1))
+	{
+		lua_pushvalue(L, 1);
+		lua_call(L, 1, LUA_MULTRET);
+		rv = lua_gettop(L) - preCall;
+	}
+	return rv;
 }
 
 int FileUserdata::metamethod__newindex(lua_State* L)
@@ -240,6 +248,7 @@ int FileUserdata::remove(lua_State* L)
 {
 	return 0;
 }
+
 int FileUserdata::renameTo(lua_State* L)
 {
 	return 0;
@@ -248,26 +257,102 @@ int FileUserdata::renameTo(lua_State* L)
 // read properties
 int FileUserdata::canExecute(lua_State* L)
 {
-	return 0;
+	int rv = 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	int executable = 0;
+	try
+	{
+		executable = fud->mFile->canExecute();
+		lua_pushboolean(L, executable);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::canRead(lua_State* L)
 {
-	return 0;
+	int rv = 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	int readable = 0;
+	try
+	{
+		readable = fud->mFile->canRead();
+		lua_pushboolean(L, readable);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::canWrite(lua_State* L)
 {
-	return 0;
+	int rv = 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	int writable = 0;
+	try
+	{
+		writable = fud->mFile->canWrite();
+		lua_pushboolean(L, writable);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::created(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
 	return 0;
 }
 
 int FileUserdata::exists(lua_State* L)
 {
+	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
 		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
 	
@@ -275,30 +360,36 @@ int FileUserdata::exists(lua_State* L)
 	try
 	{
 		exists = fud->mFile->exists();
+		lua_pushboolean(L, exists);
+		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
 		lua_pushnil(L);
 		lua_pushstring(L, e.what());
+		rv = 2;
 	}
 	catch (...)
 	{
 		lua_pushnil(L);
 		lua_pushstring(L, "unknown error");
-		return 2;
+		rv = 2;
 	}
 	
-	lua_pushboolean(L, exists);
-	return 1;
+	return rv;
 }
 
 int FileUserdata::getLastModified(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
 	return 0;
 }
 
 int FileUserdata::getSize(lua_State* L)
 {
+	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
 		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
 	
@@ -307,76 +398,292 @@ int FileUserdata::getSize(lua_State* L)
 	try
 	{
 		num = fud->mFile->getSize();
+		lua_pushnumber(L, num);
+		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
 		lua_pushnil(L);
 		lua_pushstring(L, e.what());
+		rv = 2;
 	}
 	catch (...)
 	{
 		lua_pushnil(L);
 		lua_pushstring(L, "unknown error");
-		return 2;
+		rv = 2;
 	}
 	
-	lua_pushnumber(L, num);
-	return 1;
+	return rv;
 }
 
 int FileUserdata::isDevice(lua_State* L)
 {
-	return 0;
+	int rv = 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	int device = 0;
+	try
+	{
+		device = fud->mFile->isDevice();
+		lua_pushboolean(L, device);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::isDirectory(lua_State* L)
 {
-	return 0;
+	int rv = 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	int directory = 0;
+	try
+	{
+		directory = fud->mFile->isDirectory();
+		lua_pushboolean(L, directory);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::isFile(lua_State* L)
 {
-	return 0;
+	int rv = 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	int file = 0;
+	try
+	{
+		file = fud->mFile->isFile();
+		lua_pushboolean(L, file);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::isHidden(lua_State* L)
 {
-	return 0;
+	int rv = 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	int hidden = 0;
+	try
+	{
+		hidden = fud->mFile->isHidden();
+		lua_pushboolean(L, hidden);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::isLink(lua_State* L)
 {
-	return 0;
+	int rv = 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	int link = 0;
+	try
+	{
+		link = fud->mFile->isLink();
+		lua_pushboolean(L, link);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::path(lua_State* L)
 {
-	return 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	std::string path = fud->mFile->path();
+	lua_pushlstring(L, path.c_str(), path.size());
+	
+	return 1;
 }
 
 // write properties
 int FileUserdata::setExecutable(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
+	int executable = 1;
+	if (lua_gettop(L) > 1)
+		executable = lua_toboolean(L, 2);
+	try
+	{
+		fud->mFile->setExecutable(executable);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushstring(L, e.what());
+		lua_error(L);
+	}
+	catch (...)
+	{
+		lua_pushstring(L, "unknown error");
+		lua_error(L);
+	}
+	
 	return 0;
 }
 
 int FileUserdata::setLastModified(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+	
 	return 0;
 }
 
 int FileUserdata::setReadOnly(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		
+	int readOnly = 1;
+	if (lua_gettop(L) > 1)
+		readOnly = lua_toboolean(L, 2);
+	
+	try
+	{
+		fud->mFile->setReadOnly(readOnly);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushstring(L, e.what());
+		lua_error(L);
+	}
+	catch (...)
+	{
+		lua_pushstring(L, "unknown error");
+		lua_error(L);
+	}
+	
 	return 0;
 }
 
 int FileUserdata::setSize(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		
+	lua_Number size = luaL_checknumber(L, 2);
+	
+	try
+	{
+		fud->mFile->setSize(size);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushstring(L, e.what());
+		lua_error(L);
+	}
+	catch (...)
+	{
+		lua_pushstring(L, "unknown error");
+		lua_error(L);
+	}
+	
 	return 0;
 }
 
 int FileUserdata::setWritable(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		
+	int writable = 1;
+	if (lua_gettop(L) > 1)
+		writable = lua_toboolean(L, 2);
+	
+	try
+	{
+		fud->mFile->setWriteable(writable);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushstring(L, e.what());
+		lua_error(L);
+	}
+	catch (...)
+	{
+		lua_pushstring(L, "unknown error");
+		lua_error(L);
+	}
+	
 	return 0;
 }
 
