@@ -1,10 +1,14 @@
-# Build core components for sub libraries
-
 set(LUAPOCO_SRC
+	Loader.cpp
 	Userdata.cpp)
+	
+set(FOUNDATION_SRC
+	foundation/File.cpp)
 
-add_library(luapoco-core SHARED ${LUAPOCO_SRC})
-target_link_libraries(luapoco-core ${LIBLUA51})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# Build foundation binding
-add_subdirectory(foundation)
+add_library(poco SHARED ${LUAPOCO_SRC} ${FOUNDATION_SRC})
+target_link_libraries(poco ${LIBLUA51} ${LIBPocoFoundation})
+set_target_properties(poco PROPERTIES PREFIX "")
+
+install(TARGETS poco LIBRARY DESTINATION ${CMAKE_BINARY_DIR})

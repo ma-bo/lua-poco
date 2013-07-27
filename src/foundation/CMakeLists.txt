@@ -3,4 +3,7 @@ set(FOUNDATION_SRC
 	File.cpp)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
 add_library(foundation SHARED ${FOUNDATION_SRC})
-target_link_libraries(foundation luapoco-core ${LIBLUA51} ${LIBPocoFoundation})
+set_target_properties(foundation PROPERTIES PREFIX "")
+target_link_libraries(foundation poco-common ${LIBLUA51} ${LIBPocoFoundation})
+
+install(TARGETS foundation LIBRARY DESTINATION ${CMAKE_BINARY_DIR}/poco)

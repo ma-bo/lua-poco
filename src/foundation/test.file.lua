@@ -1,6 +1,6 @@
-local foundation = assert(require("foundation"))
-local file = assert(foundation.File("test1"))
+local foundation = assert(require("poco"))
+local ff = assert(foundation.File("test1"))
 
-print("file: ", "test1")
-print("exists", file:exists())
-print("size: ", file:getSize())
+print("file: ", ff.path)
+print("exists: ", ff.exists)
+print("size: ", ff:size)
