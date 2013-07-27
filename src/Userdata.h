@@ -28,6 +28,8 @@ public:
 	Userdata();
 	virtual ~Userdata();
 	
+	virtual bool isCopyable();
+	virtual bool copyToState(lua_State *L);
 	UserdataType getType();
 	BaseType getBaseType();
 

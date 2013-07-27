@@ -15,6 +15,16 @@ Userdata::~Userdata()
 	mUserdataType = Userdata_None;
 }
 
+bool Userdata::isCopyable()
+{
+	return false;
+}
+
+bool Userdata::copyToState(lua_State *L)
+{
+	return false;
+}
+
 UserdataType Userdata::getType()
 {
 	return mUserdataType;
