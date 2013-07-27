@@ -41,6 +41,15 @@ PocoNote 2: How to tell worker threads they are done?
 	
 * Task
 ----------------------------------------
-1. Task needs to have a userdata with protected side accessible interface 
-	in order to check isCancelled/sleep, etc.  Userdata registered as self or 
-	_self in the global environment of the new lua_State/native thread.
+1. Has one userdata representing 'self' in a thread, and another userdata 
+	representing the task in the main thread.
+2. Tasks are not constructed explicitly, but created by start() member on the
+	TaskManager and a userdata is stored in the registry.
+3. LuaTask class has a getRegistryIdx() function such that when the TaskManager
+	sends a notification to the main thread, the Task pointer can be cast to a
+	LuaTask and the userdata associated with it can be retrieved from the registry
+	and returned to Lua.
+4. Tasks can post LuaNotification's to the TaskManager which encompass a 
+	copyable Poco userdata or a basic Lua type? (copyable userdata is a lot of code 
+	to manage, unless each class implements a bool copyToState(lua_State* L) 
+	function.)
