@@ -28,8 +28,6 @@ private:
 	
 	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);
-	static int metamethod__index(lua_State* L);
-	static int metamethod__newindex(lua_State* L);
 	static int metamethod__tostring(lua_State* L);
 	
 	// userdata methods
@@ -42,8 +40,6 @@ private:
 	static int moveTo(lua_State* L);
 	static int remove(lua_State* L);
 	static int renameTo(lua_State* L);
-	
-	// read properties
 	static int canExecute(lua_State* L);
 	static int canRead(lua_State* L);
 	static int canWrite(lua_State* L);
@@ -57,8 +53,6 @@ private:
 	static int isHidden(lua_State* L);
 	static int isLink(lua_State* L);
 	static int path(lua_State* L);
-	
-	// write properties
 	static int setExecutable(lua_State* L);
 	static int setLastModified(lua_State* L);
 	static int setReadOnly(lua_State* L);
