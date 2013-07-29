@@ -14,6 +14,8 @@ public:
 	FileUserdata(const char *path);
 	FileUserdata(const Poco::File& file);
 	virtual ~FileUserdata();
+	virtual UserdataType getType();
+	virtual bool copyToState(lua_State* L);
 	Poco::File* getFileInternal();
 	
 	// register metatable for this class

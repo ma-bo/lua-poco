@@ -9,13 +9,14 @@ namespace LuaPoco
 enum UserdataType
 {
 	Userdata_None = 0,
-	Userdata_File
+	Userdata_File,
+	Userdata_Timestamp,
+	Userdata_Int64
 };
 
 enum BaseType
 {
 	BaseType_None = 0,
-	BaseType_File
 };
 
 // base class for all userdata
@@ -30,19 +31,12 @@ public:
 	
 	virtual bool isCopyable();
 	virtual bool copyToState(lua_State *L);
-	UserdataType getType();
-	BaseType getBaseType();
+	virtual UserdataType getType() = 0;
+	virtual BaseType getBaseType();
 
-protected:
-	void setType(UserdataType type);
-	void setBaseType(BaseType type);
-	
 private:
 	Userdata(const Userdata& disabledCopy);
 	Userdata& operator=(const Userdata& disabledAssignment);
-	
-	BaseType mBaseType;
-	UserdataType mUserdataType;
 };
 
 

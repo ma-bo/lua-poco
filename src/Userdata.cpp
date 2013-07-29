@@ -4,15 +4,12 @@ namespace LuaPoco
 {
 
 // public member functions
-Userdata::Userdata() : 
-	mBaseType(BaseType_None), mUserdataType(Userdata_None)
+Userdata::Userdata()
 {
 }
 
 Userdata::~Userdata()
 {
-	mBaseType = BaseType_None;
-	mUserdataType = Userdata_None;
 }
 
 bool Userdata::isCopyable()
@@ -25,25 +22,9 @@ bool Userdata::copyToState(lua_State *L)
 	return false;
 }
 
-UserdataType Userdata::getType()
-{
-	return mUserdataType;
-}
-
 BaseType Userdata::getBaseType()
 {
-	return mBaseType;
-}
-
-
-void Userdata::setType(UserdataType type)
-{
-	mUserdataType = type;
-}
-
-void Userdata::setBaseType(BaseType type)
-{
-	mBaseType = type;
+	return BaseType_None;
 }
 
 } // LuaPoco

@@ -3,7 +3,9 @@ set(LUAPOCO_SRC
 	Userdata.cpp)
 	
 set(FOUNDATION_SRC
-	foundation/File.cpp)
+	foundation/File.cpp
+	foundation/Timestamp.cpp
+	foundation/Int64.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 

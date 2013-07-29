@@ -8,15 +8,11 @@ namespace LuaPoco
 
 FileUserdata::FileUserdata(const char* path) : mFile(NULL)
 {
-	setType(Userdata_File);
-	setBaseType(BaseType_None);
 	mFile = new Poco::File(path);
 }
 
 FileUserdata::FileUserdata(const Poco::File& file)
 {
-	setType(Userdata_File);
-	setBaseType(BaseType_None);
 	mFile = new Poco::File(file);
 }
 
@@ -26,93 +22,109 @@ FileUserdata::~FileUserdata()
 	mFile = NULL;
 }
 
+UserdataType FileUserdata::getType()
+{
+	return Userdata_File;
+}
+
+bool FileUserdata::copyToState(lua_State* L)
+{
+	void* ud = lua_newuserdata(L, sizeof *this);
+	luaL_getmetatable(L, "Poco.File.metatable");
+	lua_setmetatable(L, -2);
+	
+	FileUserdata* fud = new(ud) FileUserdata(*mFile);
+	
+	return true;
+}
+
 bool FileUserdata::registerFile(lua_State* L)
 {
 	bool result = false;
-	if (lua_istable(L, -1))
-	{
-		// register the constructor in the Foundation table
-		lua_pushcfunction(L, File);
-		lua_setfield(L, -2, "File");
-		
-		// create metatable for Poco::File
-		luaL_newmetatable(L, "LuaPoco.File.metatable");
-		// indexing and gc
-		lua_pushcfunction(L, metamethod__index);
-		lua_setfield(L, -2, "__index");
-		lua_pushcfunction(L, metamethod__newindex);
-		lua_setfield(L, -2, "__newindex");
-		lua_pushcfunction(L, metamethod__gc);
-		lua_setfield(L, -2, "__gc");
-		lua_pushcfunction(L, metamethod__tostring);
-		lua_setfield(L, -2, "__tostring");
-		// methods
-		lua_pushcfunction(L, copyTo);
-		lua_setfield(L, -2, "copyTo");
-		lua_pushcfunction(L, createDirectories);
-		lua_setfield(L, -2, "createDirectories");
-		lua_pushcfunction(L, createDirectory);
-		lua_setfield(L, -2, "createDirectory");
-		lua_pushcfunction(L, createFile);
-		lua_setfield(L, -2, "createFile");
-		lua_pushcfunction(L, listNames);
-		lua_setfield(L, -2, "listNames");
-		lua_pushcfunction(L, listFiles);
-		lua_setfield(L, -2, "listFiles");
-		lua_pushcfunction(L, moveTo);
-		lua_setfield(L, -2, "moveTo");
-		lua_pushcfunction(L, remove);
-		lua_setfield(L, -2, "remove");
-		lua_pushcfunction(L, renameTo);
-		lua_setfield(L, -2, "renameTo");
-		lua_pop(L, 1);
-		
-		// create table for readable properties
-		luaL_newmetatable(L, "LuaPoco.File.properties.read");		
-		lua_pushcfunction(L, canExecute);
-		lua_setfield(L, -2, "executable");
-		lua_pushcfunction(L, canRead);
-		lua_setfield(L, -2, "readable");
-		lua_pushcfunction(L, canWrite);
-		lua_setfield(L, -2, "writable");
-		lua_pushcfunction(L, created);
-		lua_setfield(L, -2, "created");
-		lua_pushcfunction(L, exists);
-		lua_setfield(L, -2, "exists");
-		lua_pushcfunction(L, getLastModified);
-		lua_setfield(L, -2, "lastModified");
-		lua_pushcfunction(L, getSize);
-		lua_setfield(L, -2, "size");
-		lua_pushcfunction(L, isDevice);
-		lua_setfield(L, -2, "device");
-		lua_pushcfunction(L, isDirectory);
-		lua_setfield(L, -2, "directory");
-		lua_pushcfunction(L, isFile);
-		lua_setfield(L, -2, "file");
-		lua_pushcfunction(L, isHidden);
-		lua_setfield(L, -2, "hidden");
-		lua_pushcfunction(L, isLink);
-		lua_setfield(L, -2, "link");
-		lua_pushcfunction(L, path);
-		lua_setfield(L, -2, "path");
-		lua_pop(L, 1);
-		
-		// create table for readable properties
-		luaL_newmetatable(L, "LuaPoco.File.properties.write");
-		lua_pushcfunction(L, setExecutable);
-		lua_setfield(L, -2, "executable");
-		lua_pushcfunction(L, setLastModified);
-		lua_setfield(L, -2, "lastModified");
-		lua_pushcfunction(L, setReadOnly);
-		lua_setfield(L, -2, "readOnly");
-		lua_pushcfunction(L, setSize);
-		lua_setfield(L, -2, "size");
-		lua_pushcfunction(L, setWritable);
-		lua_setfield(L, -2, "writable");
-		lua_pop(L, 1);
-				
-		result = true;
-	}
+	if (!lua_istable(L, -1))
+		return result;
+	
+	// constructor: poco.File()
+	lua_pushcfunction(L, File);
+	lua_setfield(L, -2, "File");
+	
+	// create metatable for Poco::File
+	luaL_newmetatable(L, "Poco.File.metatable");
+	// indexing and gc
+	lua_pushcfunction(L, metamethod__index);
+	lua_setfield(L, -2, "__index");
+	lua_pushcfunction(L, metamethod__newindex);
+	lua_setfield(L, -2, "__newindex");
+	lua_pushcfunction(L, metamethod__gc);
+	lua_setfield(L, -2, "__gc");
+	lua_pushcfunction(L, metamethod__tostring);
+	lua_setfield(L, -2, "__tostring");
+	// methods
+	lua_pushcfunction(L, copyTo);
+	lua_setfield(L, -2, "copyTo");
+	lua_pushcfunction(L, createDirectories);
+	lua_setfield(L, -2, "createDirectories");
+	lua_pushcfunction(L, createDirectory);
+	lua_setfield(L, -2, "createDirectory");
+	lua_pushcfunction(L, createFile);
+	lua_setfield(L, -2, "createFile");
+	lua_pushcfunction(L, listNames);
+	lua_setfield(L, -2, "listNames");
+	lua_pushcfunction(L, listFiles);
+	lua_setfield(L, -2, "listFiles");
+	lua_pushcfunction(L, moveTo);
+	lua_setfield(L, -2, "moveTo");
+	lua_pushcfunction(L, remove);
+	lua_setfield(L, -2, "remove");
+	lua_pushcfunction(L, renameTo);
+	lua_setfield(L, -2, "renameTo");
+	lua_pop(L, 1);
+	
+	// create table for readable properties
+	luaL_newmetatable(L, "Poco.File.properties.read");		
+	lua_pushcfunction(L, canExecute);
+	lua_setfield(L, -2, "executable");
+	lua_pushcfunction(L, canRead);
+	lua_setfield(L, -2, "readable");
+	lua_pushcfunction(L, canWrite);
+	lua_setfield(L, -2, "writable");
+	lua_pushcfunction(L, created);
+	lua_setfield(L, -2, "created");
+	lua_pushcfunction(L, exists);
+	lua_setfield(L, -2, "exists");
+	lua_pushcfunction(L, getLastModified);
+	lua_setfield(L, -2, "lastModified");
+	lua_pushcfunction(L, getSize);
+	lua_setfield(L, -2, "size");
+	lua_pushcfunction(L, isDevice);
+	lua_setfield(L, -2, "device");
+	lua_pushcfunction(L, isDirectory);
+	lua_setfield(L, -2, "directory");
+	lua_pushcfunction(L, isFile);
+	lua_setfield(L, -2, "file");
+	lua_pushcfunction(L, isHidden);
+	lua_setfield(L, -2, "hidden");
+	lua_pushcfunction(L, isLink);
+	lua_setfield(L, -2, "link");
+	lua_pushcfunction(L, path);
+	lua_setfield(L, -2, "path");
+	lua_pop(L, 1);
+	
+	// create table for readable properties
+	luaL_newmetatable(L, "Poco.File.properties.write");
+	lua_pushcfunction(L, setExecutable);
+	lua_setfield(L, -2, "executable");
+	lua_pushcfunction(L, setLastModified);
+	lua_setfield(L, -2, "lastModified");
+	lua_pushcfunction(L, setReadOnly);
+	lua_setfield(L, -2, "readOnly");
+	lua_pushcfunction(L, setSize);
+	lua_setfield(L, -2, "size");
+	lua_pushcfunction(L, setWritable);
+	lua_setfield(L, -2, "writable");
+	lua_pop(L, 1);
+	
+	result = true;
 	
 	return result;
 }
@@ -150,7 +162,7 @@ int FileUserdata::File(lua_State* L)
 		return 2;
 	}
 	
-	luaL_getmetatable(L, "LuaPoco.File.metatable");
+	luaL_getmetatable(L, "Poco.File.metatable");
 	lua_setmetatable(L, -2);
 	return 1;
 }
@@ -159,7 +171,7 @@ int FileUserdata::File(lua_State* L)
 int FileUserdata::metamethod__gc(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	fud->~FileUserdata();
 	
 	return 0;
@@ -168,7 +180,7 @@ int FileUserdata::metamethod__gc(lua_State* L)
 int FileUserdata::metamethod__index(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	if (!lua_getmetatable(L, 1))
 		return 0;
@@ -180,7 +192,7 @@ int FileUserdata::metamethod__index(lua_State* L)
 		return 1;
 	
 	// else return value for property
-	luaL_getmetatable(L, "LuaPoco.File.properties.read");
+	luaL_getmetatable(L, "Poco.File.properties.read");
 	int preCall = lua_gettop(L);
 	lua_pushvalue(L, 2);
 	lua_rawget(L, -2);
@@ -202,9 +214,9 @@ int FileUserdata::metamethod__newindex(lua_State* L)
 int FileUserdata::metamethod__tostring(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
-	lua_pushfstring(L, "LuaPoco.File (%p)", reinterpret_cast<void*>(fud));
+	lua_pushfstring(L, "Poco.File (%p)", reinterpret_cast<void*>(fud));
 	return 1;
 }
 
@@ -259,7 +271,7 @@ int FileUserdata::canExecute(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int executable = 0;
 	try
@@ -288,7 +300,7 @@ int FileUserdata::canRead(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int readable = 0;
 	try
@@ -317,7 +329,7 @@ int FileUserdata::canWrite(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int writable = 0;
 	try
@@ -345,7 +357,7 @@ int FileUserdata::canWrite(lua_State* L)
 int FileUserdata::created(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	return 0;
 }
@@ -354,7 +366,7 @@ int FileUserdata::exists(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int exists = 0;
 	try
@@ -382,7 +394,7 @@ int FileUserdata::exists(lua_State* L)
 int FileUserdata::getLastModified(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	return 0;
 }
@@ -391,7 +403,7 @@ int FileUserdata::getSize(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	lua_Number num;
 	
@@ -421,7 +433,7 @@ int FileUserdata::isDevice(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int device = 0;
 	try
@@ -450,7 +462,7 @@ int FileUserdata::isDirectory(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int directory = 0;
 	try
@@ -479,7 +491,7 @@ int FileUserdata::isFile(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int file = 0;
 	try
@@ -508,7 +520,7 @@ int FileUserdata::isHidden(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int hidden = 0;
 	try
@@ -537,7 +549,7 @@ int FileUserdata::isLink(lua_State* L)
 {
 	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int link = 0;
 	try
@@ -565,7 +577,7 @@ int FileUserdata::isLink(lua_State* L)
 int FileUserdata::path(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	std::string path = fud->mFile->path();
 	lua_pushlstring(L, path.c_str(), path.size());
@@ -577,7 +589,7 @@ int FileUserdata::path(lua_State* L)
 int FileUserdata::setExecutable(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	int executable = 1;
 	if (lua_gettop(L) > 1)
@@ -603,7 +615,7 @@ int FileUserdata::setExecutable(lua_State* L)
 int FileUserdata::setLastModified(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
 	return 0;
 }
@@ -611,7 +623,7 @@ int FileUserdata::setLastModified(lua_State* L)
 int FileUserdata::setReadOnly(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 		
 	int readOnly = 1;
 	if (lua_gettop(L) > 1)
@@ -638,7 +650,7 @@ int FileUserdata::setReadOnly(lua_State* L)
 int FileUserdata::setSize(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 		
 	lua_Number size = luaL_checknumber(L, 2);
 	
@@ -663,7 +675,7 @@ int FileUserdata::setSize(lua_State* L)
 int FileUserdata::setWritable(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-		luaL_checkudata(L, 1, "LuaPoco.File.metatable"));
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
 		
 	int writable = 1;
 	if (lua_gettop(L) > 1)
