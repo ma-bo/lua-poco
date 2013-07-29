@@ -1,4 +1,5 @@
 #include "File.h"
+#include "Timestamp.h"
 #include <Poco/Exception.h>
 #include <iostream>
 #include <string>
@@ -580,10 +581,33 @@ int FileUserdata::canWrite(lua_State* L)
 
 int FileUserdata::created(lua_State* L)
 {
+	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
 		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
-	return 0;
+	try
+	{
+		Poco::Timestamp ts = fud->mFile->created();
+		void *ud = lua_newuserdata(L, sizeof (TimestampUserdata));
+		luaL_getmetatable(L, "Poco.Timestamp.metatable");
+		lua_setmetatable(L, -2);
+		TimestampUserdata* tsud = new(ud) TimestampUserdata(ts);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::exists(lua_State* L)
@@ -616,10 +640,33 @@ int FileUserdata::exists(lua_State* L)
 
 int FileUserdata::getLastModified(lua_State* L)
 {
+	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
 		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
-	return 0;
+	try
+	{
+		Poco::Timestamp ts = fud->mFile->getLastModified();
+		void *ud = lua_newuserdata(L, sizeof (TimestampUserdata));
+		luaL_getmetatable(L, "Poco.Timestamp.metatable");
+		lua_setmetatable(L, -2);
+		TimestampUserdata* tsud = new(ud) TimestampUserdata(ts);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+		rv = 2;
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		rv = 2;
+	}
+	
+	return rv;
 }
 
 int FileUserdata::getSize(lua_State* L)
