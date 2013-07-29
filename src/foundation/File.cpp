@@ -223,46 +223,283 @@ int FileUserdata::metamethod__tostring(lua_State* L)
 // methods
 int FileUserdata::copyTo(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
+		
+	size_t pathLen = 0;
+	const char* path = luaL_checklstring(L, 2, &pathLen);
+	
+	if (pathLen == 0)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "invalid path");
+		return 2;
+	}
+	
+	try
+	{
+		fud->mFile->copyTo(path);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		return 2;
+	}
+	
 	return 0;
 }
 
 int FileUserdata::createDirectories(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
+	
+	try
+	{
+		fud->mFile->createDirectories();
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		return 2;
+	}
+	
 	return 0;
 }
 
 int FileUserdata::createDirectory(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
+	
+	try
+	{
+		fud->mFile->createDirectory();
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		return 2;
+	}
+	
 	return 0;
 }
 
 int FileUserdata::createFile(lua_State* L)
 {
-	return 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
+	int created = 0;
+	
+	try
+	{
+		created = fud->mFile->createFile();
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		return 2;
+	}
+	
+	lua_pushboolean(L, created);
+	return 1;
 }
 
 int FileUserdata::listNames(lua_State* L)
 {
-	return 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
+	
+	std::vector<std::string> fileNames;
+	
+	try
+	{
+		fud->mFile->list(fileNames);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		return 2;
+	}
+	
+	lua_createtable(L, fileNames.size(), 0);
+	int tableIndex = 1;
+	std::vector<std::string>::iterator i = fileNames.begin();
+	
+	while (i != fileNames.end())
+	{
+		lua_pushlstring(L, i->c_str(), i->size());
+		lua_rawseti(L, -2, tableIndex);
+		++i;
+		++tableIndex;
+	}
+	
+	return 1;
 }
 
 int FileUserdata::listFiles(lua_State* L)
 {
-	return 0;
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
+	
+	std::vector<Poco::File> files;
+	
+	try
+	{
+		fud->mFile->list(files);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		return 2;
+	}
+	
+	lua_createtable(L, files.size(), 0);
+	int tableIndex = 1;
+	std::vector<Poco::File>::iterator i = files.begin();
+	
+	while (i != files.end())
+	{
+		void* ud = lua_newuserdata(L, sizeof *fud);
+		luaL_getmetatable(L, "Poco.File.metatable");
+		lua_setmetatable(L, -2);
+		FileUserdata* fud = new(ud) FileUserdata(*i);
+		lua_rawseti(L, -2, tableIndex);
+		++i;
+		++tableIndex;
+	}
+	
+	return 1;
 }
 
 int FileUserdata::moveTo(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
+		
+	size_t pathLen = 0;
+	const char* path = luaL_checklstring(L, 2, &pathLen);
+	
+	if (pathLen == 0)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "invalid path");
+		return 2;
+	}
+	
+	try
+	{
+		fud->mFile->moveTo(path);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		return 2;
+	}
+	
 	return 0;
 }
 
 int FileUserdata::remove(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
+		
+	luaL_checktype(L, 2, LUA_TBOOLEAN);
+	int recursive = lua_toboolean(L, 2);
+	
+	try
+	{
+		fud->mFile->remove(recursive);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		return 2;
+	}
+	
 	return 0;
 }
 
 int FileUserdata::renameTo(lua_State* L)
 {
+	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
+		luaL_checkudata(L, 1, "Poco.File.metatable"));
+		
+	size_t pathLen = 0;
+	const char* path = luaL_checklstring(L, 2, &pathLen);
+	
+	if (pathLen == 0)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "invalid path");
+		return 2;
+	}
+	
+	try
+	{
+		fud->mFile->renameTo(path);
+	}
+	catch (const Poco::Exception& e)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, e.what());
+	}
+	catch (...)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "unknown error");
+		return 2;
+	}
+	
 	return 0;
 }
 
