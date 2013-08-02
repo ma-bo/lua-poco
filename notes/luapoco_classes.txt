@@ -53,3 +53,40 @@ PocoNote 2: How to tell worker threads they are done?
 	copyable Poco userdata or a basic Lua type? (copyable userdata is a lot of code 
 	to manage, unless each class implements a bool copyToState(lua_State* L) 
 	function.)
+
+* Foundation classes to bind
+----------------------------------------
+- Ascii, Buffer?, ByteOrder, Checksum
+- DynamicAny
+- Environment, MemoryPool? (perhaps useful for i/o from streams), NumberFormatter (not terribly useful given string.format, but maybe for int64s)
+- NumberParser (same as above), StringTokenizer, Cache (and variants there of, difficult due to templates)
+- DigestEngine (HMACEngine, MD4, MD5, SHA1 Engines), DigestInputStream/DigestOutputStream?
+- Random, RandomInputStream
+- DateTime, DateTimeFormat(er), DateTimeParser, LocalDateTime, Stopwatch, Timespan, Timestamp, Timezone
+- DirectoryIterator, DirectoryWatcher, Path, Glob, TemporaryFile
+- Logging, (*)Channel, 
+- Notification, NotificationQueue, PriorityNotificationQueue, TimedNotificationQueue
+- NamedEvent, NamedMutex, Pipe, PipeInputStream, PipeOutputStream, Process, ProcessHandle, SharedMemory
+- Match, RegularExpression
+- (Streams aka ios_base) Base64, MemoryStream, BinaryReader/Writer, Counting?, Deflating, FileStream,
+	HexBinaryDecoder/Encoder, Inflating, LineEndingConverter?, Memory, Null, StreamCopier, StreamTokenizer
+	Tee (Most complicated thing here is how to represent arbitrary iostream userdata in a nice generic way to Lua)
+- Task, TaskManager, TaskNotification
+- TextEncoding, TextConverter, TextIterator, Unicode, UnicodeConverter
+- Condition, ErrorHandler, Event, FastMutex, Mutex, RWLock, Semaphore, Thread, ThreadPool, Timer
+- URI, URIRedirection?, URIStreamOpener, UUID, UUIDGenerator
+
+
+* Net classes to bind
+----------------------------------------
+- FTPClientSession, FTPStreamFactory, FTPPasswordProvider
+- HTMLForm
+- HTTPAuthenticationParams, HTTPBasicCredentials,HTTPChunkedInputStream, HTTPChunkedOutputStream
+- HTTPCookie, HTTPCredentials, HTTPDigestCredentials, HTTPHeaderInputStream, HTTPHeaderOutputStream
+- HTTPMessage?, HTTPRequest, HTTPResponse, HTTPClientSession, 
+
+
+* NetSSL classes to bind
+----------------------------------------
+- HTTPSClientSession, SecureSMTPClientSession, SecureStreamSocket, SecureServerSocket
+- SSLManager, Context, Session, Utility, PrivateKeyPassphraseHandler
