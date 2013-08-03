@@ -11,7 +11,8 @@ enum UserdataType
 	Userdata_None = 0,
 	Userdata_File,
 	Userdata_Timestamp,
-	Userdata_Int64
+	Userdata_Int64,
+	Userdata_RegularExpression
 };
 
 enum BaseType
