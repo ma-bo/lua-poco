@@ -18,7 +18,6 @@ public:
 	
 	// register metatable for this class
 	static bool registerRegularExpression(lua_State* L);
-	static int RegexMatch(lua_State* L);
 private:
 	RegularExpressionUserdata();
 	RegularExpressionUserdata(const RegularExpressionUserdata& disable);
@@ -37,7 +36,6 @@ private:
 	static int extractOffsets(lua_State* L);
 	static int extractCaptures(lua_State* L);
 	static int substitute(lua_State* L);
-	static int metamethod__eq(lua_State* L);
 	
 	Poco::RegularExpression mRegularExpression;
 };

@@ -1,5 +1,6 @@
 #include "LuaPoco.h"
 #include "foundation/File.h"
+#include "foundation/RegularExpression.h"
 #include <iostream>
 
 extern "C" 
@@ -18,9 +19,12 @@ int luaopen_poco(lua_State* L)
 	lua_createtable(L, 0, 5);
 	
 	// Foundation classes go into the root of the table.
-	if (FileUserdata::registerFile(L))
+	if (
+		FileUserdata::registerFile(L) &&
+		RegularExpressionUserdata::registerRegularExpression(L)
+	)
 		result = 1;
-		
+	
 	return result;
 }
 
