@@ -99,8 +99,8 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 	lua_setfield(L, -2, "extract");
 	lua_pushcfunction(L, match);
 	lua_setfield(L, -2, "match");
-	lua_pushcfunction(L, extractOffsets);
-	lua_setfield(L, -2, "extractOffsets");
+	lua_pushcfunction(L, extractPositions);
+	lua_setfield(L, -2, "extractPositions");
 	lua_pushcfunction(L, extractCaptures);
 	lua_setfield(L, -2, "extractCaptures");
 	lua_pushcfunction(L, substitute);
@@ -111,7 +111,6 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 }
 
 // constructor function
-// pattern, options, study
 int RegularExpressionUserdata::RegularExpression(lua_State* L)
 {
 	int rv = 0;
@@ -140,15 +139,11 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -204,15 +199,11 @@ int RegularExpressionUserdata::extract(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -247,9 +238,10 @@ int RegularExpressionUserdata::match(lua_State* L)
 		lua_pushnumber(L, matchCount);
 		if (matchCount > 0)
 		{
-			// return a 1-based position for start and end
+			// return a 1-based start position and end position, 
+			// instead of offset + length
 			lua_pushnumber(L, match.offset + 1);
-			lua_pushnumber(L, match.offset + 1 + match.length);
+			lua_pushnumber(L, match.offset + match.length);
 		}
 		else
 		{
@@ -260,15 +252,11 @@ int RegularExpressionUserdata::match(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -310,15 +298,11 @@ int RegularExpressionUserdata::substitute(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -366,21 +350,17 @@ int RegularExpressionUserdata::extractCaptures(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
 }
 
-int RegularExpressionUserdata::extractOffsets(lua_State* L)
+int RegularExpressionUserdata::extractPositions(lua_State* L)
 {
 	int rv = 0;
 	RegularExpressionUserdata* reud = reinterpret_cast<RegularExpressionUserdata*>(
@@ -414,23 +394,21 @@ int RegularExpressionUserdata::extractOffsets(lua_State* L)
 		lua_pushnumber(L, matchCount);
 		for (size_t i = 0; matchCount > 0 && i < matches.size(); ++i)
 		{
-			lua_pushlstring(L, subject + matches[i].offset, matches[i].length);
 			// overwrite values from 1 to matchCount
+			lua_pushnumber(L, matches[i].offset + 1);
 			lua_rawseti(L, 3, i + 1);
+			lua_pushnumber(L, matches[i].offset + matches[i].length);
+			lua_rawseti(L, 3, i + 2);
 		}
 		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;

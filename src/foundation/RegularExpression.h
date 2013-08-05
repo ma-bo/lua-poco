@@ -33,7 +33,7 @@ private:
 	// userdata methods
 	static int extract(lua_State* L);
 	static int match(lua_State* L);
-	static int extractOffsets(lua_State* L);
+	static int extractPositions(lua_State* L);
 	static int extractCaptures(lua_State* L);
 	static int substitute(lua_State* L);
 	

@@ -67,7 +67,6 @@ PocoNote 2: How to tell worker threads they are done?
 - Logging, (*)Channel, 
 - Notification, NotificationQueue, PriorityNotificationQueue, TimedNotificationQueue
 - NamedEvent, NamedMutex, Pipe, PipeInputStream, PipeOutputStream, Process, ProcessHandle, SharedMemory
-- Match, RegularExpression
 - (Streams aka ios_base) Base64, MemoryStream, BinaryReader/Writer, Counting?, Deflating, FileStream,
 	HexBinaryDecoder/Encoder, Inflating, LineEndingConverter?, Memory, Null, StreamCopier, StreamTokenizer
 	Tee (Most complicated thing here is how to represent arbitrary iostream userdata in a nice generic way to Lua)

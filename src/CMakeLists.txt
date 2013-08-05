@@ -5,7 +5,7 @@ set(LUAPOCO_SRC
 set(FOUNDATION_SRC
 	foundation/File.cpp
 	foundation/Timestamp.cpp
-	foundation/Int64.cpp
+	foundation/DynamicAny.cpp
 	foundation/RegularExpression.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

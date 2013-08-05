@@ -121,6 +121,7 @@ bool FileUserdata::registerFile(lua_State* L)
 // poco.File() constructor
 int FileUserdata::File(lua_State* L)
 {
+	int rv = 0;
 	size_t pathLen = 0;
 	const char* path = luaL_checklstring(L, 1, &pathLen);
 	
@@ -139,21 +140,20 @@ int FileUserdata::File(lua_State* L)
 		fud = new (ud) FileUserdata(path);
 		luaL_getmetatable(L, "Poco.File.metatable");
 		lua_setmetatable(L, -2);
+		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		return 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		return 2;
+	{
+		rv = pushUnknownException(L);
+	}
 	}
 
-	return 1;
+	return rv;
 }
 
 // metamethods
@@ -200,15 +200,13 @@ int FileUserdata::copyTo(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+	{
+		rv = pushUnknownException(L);
+	}
 	}
 	
 	return rv;
@@ -228,15 +226,11 @@ int FileUserdata::createDirectories(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -258,15 +252,11 @@ int FileUserdata::createDirectory(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -288,15 +278,11 @@ int FileUserdata::createFile(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -304,83 +290,76 @@ int FileUserdata::createFile(lua_State* L)
 
 int FileUserdata::listNames(lua_State* L)
 {
+	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
 		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
-	std::vector<std::string> fileNames;
-	
 	try
 	{
+		std::vector<std::string> fileNames;
 		fud->mFile->list(fileNames);
+		int tableIndex = 1;
+		lua_createtable(L, fileNames.size(), 0);
+		std::vector<std::string>::iterator i = fileNames.begin();
+		
+		while (i != fileNames.end())
+		{
+			lua_pushlstring(L, i->c_str(), i->size());
+			lua_rawseti(L, -2, tableIndex);
+			++i;
+			++tableIndex;
+		}
+		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		return 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		return 2;
+		rv = pushUnknownException(L);
 	}
 	
-	lua_createtable(L, fileNames.size(), 0);
-	int tableIndex = 1;
-	std::vector<std::string>::iterator i = fileNames.begin();
-	
-	while (i != fileNames.end())
-	{
-		lua_pushlstring(L, i->c_str(), i->size());
-		lua_rawseti(L, -2, tableIndex);
-		++i;
-		++tableIndex;
-	}
-	
-	return 1;
+	return rv;
 }
 
 int FileUserdata::listFiles(lua_State* L)
 {
+	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
 		luaL_checkudata(L, 1, "Poco.File.metatable"));
 	
-	std::vector<Poco::File> files;
-	
 	try
 	{
+		std::vector<Poco::File> files;
 		fud->mFile->list(files);
+		int tableIndex = 1;
+		lua_createtable(L, files.size(), 0);
+		std::vector<Poco::File>::iterator i = files.begin();
+		
+		while (i != files.end())
+		{
+			void* ud = lua_newuserdata(L, sizeof *fud);
+			luaL_getmetatable(L, "Poco.File.metatable");
+			lua_setmetatable(L, -2);
+			FileUserdata* fud = new(ud) FileUserdata(*i);
+			lua_rawseti(L, -2, tableIndex);
+			++i;
+			++tableIndex;
+		}
+		
+		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		return 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		return 2;
+		rv = pushUnknownException(L);
 	}
 	
-	lua_createtable(L, files.size(), 0);
-	int tableIndex = 1;
-	std::vector<Poco::File>::iterator i = files.begin();
-	
-	while (i != files.end())
-	{
-		void* ud = lua_newuserdata(L, sizeof *fud);
-		luaL_getmetatable(L, "Poco.File.metatable");
-		lua_setmetatable(L, -2);
-		FileUserdata* fud = new(ud) FileUserdata(*i);
-		lua_rawseti(L, -2, tableIndex);
-		++i;
-		++tableIndex;
-	}
-	
-	return 1;
+	return rv;
 }
 
 int FileUserdata::moveTo(lua_State* L)
@@ -407,15 +386,11 @@ int FileUserdata::moveTo(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -440,15 +415,11 @@ int FileUserdata::remove(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -478,15 +449,11 @@ int FileUserdata::renameTo(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -507,15 +474,11 @@ int FileUserdata::canExecute(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -536,15 +499,11 @@ int FileUserdata::canRead(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -565,15 +524,11 @@ int FileUserdata::canWrite(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -596,15 +551,11 @@ int FileUserdata::created(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -624,15 +575,11 @@ int FileUserdata::exists(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -655,15 +602,11 @@ int FileUserdata::getLastModified(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -685,15 +628,11 @@ int FileUserdata::getSize(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -714,15 +653,11 @@ int FileUserdata::isDevice(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -743,15 +678,11 @@ int FileUserdata::isDirectory(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -772,15 +703,11 @@ int FileUserdata::isFile(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -801,15 +728,11 @@ int FileUserdata::isHidden(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -830,15 +753,11 @@ int FileUserdata::isLink(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -872,15 +791,11 @@ int FileUserdata::setExecutable(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -913,15 +828,11 @@ int FileUserdata::setReadOnly(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -943,15 +854,11 @@ int FileUserdata::setSize(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;
@@ -975,15 +882,11 @@ int FileUserdata::setWritable(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, e.what());
-		rv = 2;
+		rv = pushPocoException(L, e);
 	}
 	catch (...)
 	{
-		lua_pushnil(L);
-		lua_pushstring(L, "unknown error");
-		rv = 2;
+		rv = pushUnknownException(L);
 	}
 	
 	return rv;

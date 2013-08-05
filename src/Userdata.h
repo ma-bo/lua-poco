@@ -2,6 +2,7 @@
 #define LUA_POCO_USERDATA_H
 
 #include "LuaPoco.h"
+#include "Poco/Exception.h"
 
 namespace LuaPoco
 {
@@ -11,7 +12,7 @@ enum UserdataType
 	Userdata_None = 0,
 	Userdata_File,
 	Userdata_Timestamp,
-	Userdata_Int64,
+	Userdata_DynamicAny,
 	Userdata_RegularExpression
 };
 
@@ -19,6 +20,10 @@ enum BaseType
 {
 	BaseType_None = 0,
 };
+
+// generic functions to reduce the amount of copy and paste code.
+int pushPocoException(lua_State* L, const Poco::Exception& e);
+int pushUnknownException(lua_State* L);
 
 // base class for all userdata
 // the idea is that it will be possible to pass a userdata to another 

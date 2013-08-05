@@ -1,7 +1,7 @@
 #include "LuaPoco.h"
 #include "foundation/File.h"
 #include "foundation/RegularExpression.h"
-#include <iostream>
+#include "foundation/DynamicAny.h"
 
 extern "C" 
 {
@@ -12,7 +12,7 @@ using namespace LuaPoco;
 // and load class constructors into the poco table.
 int luaopen_poco(lua_State* L)
 {
-	int result = 0;
+	int rv = 0;
 	// table for main poco module
 	// all sub modules will load into this table
 	// corresponding to the Poco namespaces for each class.
@@ -21,11 +21,15 @@ int luaopen_poco(lua_State* L)
 	// Foundation classes go into the root of the table.
 	if (
 		FileUserdata::registerFile(L) &&
-		RegularExpressionUserdata::registerRegularExpression(L)
+		RegularExpressionUserdata::registerRegularExpression(L) &&
+		DynamicAnyUserdata::registerDynamicAny(L)
 	)
-		result = 1;
+	{
+		rv = 1;
+	}
 	
-	return result;
+	
+	return rv;
 }
 
 }
