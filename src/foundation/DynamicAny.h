@@ -39,6 +39,14 @@ private:
 	static int toString(lua_State* L);
 	static int toBoolean(lua_State* L);
 	static int metamethod__add(lua_State* L);
+	static int metamethod__sub(lua_State* L);
+	static int metamethod__mul(lua_State* L);
+	static int metamethod__div(lua_State* L);
+	static int metamethod__mod(lua_State* L);
+	static int metamethod__pow(lua_State* L);
+	static int metamethod__eq(lua_State* L);
+	static int metamethod__lt(lua_State* L);
+	static int metamethod__le(lua_State* L);
 	
 	Poco::DynamicAny mDynamicAny;
 };
