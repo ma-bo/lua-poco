@@ -31,6 +31,7 @@ private:
 	static int metamethod__tostring(lua_State* L);
 	
 	// methods
+	static int convert(lua_State* L);
 	static int isNumeric(lua_State* L);
 	static int isInteger(lua_State* L);
 	static int isSigned(lua_State* L);
@@ -42,8 +43,6 @@ private:
 	static int metamethod__sub(lua_State* L);
 	static int metamethod__mul(lua_State* L);
 	static int metamethod__div(lua_State* L);
-	static int metamethod__mod(lua_State* L);
-	static int metamethod__pow(lua_State* L);
 	static int metamethod__eq(lua_State* L);
 	static int metamethod__lt(lua_State* L);
 	static int metamethod__le(lua_State* L);
