@@ -384,7 +384,7 @@ int DynamicAnyUserdata::metamethod__add(lua_State* L)
 			
 			if (equal)
 			{
-				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, udIndex));
+				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
 				newValueUd->mDynamicAny = daud->mDynamicAny + daudOther->mDynamicAny;
 				rv = 1;
 			}
@@ -404,7 +404,7 @@ int DynamicAnyUserdata::metamethod__add(lua_State* L)
 			rv = 1;
 		}
 		else
-			luaL_error(L, "invalid type supplied to __add: %s", lua_typename(L, valIndex));
+			luaL_error(L, "invalid type supplied to __add: %s", lua_typename(L, lua_type(L, valIndex)));
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -450,7 +450,7 @@ int DynamicAnyUserdata::metamethod__sub(lua_State* L)
 			
 			if (equal)
 			{
-				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, udIndex));
+				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
 				if (udIndex == 1)
 					newValueUd->mDynamicAny = daud->mDynamicAny - daudOther->mDynamicAny;
 				else
@@ -472,7 +472,7 @@ int DynamicAnyUserdata::metamethod__sub(lua_State* L)
 			rv = 1;
 		}
 		else
-			luaL_error(L, "invalid type supplied to __sub: %s", lua_typename(L, valIndex));
+			luaL_error(L, "invalid type supplied to __sub: %s", lua_typename(L, lua_type(L, valIndex)));
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -518,7 +518,7 @@ int DynamicAnyUserdata::metamethod__mul(lua_State* L)
 			
 			if (equal)
 			{
-				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, udIndex));
+				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
 				newValueUd->mDynamicAny = daud->mDynamicAny * daudOther->mDynamicAny;
 				rv = 1;
 			}
@@ -532,7 +532,7 @@ int DynamicAnyUserdata::metamethod__mul(lua_State* L)
 			rv = 1;
 		}
 		else
-			luaL_error(L, "invalid type supplied to __mul: %s", lua_typename(L, valIndex));
+			luaL_error(L, "invalid type supplied to __mul: %s", lua_typename(L, lua_type(L, valIndex)));
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -578,7 +578,7 @@ int DynamicAnyUserdata::metamethod__div(lua_State* L)
 			
 			if (equal)
 			{
-				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, udIndex));
+				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
 				
 				if (udIndex == 1)
 					newValueUd->mDynamicAny = daud->mDynamicAny / daudOther->mDynamicAny;
@@ -600,7 +600,7 @@ int DynamicAnyUserdata::metamethod__div(lua_State* L)
 			rv = 1;
 		}
 		else
-			luaL_error(L, "invalid type supplied to __div: %s", lua_typename(L, valIndex));
+			luaL_error(L, "invalid type supplied to __div: %s", lua_typename(L, lua_type(L, valIndex)));
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -641,7 +641,7 @@ int DynamicAnyUserdata::metamethod__eq(lua_State* L)
 			
 			if (equal)
 			{
-				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, udIndex));
+				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
 				bool result = daud->mDynamicAny == daudOther->mDynamicAny;
 				lua_pushboolean(L, result);
 				rv = 1;
@@ -650,7 +650,7 @@ int DynamicAnyUserdata::metamethod__eq(lua_State* L)
 				luaL_error(L, "expected two Poco.DynamicAny userdata");
 		}
 		else
-			luaL_error(L, "invalid type supplied to __eq: %s", lua_typename(L, valIndex));
+			luaL_error(L, "invalid type supplied to __eq: %s", lua_typename(L, lua_type(L, valIndex)));
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -691,7 +691,7 @@ int DynamicAnyUserdata::metamethod__lt(lua_State* L)
 			
 			if (equal)
 			{
-				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, udIndex));
+				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
 				bool result;
 				
 				if (udIndex == 1)
@@ -706,7 +706,7 @@ int DynamicAnyUserdata::metamethod__lt(lua_State* L)
 				luaL_error(L, "expected two Poco.DynamicAny userdata");
 		}
 		else
-			luaL_error(L, "invalid type supplied to __lt: %s", lua_typename(L, valIndex));
+			luaL_error(L, "invalid type supplied to __lt: %s", lua_typename(L, lua_type(L, valIndex)));
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -747,7 +747,7 @@ int DynamicAnyUserdata::metamethod__le(lua_State* L)
 			
 			if (equal)
 			{
-				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, udIndex));
+				DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
 				bool result;
 				
 				if (udIndex == 1)
@@ -762,7 +762,7 @@ int DynamicAnyUserdata::metamethod__le(lua_State* L)
 				luaL_error(L, "expected two Poco.DynamicAny userdata");
 		}
 		else
-			luaL_error(L, "invalid type supplied to __le: %s", lua_typename(L, valIndex));
+			luaL_error(L, "invalid type supplied to __le: %s", lua_typename(L, lua_type(L, valIndex)));
 	}
 	catch (const Poco::Exception& e)
 	{
