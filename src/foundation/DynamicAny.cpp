@@ -51,6 +51,9 @@ bool DynamicAnyUserdata::registerDynamicAny(lua_State* L)
 	lua_pushcfunction(L, metamethod__tostring);
 	lua_setfield(L, -2, "__tostring");
 	
+	lua_pushstring(L, "Poco.DynamicAny.metatable");
+	lua_setfield(L, -2, "poco.userdata");
+	
 	// methods
 	lua_pushcfunction(L, convert);
 	lua_setfield(L, -2, "convert");

@@ -18,9 +18,10 @@ public:
 	virtual UserdataType getType();
 	virtual bool isCopyable();
 	virtual bool copyToState(lua_State* L);
-	
 	// register metatable for this class
 	static bool registerDynamicAny(lua_State* L);
+	
+	Poco::DynamicAny mDynamicAny;
 private:
 	DynamicAnyUserdata();
 	// Lua constructor
@@ -46,8 +47,6 @@ private:
 	static int metamethod__eq(lua_State* L);
 	static int metamethod__lt(lua_State* L);
 	static int metamethod__le(lua_State* L);
-	
-	Poco::DynamicAny mDynamicAny;
 };
 
 } // LuaPoco

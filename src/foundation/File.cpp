@@ -57,6 +57,10 @@ bool FileUserdata::registerFile(lua_State* L)
 	lua_setfield(L, -2, "__gc");
 	lua_pushcfunction(L, metamethod__tostring);
 	lua_setfield(L, -2, "__tostring");
+	
+	lua_pushstring(L, "Poco.File.metatable");
+	lua_setfield(L, -2, "poco.userdata");
+	
 	// methods
 	lua_pushcfunction(L, copyTo);
 	lua_setfield(L, -2, "copyTo");

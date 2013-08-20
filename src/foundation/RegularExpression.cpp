@@ -94,6 +94,10 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 	lua_setfield(L, -2, "__gc");
 	lua_pushcfunction(L, metamethod__tostring);
 	lua_setfield(L, -2, "__tostring");
+	
+	lua_pushstring(L, "Poco.RegularExpression.metatable");
+	lua_setfield(L, -2, "poco.userdata");
+	
 	// methods
 	lua_pushcfunction(L, extract);
 	lua_setfield(L, -2, "extract");

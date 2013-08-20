@@ -2,6 +2,7 @@
 #include "foundation/File.h"
 #include "foundation/RegularExpression.h"
 #include "foundation/DynamicAny.h"
+#include "foundation/Timestamp.h"
 
 extern "C" 
 {
@@ -22,7 +23,8 @@ int luaopen_poco(lua_State* L)
 	if (
 		FileUserdata::registerFile(L) &&
 		RegularExpressionUserdata::registerRegularExpression(L) &&
-		DynamicAnyUserdata::registerDynamicAny(L)
+		DynamicAnyUserdata::registerDynamicAny(L) &&
+		TimestampUserdata::registerTimestamp(L)
 	)
 	{
 		rv = 1;
