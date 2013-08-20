@@ -3,6 +3,7 @@
 #include "foundation/RegularExpression.h"
 #include "foundation/DynamicAny.h"
 #include "foundation/Timestamp.h"
+#include "foundation/Checksum.h"
 
 extern "C" 
 {
@@ -24,7 +25,8 @@ int luaopen_poco(lua_State* L)
 		FileUserdata::registerFile(L) &&
 		RegularExpressionUserdata::registerRegularExpression(L) &&
 		DynamicAnyUserdata::registerDynamicAny(L) &&
-		TimestampUserdata::registerTimestamp(L)
+		TimestampUserdata::registerTimestamp(L) &&
+		ChecksumUserdata::registerChecksum(L)
 	)
 	{
 		rv = 1;

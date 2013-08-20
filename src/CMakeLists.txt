@@ -6,7 +6,8 @@ set(FOUNDATION_SRC
 	foundation/File.cpp
 	foundation/Timestamp.cpp
 	foundation/DynamicAny.cpp
-	foundation/RegularExpression.cpp)
+	foundation/RegularExpression.cpp
+	foundation/Checksum.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
