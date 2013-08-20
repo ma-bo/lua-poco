@@ -4,6 +4,7 @@
 #include "foundation/DynamicAny.h"
 #include "foundation/Timestamp.h"
 #include "foundation/Checksum.h"
+#include "foundation/Environment.h"
 
 extern "C" 
 {
@@ -26,7 +27,8 @@ int luaopen_poco(lua_State* L)
 		RegularExpressionUserdata::registerRegularExpression(L) &&
 		DynamicAnyUserdata::registerDynamicAny(L) &&
 		TimestampUserdata::registerTimestamp(L) &&
-		ChecksumUserdata::registerChecksum(L)
+		ChecksumUserdata::registerChecksum(L) &&
+		Environment::registerEnvironment(L)
 	)
 	{
 		rv = 1;
