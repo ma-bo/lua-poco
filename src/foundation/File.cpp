@@ -807,10 +807,28 @@ int FileUserdata::setExecutable(lua_State* L)
 
 int FileUserdata::setLastModified(lua_State* L)
 {
+	int rv = 0;
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
 		luaL_checkudata(L, 1, "Poco.File.metatable"));
+	TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
+		luaL_checkudata(L, 2, "Poco.Timestamp.metatable"));
 	
-	return 0;
+	try
+	{
+		fud->mFile->setLastModified(tsud->mTimestamp);
+		lua_pushboolean(L, 1);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		rv = pushPocoException(L, e);
+	}
+	catch (...)
+	{
+		rv = pushUnknownException(L);
+	}
+	
+	return rv;
 }
 
 int FileUserdata::setReadOnly(lua_State* L)
