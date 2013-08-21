@@ -240,7 +240,22 @@ int PipeUserdata::close(lua_State* L)
 	PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
 		luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
 	
-	return rv;
+	const char* closeEnd = "both";
+	int top = lua_gettop(L);
+	if (top > 1)
+		closeEnd = luaL_checkstring(L, 2);
+	
+	if (std::strcmp(closeEnd, "read") == 0)
+		pud->mReadStream.close();
+	else if (std::strcmp(closeEnd, "write") == 0)
+		pud->mWriteStream.close();
+	else
+	{
+		pud->mReadStream.close();
+		pud->mWriteStream.close();
+	}
+	
+	return 1;
 }
 
 } // LuaPoco
