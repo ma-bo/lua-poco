@@ -5,6 +5,7 @@
 #include "foundation/Timestamp.h"
 #include "foundation/Checksum.h"
 #include "foundation/Environment.h"
+#include "foundation/Pipe.h"
 
 extern "C" 
 {
@@ -28,7 +29,8 @@ int luaopen_poco(lua_State* L)
 		DynamicAnyUserdata::registerDynamicAny(L) &&
 		TimestampUserdata::registerTimestamp(L) &&
 		ChecksumUserdata::registerChecksum(L) &&
-		Environment::registerEnvironment(L)
+		Environment::registerEnvironment(L) &&
+		PipeUserdata::registerPipe(L)
 	)
 	{
 		rv = 1;

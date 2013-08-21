@@ -14,7 +14,8 @@ enum UserdataType
 	Userdata_Timestamp,
 	Userdata_DynamicAny,
 	Userdata_RegularExpression,
-	Userdata_Checksum
+	Userdata_Checksum,
+	Userdata_Pipe
 };
 
 enum BaseType

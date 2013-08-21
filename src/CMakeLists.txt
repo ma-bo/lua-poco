@@ -8,7 +8,8 @@ set(FOUNDATION_SRC
 	foundation/DynamicAny.cpp
 	foundation/RegularExpression.cpp
 	foundation/Checksum.cpp
-	foundation/Environment.cpp)
+	foundation/Environment.cpp
+	foundation/Pipe.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
