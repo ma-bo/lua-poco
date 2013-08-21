@@ -6,6 +6,9 @@
 #include "foundation/Checksum.h"
 #include "foundation/Environment.h"
 #include "foundation/Pipe.h"
+#include "foundation/NamedEvent.h"
+#include "foundation/NamedMutex.h"
+#include "foundation/Process.h"
 
 extern "C" 
 {
@@ -30,7 +33,10 @@ int luaopen_poco(lua_State* L)
 		TimestampUserdata::registerTimestamp(L) &&
 		ChecksumUserdata::registerChecksum(L) &&
 		Environment::registerEnvironment(L) &&
-		PipeUserdata::registerPipe(L)
+		PipeUserdata::registerPipe(L) &&
+		NamedEventUserdata::registerNamedEvent(L) && 
+		NamedMutexUserdata::registerNamedMutex(L) &&
+		Process::registerProcess(L)
 	)
 	{
 		rv = 1;

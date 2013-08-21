@@ -1,4 +1,4 @@
-local poco = assert(require("poco"))
+poco = assert(require("poco"))
 local ff = assert(poco.File("test1"))
 
 local fileType

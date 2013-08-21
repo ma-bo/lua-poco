@@ -15,7 +15,10 @@ enum UserdataType
 	Userdata_DynamicAny,
 	Userdata_RegularExpression,
 	Userdata_Checksum,
-	Userdata_Pipe
+	Userdata_Pipe,
+	Userdata_NamedEvent,
+	Userdata_NamedMutex,
+	Userdata_ProcessHandle
 };
 
 enum BaseType

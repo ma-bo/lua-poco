@@ -9,7 +9,11 @@ set(FOUNDATION_SRC
 	foundation/RegularExpression.cpp
 	foundation/Checksum.cpp
 	foundation/Environment.cpp
-	foundation/Pipe.cpp)
+	foundation/Pipe.cpp
+	foundation/NamedEvent.cpp
+	foundation/NamedMutex.cpp
+	foundation/ProcessHandle.cpp
+	foundation/Process.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
