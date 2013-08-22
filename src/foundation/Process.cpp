@@ -2,7 +2,8 @@
 #include "ProcessHandle.h"
 #include "Pipe.h"
 #include "Poco/Exception.h"
-
+#include "Poco/Path.h"
+#include <iostream>
 namespace LuaPoco
 {
 
@@ -123,50 +124,122 @@ int Process::times(lua_State* L)
 namespace
 {
 
-// requires that the env table is at -1 on the stack
-bool constructEnv(lua_State* L, Poco::Process::Env& env)
+const char* getCommand(lua_State* L)
 {
-	int tableIndex = lua_gettop(L);
+	const char* command = NULL;
 	
-	lua_pushnil(L);
-	while (lua_next(L, tableIndex))
-	{
-		// key and value must be strings
-		if (!lua_isstring(L, -1) || lua_isstring(L, -2))
-		{
-			// restore stack for caller
-			lua_pop(L, 2);
-			return false;
-		}
-		
-		const char* value = lua_tostring(L, -1);
-		const char* key = lua_tostring(L, -2);
-		env[key] = value;
-		// pop the value, leaving the key at -1 for next()
-		lua_pop(L, 1);
-	}
-	return true;
+	lua_getfield(L, -1, "command");
+	if (lua_isstring(L, -1))
+		command = lua_tostring(L, -1);
+	
+	lua_pop(L, 1);
+	
+	return command;
 }
 
-bool constructArgs(lua_State* L, Poco::Process::Args& args)
+const char* getWorkingDir(lua_State* L)
 {
-	size_t i = 0;
-	// start at index 1
-	for (lua_rawgeti(L, ++i, -1); !lua_isnil(L, -1); lua_rawgeti(L, ++i, -1))
+	const char* wd = NULL;
+	
+	lua_getfield(L, -1, "workingDir");
+	if (lua_isstring(L, -1))
+		wd = lua_tostring(L, -1);
+	
+	lua_pop(L, 1);
+	
+	return wd;
+}
+
+void getPipes(lua_State* L, PipeUserdata*& inPipe, PipeUserdata*& outPipe, PipeUserdata*& errPipe)
+{
+	lua_getfield(L, -1, "inPipe");
+	if (lua_isuserdata(L, -1))
 	{
-		if (!lua_isstring(L, -1))
-		{
-			// remove value from stack and bail
-			lua_pop(L, 1);
-			return false;
-		}
+		lua_getmetatable(L, -1);
+		luaL_getmetatable(L, "Poco.Pipe.metatable");
+		if (lua_rawequal(L, -1, -2))
+			inPipe = reinterpret_cast<PipeUserdata*>(lua_touserdata(L, -3));
+		lua_pop(L, 2);
+	}
+	lua_pop(L, 1);
+	
+	lua_getfield(L, -1, "outPipe");
+	if (lua_isuserdata(L, -1))
+	{
+		lua_getmetatable(L, -1);
+		luaL_getmetatable(L, "Poco.Pipe.metatable");
+		if (lua_rawequal(L, -1, -2))
+			outPipe = reinterpret_cast<PipeUserdata*>(lua_touserdata(L, -3));
+		else
+			
+		lua_pop(L, 2);
+	}
+	lua_pop(L, 1);
+	
+	lua_getfield(L, -1, "errPipe");
+	if (lua_isuserdata(L, -1))
+	{
+		lua_getmetatable(L, -1);
+		luaL_getmetatable(L, "Poco.Pipe.metatable");
+		if (lua_rawequal(L, -1, -2))
+			errPipe = reinterpret_cast<PipeUserdata*>(lua_touserdata(L, -3));
+		lua_pop(L, 2);
+	}
+	lua_pop(L, 1);
+}
+
+// requires that the env table is at -1 on the stack
+bool getEnv(lua_State* L, Poco::Process::Env& env)
+{
+	bool result = false;
+	
+	int cleanTop = lua_gettop(L);
+	lua_getfield(L, -1, "env");
+	
+	if (lua_istable(L, -1))
+	{
+		result = true;
 		
-		const char* value = lua_tostring(L, -1);
-		args.push_back(value);
+		lua_pushnil(L);
+		while (lua_next(L, -2))
+		{
+			// key and value must be strings
+			if (!lua_isstring(L, -1) || lua_isstring(L, -2))
+				break;
+			
+			const char* value = lua_tostring(L, -1);
+			const char* key = lua_tostring(L, -2);
+			env[key] = value;
+			// pop the value, leaving the key at -1 for next()
+			lua_pop(L, 1);
+		}
+	}
+	lua_pop(L, lua_gettop(L) - cleanTop);
+	
+	return result;
+}
+
+void getArgs(lua_State* L, Poco::Process::Args& args)
+{
+	size_t i = 1;
+	
+	lua_getfield(L, -1, "args");
+	if (lua_istable(L, -1))
+	{
+		// start at index 1
+		for (lua_rawgeti(L, -1, i); lua_isstring(L, -1); lua_rawgeti(L, -1, i))
+		{
+			const char* value = lua_tostring(L, -1);
+			args.push_back(value);
+			// pop value just obtained
+			lua_pop(L, 1);
+			++i;
+		}
+		// pop nil result from 1 past the last valid index
 		lua_pop(L, 1);
 	}
-	
-	return true;
+	// pop args table
+	lua_pop(L, 1);
 }
 
 }
@@ -176,43 +249,55 @@ int Process::launch(lua_State* L)
 	int rv = 0;
 	luaL_checktype(L, 1, LUA_TTABLE);
 	
-	// optional table parameters
-	bool haveEnv = false;
-	const char* workingDir = NULL;
-	ProcessHandleUserdata* inPipeUd = NULL;
-	ProcessHandleUserdata* outPipeUd = NULL;
-	ProcessHandleUserdata* errPipeUd = NULL;
-	
 	// required parameters
-	const char* command = NULL;
+	const char* command = getCommand(L);
+	if (!command)
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "must at least have a command in launch table");
+		return 2;
+	}
+	
+	// optional table parameters
+	const char* workingDir = getWorkingDir(L);
+	
 	Poco::Process::Args args;
+	getArgs(L, args);
 	
-	lua_getfield(L, -1, "command");
-	if (!lua_isstring(L, -1))
-	{
-		lua_pop(L, 1);
-		lua_pushnil(L);
-		lua_pushstring(L, "command table entry must be a string");
-		return 2;
-	}
-	command = lua_tostring(L, -1);
-	lua_pop(L, 1);
+	PipeUserdata* inPipeUd = NULL;
+	PipeUserdata* outPipeUd = NULL;
+	PipeUserdata* errPipeUd = NULL;
+	getPipes(L, inPipeUd, outPipeUd, errPipeUd);
 	
-	lua_getfield(L, -1, "args");
-	if (lua_istable(L, -1))
-	{
-		if (!constructArgs(L, args))
-		lua_pop(L, 1);
-		lua_pushnil(L);
-		lua_pushstring(L, "args table entry must be an array of strings");
-		return 2;
-	}
-	lua_pop(L, 1);
+	Poco::Pipe* inPipe = inPipeUd ? &inPipeUd->mPipe : NULL;
+	Poco::Pipe* outPipe = outPipeUd ? &outPipeUd->mPipe : NULL;
+	Poco::Pipe* errPipe = errPipeUd ? &errPipeUd->mPipe : NULL;
+	
+	Poco::Process::Env env;
+	bool haveEnv = getEnv(L, env);
 	
 	try
 	{
+		void *ud = lua_newuserdata(L, sizeof(ProcessHandleUserdata*));
+		luaL_getmetatable(L, "Poco.ProcessHandle.metatable");
+		lua_setmetatable(L, -2);
 		
-		rv = 0;
+		if (haveEnv)
+		{
+			Poco::ProcessHandle ph = Poco::Process::launch(command, args, 
+				workingDir ? workingDir : Poco::Path::current(),
+				inPipe, outPipe, errPipe, env);
+			ProcessHandleUserdata* phud = new (ud) ProcessHandleUserdata(ph);
+			rv = 1;
+		}
+		else
+		{
+			Poco::ProcessHandle ph = Poco::Process::launch(command, args, 
+				workingDir ? workingDir : Poco::Path::current(),
+				inPipe, outPipe, errPipe);
+			ProcessHandleUserdata* phud = new (ud) ProcessHandleUserdata(ph);
+			rv = 1;
+		}
 	}
 	catch (const Poco::Exception& e)
 	{

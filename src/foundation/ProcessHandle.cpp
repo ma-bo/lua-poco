@@ -61,22 +61,47 @@ int ProcessHandleUserdata::metamethod__gc(lua_State* L)
 
 int ProcessHandleUserdata::metamethod__tostring(lua_State* L)
 {
+	int rv = 0;
 	ProcessHandleUserdata* phud = reinterpret_cast<ProcessHandleUserdata*>(
 		luaL_checkudata(L, 1, "Poco.ProcessHandle.metatable"));
+	try
+	{
+		lua_pushfstring(L, "Poco.ProcessHandle (%p)", reinterpret_cast<void*>(phud));
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		rv = pushPocoException(L, e);
+	}
+	catch (...)
+	{
+		rv = pushUnknownException(L);
+	}
 	
-	lua_pushfstring(L, "Poco.ProcessHandle (%p)", reinterpret_cast<void*>(phud));
-	return 1;
+	return rv;
 }
 
 // userdata methods
 int ProcessHandleUserdata::id(lua_State* L)
 {
+	int rv = 0;
 	ProcessHandleUserdata* phud = reinterpret_cast<ProcessHandleUserdata*>(
 		luaL_checkudata(L, 1, "Poco.ProcessHandle.metatable"));
+	try
+	{
+		lua_pushnumber(L, phud->mProcessHandle.id());
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		rv = pushPocoException(L, e);
+	}
+	catch (...)
+	{
+		rv = pushUnknownException(L);
+	}
 	
-	lua_pushnumber(L, phud->mProcessHandle.id());
-	
-	return 1;
+	return rv;
 }
 
 int ProcessHandleUserdata::wait(lua_State* L)

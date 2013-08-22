@@ -20,6 +20,7 @@ public:
 	virtual bool copyToState(lua_State *L);
 	// register metatable for this class
 	static bool registerPipe(lua_State* L);
+	Poco::Pipe mPipe;
 private:
 	// constructor function 
 	static int Pipe(lua_State* L);
@@ -33,7 +34,6 @@ private:
 	static int write(lua_State* L);
 	static int close(lua_State* L);
 	
-	Poco::Pipe mPipe;
 	Poco::PipeInputStream mReadStream;
 	Poco::PipeOutputStream mWriteStream;
 };

@@ -8,6 +8,7 @@
 #include "foundation/Pipe.h"
 #include "foundation/NamedEvent.h"
 #include "foundation/NamedMutex.h"
+#include "foundation/ProcessHandle.h"
 #include "foundation/Process.h"
 
 extern "C" 
@@ -36,6 +37,7 @@ int luaopen_poco(lua_State* L)
 		PipeUserdata::registerPipe(L) &&
 		NamedEventUserdata::registerNamedEvent(L) && 
 		NamedMutexUserdata::registerNamedMutex(L) &&
+		ProcessHandleUserdata::registerProcessHandle(L) &&
 		Process::registerProcess(L)
 	)
 	{
