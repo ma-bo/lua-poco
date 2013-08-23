@@ -18,7 +18,8 @@ enum UserdataType
 	Userdata_Pipe,
 	Userdata_NamedEvent,
 	Userdata_NamedMutex,
-	Userdata_ProcessHandle
+	Userdata_ProcessHandle,
+	Userdata_Semaphore
 };
 
 enum BaseType

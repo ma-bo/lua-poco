@@ -10,6 +10,7 @@
 #include "foundation/NamedMutex.h"
 #include "foundation/ProcessHandle.h"
 #include "foundation/Process.h"
+#include "foundation/Semaphore.h"
 
 extern "C" 
 {
@@ -38,7 +39,8 @@ int luaopen_poco(lua_State* L)
 		NamedEventUserdata::registerNamedEvent(L) && 
 		NamedMutexUserdata::registerNamedMutex(L) &&
 		ProcessHandleUserdata::registerProcessHandle(L) &&
-		Process::registerProcess(L)
+		Process::registerProcess(L) &&
+		SemaphoreUserdata::registerSemaphore(L)
 	)
 	{
 		rv = 1;

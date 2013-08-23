@@ -13,7 +13,8 @@ set(FOUNDATION_SRC
 	foundation/NamedEvent.cpp
 	foundation/NamedMutex.cpp
 	foundation/ProcessHandle.cpp
-	foundation/Process.cpp)
+	foundation/Process.cpp
+	foundation/Semaphore.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
