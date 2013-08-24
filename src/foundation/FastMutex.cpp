@@ -35,7 +35,7 @@ bool FastMutexUserdata::copyToState(lua_State *L)
 	luaL_getmetatable(L, "Poco.FastMutex.metatable");
 	lua_setmetatable(L, -2);
 	
-	FastMutexUserdata* sud = new(ud) FastMutexUserdata(mFastMutex);
+	FastMutexUserdata* fmud = new(ud) FastMutexUserdata(mFastMutex);
 	return true;
 }
 
@@ -83,7 +83,7 @@ int FastMutexUserdata::FastMutex(lua_State* L)
 	try
 	{
 		rv = 1;
-		FastMutexUserdata* sud = new(ud) FastMutexUserdata();
+		FastMutexUserdata* fmud = new(ud) FastMutexUserdata();
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -99,19 +99,19 @@ int FastMutexUserdata::FastMutex(lua_State* L)
 // metamethod infrastructure
 int FastMutexUserdata::metamethod__gc(lua_State* L)
 {
-	FastMutexUserdata* sud = reinterpret_cast<FastMutexUserdata*>(
+	FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
 		luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
-	sud->~FastMutexUserdata();
+	fmud->~FastMutexUserdata();
 	
 	return 0;
 }
 
 int FastMutexUserdata::metamethod__tostring(lua_State* L)
 {
-	FastMutexUserdata* sud = reinterpret_cast<FastMutexUserdata*>(
+	FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
 		luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
 	
-	lua_pushfstring(L, "Poco.FastMutex (%p)", reinterpret_cast<void*>(sud));
+	lua_pushfstring(L, "Poco.FastMutex (%p)", reinterpret_cast<void*>(fmud));
 	return 1;
 }
 
@@ -119,7 +119,7 @@ int FastMutexUserdata::metamethod__tostring(lua_State* L)
 int FastMutexUserdata::lock(lua_State* L)
 {
 	int rv = 0;
-	FastMutexUserdata* sud = reinterpret_cast<FastMutexUserdata*>(
+	FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
 		luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
 	int top = lua_gettop(L);
 	
@@ -130,9 +130,9 @@ int FastMutexUserdata::lock(lua_State* L)
 	try
 	{
 		if (top > 1)
-			sud->mFastMutex->lock(ms);
+			fmud->mFastMutex->lock(ms);
 		else
-			sud->mFastMutex->lock();
+			fmud->mFastMutex->lock();
 		
 		lua_pushboolean(L, 1);
 		rv = 1;
@@ -152,7 +152,7 @@ int FastMutexUserdata::lock(lua_State* L)
 int FastMutexUserdata::tryLock(lua_State* L)
 {
 	int rv = 0;
-	FastMutexUserdata* sud = reinterpret_cast<FastMutexUserdata*>(
+	FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
 		luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
 	int top = lua_gettop(L);
 	
@@ -164,9 +164,9 @@ int FastMutexUserdata::tryLock(lua_State* L)
 	{
 		bool result = false;
 		if (top > 1)
-			result = sud->mFastMutex->tryLock(ms);
+			result = fmud->mFastMutex->tryLock(ms);
 		else
-			result = sud->mFastMutex->tryLock();
+			result = fmud->mFastMutex->tryLock();
 		
 		lua_pushboolean(L, result);
 		rv = 1;
@@ -186,12 +186,12 @@ int FastMutexUserdata::tryLock(lua_State* L)
 int FastMutexUserdata::unlock(lua_State* L)
 {
 	int rv = 0;
-	FastMutexUserdata* sud = reinterpret_cast<FastMutexUserdata*>(
+	FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
 		luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
 	
 	try
 	{
-		sud->mFastMutex->unlock();
+		fmud->mFastMutex->unlock();
 		lua_pushboolean(L, 1);
 		rv = 1;
 	}
