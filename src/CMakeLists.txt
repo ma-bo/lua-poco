@@ -14,7 +14,9 @@ set(FOUNDATION_SRC
 	foundation/NamedMutex.cpp
 	foundation/ProcessHandle.cpp
 	foundation/Process.cpp
-	foundation/Semaphore.cpp)
+	foundation/Semaphore.cpp
+	foundation/FastMutex.cpp
+	)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 

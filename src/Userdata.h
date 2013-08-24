@@ -19,7 +19,9 @@ enum UserdataType
 	Userdata_NamedEvent,
 	Userdata_NamedMutex,
 	Userdata_ProcessHandle,
-	Userdata_Semaphore
+	Userdata_Semaphore,
+	Userdata_FastMutex,
+	Userdata_Mutex
 };
 
 enum BaseType

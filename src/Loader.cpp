@@ -11,6 +11,7 @@
 #include "foundation/ProcessHandle.h"
 #include "foundation/Process.h"
 #include "foundation/Semaphore.h"
+#include "foundation/FastMutex.h"
 
 extern "C" 
 {
@@ -40,7 +41,8 @@ int luaopen_poco(lua_State* L)
 		NamedMutexUserdata::registerNamedMutex(L) &&
 		ProcessHandleUserdata::registerProcessHandle(L) &&
 		Process::registerProcess(L) &&
-		SemaphoreUserdata::registerSemaphore(L)
+		SemaphoreUserdata::registerSemaphore(L) &&
+		FastMutexUserdata::registerFastMutex(L)
 	)
 	{
 		rv = 1;
