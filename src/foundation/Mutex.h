@@ -1,5 +1,5 @@
-#ifndef LUA_POCO_Mutex_H
-#define LUA_POCO_Mutex_H
+#ifndef LUA_POCO_MUTEX_H
+#define LUA_POCO_MUTEX_H
 
 #include "LuaPoco.h"
 #include "Userdata.h"

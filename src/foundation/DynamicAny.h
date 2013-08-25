@@ -1,5 +1,5 @@
-#ifndef LUA_POCO_INT64_H
-#define LUA_POCO_INT64_H
+#ifndef LUA_POCO_DYNAMICANY_H
+#define LUA_POCO_DYNAMICANY_H
 
 #include "LuaPoco.h"
 #include "Userdata.h"
