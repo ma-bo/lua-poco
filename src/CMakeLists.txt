@@ -1,6 +1,7 @@
 set(LUAPOCO_SRC
 	Loader.cpp
-	Userdata.cpp)
+	Userdata.cpp
+	StateTransfer.cpp)
 	
 set(FOUNDATION_SRC
 	foundation/File.cpp
