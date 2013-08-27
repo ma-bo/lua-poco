@@ -2,13 +2,13 @@
 #include "StateTransfer.h"
 #include "Poco/Exception.h"
 #include <cstring>
-#include <iostream>
 
 namespace LuaPoco
 {
 
 ThreadUserdata::ThreadUserdata() :
-	mThread(), mJoined(false), mStarted(false), mThreadState(NULL), mParamCount(0)
+	mThread(), mJoined(false), mStarted(false), mThreadState(NULL), mParamCount(0),
+	mThreadResult(0)
 {
 }
 
@@ -93,9 +93,9 @@ int ThreadUserdata::Thread(lua_State* L)
 		ThreadUserdata* thud = new(ud) ThreadUserdata();
 		rv = 1;
 		
+		Poco::Thread::Priority p = Poco::Thread::PRIO_NORMAL;
 		if (top > 0 && priority)
 		{
-			Poco::Thread::Priority p = Poco::Thread::PRIO_NORMAL;
 			if (strcmp(priority, "lowest") == 0)
 				p = Poco::Thread::PRIO_LOWEST;
 			else if (strcmp(priority, "low") == 0)
@@ -113,7 +113,8 @@ int ThreadUserdata::Thread(lua_State* L)
 				return 2;
 			}
 		}
-		
+		if (top > 0)
+			thud->mThread.setPriority(p);
 		if (top > 1 && name)
 			thud->mThread.setName(name);
 		
@@ -324,14 +325,34 @@ int ThreadUserdata::join(lua_State* L)
 	
 	try
 	{
-		if (top > 1)
-			thud->mThread.join(ms);
+		if (thud->mStarted && !thud->mJoined)
+		{
+			if (top > 1)
+				thud->mThread.join(ms);
+			else
+				thud->mThread.join();
+			
+			thud->mJoined = true;
+			
+			if (thud->mThreadResult != 0)
+			{
+				lua_pushboolean(L, 1);
+				lua_pushstring(L, lua_tostring(thud->mThreadState, -1));
+				rv = 2;
+			}
+			else
+			{
+				lua_pushboolean(L, 1);
+				lua_pushstring(L, "success");
+				rv = 2;
+			}
+		}
 		else
-			thud->mThread.join();
-		
-		thud->mJoined = true;
-		lua_pushboolean(L, 1);
-		rv = 1;
+		{
+			lua_pushnil(L);
+			lua_pushstring(L, "trying to join an unstarted or already joined thread");
+			rv = 2;
+		}
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -395,7 +416,7 @@ int ThreadUserdata::start(lua_State* L)
 	
 	thud->mThreadState = luaL_newstate();
 	luaL_openlibs(thud->mThreadState);
-	if (luaL_dostring(thud->mThreadState, "return require('poco')") != 0)
+	if (luaL_dostring(thud->mThreadState, "require('poco')") != 0)
 	{
 		lua_pushnil(L);
 		lua_pushstring(L, "could not load poco library into thread's state.");
@@ -411,9 +432,6 @@ int ThreadUserdata::start(lua_State* L)
 			lua_pushfstring(L, "non-copyable value at parameter %d\n", i);
 			return 2;
 		}
-		const char* msg = lua_tostring(L, -1);
-		msg = msg ? msg : "NULL";
-		std::cout << "pushed index: " << i << " of type: " << msg << std::endl;
 		lua_pop(L, 1);
 	}
 	
@@ -423,6 +441,7 @@ int ThreadUserdata::start(lua_State* L)
 		rv = 1;
 		thud->mThread.start(*thud);
 		lua_pushboolean(L, 1);
+		thud->mStarted = true;
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -439,22 +458,9 @@ int ThreadUserdata::start(lua_State* L)
 void ThreadUserdata::run()
 {
 	const char* msg;
-	std::cout << "calling function with " << mParamCount << " args." << std::endl;
 	int top = lua_gettop(mThreadState);
 	
-	for (int i = 1; i < top; ++i)
-	{
-		std::cout << "type of value at " << i << ": " << lua_typename(mThreadState, lua_type(mThreadState, i)) << std::endl;
-	}
-	
-	int rv = lua_pcall(mThreadState, mParamCount, 0, 0);
-	if (rv == 0)
-		std::cout << "ThreadUserdata::run success!" << std::endl;
-	else
-	{
-		std::cout << "ThreadUserdata::run pcall returned error!" << std::endl;
-		std::cout << "error: " << lua_tostring(mThreadState, -1) << std::endl;
-	}
+	mThreadResult = lua_pcall(mThreadState, mParamCount, 0, 0);
 }
 
 } // LuaPoco

@@ -41,6 +41,7 @@ private:
 	bool mJoined;
 	bool mStarted;
 	int mParamCount;
+	int mThreadResult;
 };
 
 } // LuaPoco

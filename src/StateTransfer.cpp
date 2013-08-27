@@ -2,7 +2,6 @@
 #include "Userdata.h"
 #include <cstring>
 #include <exception>
-#include <iostream>
 
 namespace LuaPoco
 {
@@ -122,7 +121,7 @@ bool transferTable(lua_State* toL, lua_State* fromL)
 				lua_pushvalue(fromL, -2);
 				if (!transferValue(toL, fromL))
 					break;
-				// pop the key off leaving -1 = sub table value, -2 = key, -3 = table
+				// pop the key off leaving fromL: -1 = sub table value, -2 = key, -3 = table
 				lua_pop(fromL, 1);
 				
 				// copy the newly created table and set the key/newtable pair as a 
@@ -201,6 +200,7 @@ bool transferValue(lua_State* toL, lua_State* fromL)
 		const char* str = lua_tolstring(fromL, -1, &len);
 		lua_pushlstring(toL, str, len);
 		result = true;
+		break;
 	}
 	case LUA_TTABLE:
 		result = transferTable(toL, fromL);
@@ -233,6 +233,7 @@ bool transferValue(lua_State* toL, lua_State* fromL)
 	default:
 		break;
 	}
+	
 	return result;
 }
 
