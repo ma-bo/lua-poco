@@ -2,6 +2,7 @@
 #include "Userdata.h"
 #include <cstring>
 #include <exception>
+#include <iostream>
 
 namespace LuaPoco
 {
@@ -172,7 +173,7 @@ bool transferTable(lua_State* toL, lua_State* fromL)
 	lua_pop(fromL, fromEntryTop - lua_gettop(fromL));
 	lua_pop(fromL, toEntryTop - lua_gettop(toL));
 	
-	return true;
+	return result;
 }
 
 bool transferValue(lua_State* toL, lua_State* fromL)
