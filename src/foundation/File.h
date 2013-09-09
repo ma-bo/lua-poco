@@ -2,8 +2,16 @@
 #define LUA_POCO_FILE_H
 
 #include "LuaPoco.h"
+#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/File.h"
+
+extern "C"
+{
+
+int luaopen_poco_file(lua_State* L);
+
+}
 
 namespace LuaPoco
 {
@@ -20,12 +28,9 @@ public:
 	
 	// register metatable for this class
 	static bool registerFile(lua_State* L);
-	
-private:
-	// constructor function 
-	// Foundation.File(string) -> userdata
+	// constructor
 	static int File(lua_State* L);
-	
+private:
 	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);
 	static int metamethod__tostring(lua_State* L);

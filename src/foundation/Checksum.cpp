@@ -2,6 +2,11 @@
 #include "Poco/Exception.h"
 #include <cstring>
 
+int luaopen_poco_checksum(lua_State* L)
+{
+	return LuaPoco::loadConstructor(L, LuaPoco::ChecksumUserdata::Checksum);
+}
+
 namespace LuaPoco
 {
 

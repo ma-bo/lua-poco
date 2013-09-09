@@ -2,6 +2,11 @@
 #include "Poco/Exception.h"
 #include <iostream>
 
+int luaopen_poco_regex(lua_State* L)
+{
+	return LuaPoco::loadConstructor(L, LuaPoco::RegularExpressionUserdata::RegularExpression);
+}
+
 namespace
 {
 	
@@ -79,13 +84,6 @@ UserdataType RegularExpressionUserdata::getType()
 // register metatable for this class
 bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 {
-	if (!lua_istable(L, -1))
-		return false;
-	
-	// constructor
-	lua_pushcfunction(L, RegularExpression);
-	lua_setfield(L, -2, "RegularExpression");
-	
 	luaL_newmetatable(L, "Poco.RegularExpression.metatable");
 	// indexing and gc
 	lua_pushvalue(L, -1);

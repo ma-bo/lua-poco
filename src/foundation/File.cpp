@@ -4,6 +4,11 @@
 #include <iostream>
 #include <string>
 
+int luaopen_poco_file(lua_State* L)
+{
+	return LuaPoco::loadConstructor(L, LuaPoco::FileUserdata::File);
+}
+
 namespace LuaPoco
 {
 
@@ -41,13 +46,6 @@ bool FileUserdata::copyToState(lua_State* L)
 
 bool FileUserdata::registerFile(lua_State* L)
 {
-	if (!lua_istable(L, -1))
-		return false;
-	
-	// constructor: poco.File()
-	lua_pushcfunction(L, File);
-	lua_setfield(L, -2, "File");
-	
 	// create metatable for Poco::File
 	luaL_newmetatable(L, "Poco.File.metatable");
 	// indexing and gc

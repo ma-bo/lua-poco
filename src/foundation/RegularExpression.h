@@ -3,8 +3,14 @@
 
 #include <string>
 #include "LuaPoco.h"
+#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/RegularExpression.h"
+
+extern "C"
+{
+int luaopen_poco_regex(lua_State* L);
+}
 
 namespace LuaPoco
 {
@@ -18,13 +24,12 @@ public:
 	
 	// register metatable for this class
 	static bool registerRegularExpression(lua_State* L);
+	// constructor function 
+	static int RegularExpression(lua_State* L);
 private:
 	RegularExpressionUserdata();
 	RegularExpressionUserdata(const RegularExpressionUserdata& disable);
 	RegularExpressionUserdata operator=(const RegularExpressionUserdata& disable);
-	
-	// constructor function 
-	static int RegularExpression(lua_State* L);
 	
 	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);
