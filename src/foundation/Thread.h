@@ -2,9 +2,15 @@
 #define LUA_POCO_THREAD_H
 
 #include "LuaPoco.h"
+#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Thread.h"
 #include "Poco/Runnable.h"
+
+extern "C"
+{
+int luaopen_poco_thread(lua_State* L);
+}
 
 namespace LuaPoco
 {
@@ -18,11 +24,10 @@ public:
 	// register metatable for this class
 	static bool registerThread(lua_State* L);
 	void run();
-	
-private:
 	// constructor function 
 	static int Thread(lua_State* L);
 	
+private:
 	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);
 	static int metamethod__tostring(lua_State* L);

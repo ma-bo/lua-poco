@@ -21,10 +21,6 @@ UserdataType ProcessHandleUserdata::getType()
 // register metatable for this class
 bool ProcessHandleUserdata::registerProcessHandle(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-
 	luaL_newmetatable(L, "Poco.ProcessHandle.metatable");
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
@@ -44,9 +40,8 @@ bool ProcessHandleUserdata::registerProcessHandle(lua_State* L)
 	lua_pushcfunction(L, kill);
 	lua_setfield(L, -2, "kill");
 	lua_pop(L, 1);
-	result = true;
-	
-	return result;
+
+	return true;
 }
 
 // metamethod infrastructure

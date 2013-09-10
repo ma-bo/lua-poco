@@ -2,8 +2,14 @@
 #define LUA_POCO_TIMESTAMP_H
 
 #include "LuaPoco.h"
+#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Timestamp.h"
+
+extern "C"
+{
+int luaopen_poco_timestamp(lua_State* L);
+}
 
 namespace LuaPoco
 {
@@ -25,10 +31,9 @@ public:
 	// standalone functions that create a TimestampUserdata
 	static int TimestampFromEpoch(lua_State* L);
 	static int TimestampFromUtc(lua_State* L);
-	
-private:
-	// Lua constructor
+		// Lua constructor
 	static int Timestamp(lua_State* L);
+private:
 	
 	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);

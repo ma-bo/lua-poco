@@ -28,20 +28,19 @@ bool loadMetatables(lua_State* L)
 	{
 		if (
 			FileUserdata::registerFile(L) &&
-			RegularExpressionUserdata::registerRegularExpression(L)
-			//DynamicAnyUserdata::registerDynamicAny(L) &&
-			//TimestampUserdata::registerTimestamp(L) &&
-			//ChecksumUserdata::registerChecksum(L) &&
-			//Environment::registerEnvironment(L) &&
-			//PipeUserdata::registerPipe(L) &&
-			//NamedEventUserdata::registerNamedEvent(L) && 
-			//NamedMutexUserdata::registerNamedMutex(L) &&
-			//ProcessHandleUserdata::registerProcessHandle(L) &&
-			//Process::registerProcess(L) &&
-			//SemaphoreUserdata::registerSemaphore(L) &&
-			//FastMutexUserdata::registerFastMutex(L) &&
-			//MutexUserdata::registerMutex(L) &&
-			//ThreadUserdata::registerThread(L)
+			RegularExpressionUserdata::registerRegularExpression(L) &&
+			DynamicAnyUserdata::registerDynamicAny(L) &&
+			TimestampUserdata::registerTimestamp(L) &&
+			ChecksumUserdata::registerChecksum(L) &&
+			PipeUserdata::registerPipe(L) &&
+			NamedEventUserdata::registerNamedEvent(L) && 
+			NamedMutexUserdata::registerNamedMutex(L) &&
+			ProcessHandleUserdata::registerProcessHandle(L) &&
+			Process::registerProcess(L) &&
+			SemaphoreUserdata::registerSemaphore(L) &&
+			FastMutexUserdata::registerFastMutex(L) &&
+			MutexUserdata::registerMutex(L) &&
+			ThreadUserdata::registerThread(L)
 		)
 		{
 			rv = true;

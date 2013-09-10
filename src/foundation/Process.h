@@ -2,8 +2,14 @@
 #define LUA_POCO_PROCESS_H
 
 #include "LuaPoco.h"
+#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Process.h"
+
+extern "C"
+{
+int luaopen_poco_process(lua_State* L);
+}
 
 namespace LuaPoco
 {

@@ -5,12 +5,16 @@
 #include "Userdata.h"
 #include "Poco/Environment.h"
 
+extern "C"
+{
+int luaopen_poco_env(lua_State* L);
+}
+
 namespace LuaPoco
 {
 namespace Environment
 {
 
-bool registerEnvironment(lua_State* L);
 int get(lua_State* L);
 int has(lua_State* L);
 int set(lua_State* L);

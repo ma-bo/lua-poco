@@ -2,9 +2,15 @@
 #define LUA_POCO_NAMEDMUTEX_H
 
 #include "LuaPoco.h"
+#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/NamedMutex.h"
 #include <string>
+
+extern "C"
+{
+int luaopen_poco_namedmutex(lua_State* L);
+}
 
 namespace LuaPoco
 {
@@ -17,10 +23,10 @@ public:
 	virtual UserdataType getType();
 	// register metatable for this class
 	static bool registerNamedMutex(lua_State* L);
-private:
 	// constructor function 
 	static int NamedMutex(lua_State* L);
 	
+private:
 	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);
 	static int metamethod__tostring(lua_State* L);

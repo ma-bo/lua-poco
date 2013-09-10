@@ -2,8 +2,14 @@
 #define LUA_POCO_DYNAMICANY_H
 
 #include "LuaPoco.h"
+#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/DynamicAny.h"
+
+extern "C"
+{
+int luaopen_poco_dynamicany(lua_State* L);
+}
 
 namespace LuaPoco
 {
@@ -20,12 +26,12 @@ public:
 	virtual bool copyToState(lua_State* L);
 	// register metatable for this class
 	static bool registerDynamicAny(lua_State* L);
+	// Lua constructor
+	static int DynamicAny(lua_State* L);
 	
 	Poco::DynamicAny mDynamicAny;
 private:
 	DynamicAnyUserdata();
-	// Lua constructor
-	static int DynamicAny(lua_State* L);
 	
 	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);

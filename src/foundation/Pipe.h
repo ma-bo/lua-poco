@@ -2,9 +2,15 @@
 #define LUA_POCO_PIPE_H
 
 #include "LuaPoco.h"
+#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Pipe.h"
 #include "Poco/PipeStream.h"
+
+extern "C"
+{
+int luaopen_poco_pipe(lua_State* L);
+}
 
 namespace LuaPoco
 {
@@ -20,11 +26,11 @@ public:
 	virtual bool copyToState(lua_State *L);
 	// register metatable for this class
 	static bool registerPipe(lua_State* L);
-	Poco::Pipe mPipe;
-private:
 	// constructor function 
 	static int Pipe(lua_State* L);
 	
+	Poco::Pipe mPipe;
+private:
 	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);
 	static int metamethod__tostring(lua_State* L);

@@ -1,6 +1,11 @@
 #include "Semaphore.h"
 #include "Poco/Exception.h"
 
+int luaopen_poco_semaphore(lua_State* L)
+{
+	return LuaPoco::loadConstructor(L, LuaPoco::SemaphoreUserdata::Semaphore);
+}
+
 namespace LuaPoco
 {
 
@@ -47,14 +52,6 @@ bool SemaphoreUserdata::copyToState(lua_State *L)
 // register metatable for this class
 bool SemaphoreUserdata::registerSemaphore(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-	
-	// constructor
-	lua_pushcfunction(L, Semaphore);
-	lua_setfield(L, -2, "Semaphore");
-	
 	luaL_newmetatable(L, "Poco.Semaphore.metatable");
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
@@ -74,9 +71,8 @@ bool SemaphoreUserdata::registerSemaphore(lua_State* L)
 	lua_pushcfunction(L, wait);
 	lua_setfield(L, -2, "wait");
 	lua_pop(L, 1);
-	result = true;
 	
-	return result;
+	return true;
 }
 
 int SemaphoreUserdata::Semaphore(lua_State* L)

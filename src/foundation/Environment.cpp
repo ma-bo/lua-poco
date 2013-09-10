@@ -1,44 +1,37 @@
 #include "Environment.h"
 #include "Poco/Exception.h"
 
-namespace LuaPoco
+int luaopen_poco_env(lua_State* L)
 {
-
-bool Environment::registerEnvironment(lua_State* L)
-{
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-
-	lua_createtable(L, 0, 12);
-	lua_pushcfunction(L, get);
+	lua_createtable(L, 0, 11);
+	lua_pushcfunction(L, LuaPoco::Environment::get);
 	lua_setfield(L, -2, "get");
-	lua_pushcfunction(L, has);
+	lua_pushcfunction(L, LuaPoco::Environment::has);
 	lua_setfield(L, -2, "has");
-	lua_pushcfunction(L, set);
+	lua_pushcfunction(L, LuaPoco::Environment::set);
 	lua_setfield(L, -2, "set");
-	lua_pushcfunction(L, libraryVersion);
+	lua_pushcfunction(L, LuaPoco::Environment::libraryVersion);
 	lua_setfield(L, -2, "libraryVersion");
-	lua_pushcfunction(L, nodeId);
+	lua_pushcfunction(L, LuaPoco::Environment::nodeId);
 	lua_setfield(L, -2, "nodeId");
-	lua_pushcfunction(L, nodeName);
+	lua_pushcfunction(L, LuaPoco::Environment::nodeName);
 	lua_setfield(L, -2, "nodeName");
-	lua_pushcfunction(L, osArchitecture);
+	lua_pushcfunction(L, LuaPoco::Environment::osArchitecture);
 	lua_setfield(L, -2, "osArchitecture");
-	lua_pushcfunction(L, osDisplayName);
+	lua_pushcfunction(L, LuaPoco::Environment::osDisplayName);
 	lua_setfield(L, -2, "osDisplayName");
-	lua_pushcfunction(L, osName);
+	lua_pushcfunction(L, LuaPoco::Environment::osName);
 	lua_setfield(L, -2, "osName");
-	lua_pushcfunction(L, osVersion);
+	lua_pushcfunction(L, LuaPoco::Environment::osVersion);
 	lua_setfield(L, -2, "osVersion");
-	lua_pushcfunction(L, processorCount);
+	lua_pushcfunction(L, LuaPoco::Environment::processorCount);
 	lua_setfield(L, -2, "processorCount");
 	
-	lua_setfield(L, -2, "Environment");
-	result = true;
-	
-	return result;
+	return 1;
 }
+
+namespace LuaPoco
+{
 
 int Environment::get(lua_State* L)
 {

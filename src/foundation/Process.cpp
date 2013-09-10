@@ -4,32 +4,26 @@
 #include "Poco/Exception.h"
 #include "Poco/Path.h"
 #include <iostream>
-namespace LuaPoco
-{
 
-bool Process::registerProcess(lua_State* L)
+int luaopen_poco_process(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-
-	lua_createtable(L, 0, 12);
-	lua_pushcfunction(L, kill);
+	lua_createtable(L, 0, 5);
+	lua_pushcfunction(L, LuaPoco::Process::kill);
 	lua_setfield(L, -2, "kill");
-	lua_pushcfunction(L, id);
+	lua_pushcfunction(L, LuaPoco::Process::id);
 	lua_setfield(L, -2, "id");
-	lua_pushcfunction(L, requestTermination);
+	lua_pushcfunction(L, LuaPoco::Process::requestTermination);
 	lua_setfield(L, -2, "requestTermination");
-	lua_pushcfunction(L, times);
+	lua_pushcfunction(L, LuaPoco::Process::times);
 	lua_setfield(L, -2, "times");
-	lua_pushcfunction(L, launch);
+	lua_pushcfunction(L, LuaPoco::Process::launch);
 	lua_setfield(L, -2, "launch");
 	
-	lua_setfield(L, -2, "Process");
-	result = true;
-	
-	return result;
+	return 1;
 }
+
+namespace LuaPoco
+{
 
 int Process::kill(lua_State* L)
 {

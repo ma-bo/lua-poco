@@ -43,14 +43,6 @@ bool ChecksumUserdata::copyToState(lua_State *L)
 // register metatable for this class
 bool ChecksumUserdata::registerChecksum(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-	
-	// constructor
-	lua_pushcfunction(L, Checksum);
-	lua_setfield(L, -2, "Checksum");
-	
 	luaL_newmetatable(L, "Poco.Checksum.metatable");
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
@@ -70,9 +62,7 @@ bool ChecksumUserdata::registerChecksum(lua_State* L)
 	lua_pushcfunction(L, type);
 	lua_setfield(L, -2, "type");
 	lua_pop(L, 1);
-	result = true;
-	
-	return result;
+	return true;
 }
 
 int ChecksumUserdata::Checksum(lua_State* L)

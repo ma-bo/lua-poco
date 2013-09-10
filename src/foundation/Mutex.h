@@ -2,9 +2,15 @@
 #define LUA_POCO_MUTEX_H
 
 #include "LuaPoco.h"
+#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Mutex.h"
 #include "Poco/SharedPtr.h"
+
+extern "C"
+{
+int luaopen_poco_mutex(lua_State* L);
+}
 
 namespace LuaPoco
 {
@@ -20,10 +26,10 @@ public:
 	virtual bool copyToState(lua_State *L);
 	// register metatable for this class
 	static bool registerMutex(lua_State* L);
-private:
 	// constructor function 
 	static int Mutex(lua_State* L);
 	
+private:
 	// metamethod infrastructure
 	static int metamethod__gc(lua_State* L);
 	static int metamethod__tostring(lua_State* L);

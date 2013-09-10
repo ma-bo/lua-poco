@@ -1,6 +1,11 @@
 #include "Mutex.h"
 #include "Poco/Exception.h"
 
+int luaopen_poco_mutex(lua_State* L)
+{
+	return LuaPoco::loadConstructor(L, LuaPoco::MutexUserdata::Mutex);
+}
+
 namespace LuaPoco
 {
 
@@ -42,14 +47,6 @@ bool MutexUserdata::copyToState(lua_State *L)
 // register metatable for this class
 bool MutexUserdata::registerMutex(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-	
-	// constructor
-	lua_pushcfunction(L, Mutex);
-	lua_setfield(L, -2, "Mutex");
-	
 	luaL_newmetatable(L, "Poco.Mutex.metatable");
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
@@ -69,9 +66,8 @@ bool MutexUserdata::registerMutex(lua_State* L)
 	lua_pushcfunction(L, unlock);
 	lua_setfield(L, -2, "unlock");
 	lua_pop(L, 1);
-	result = true;
 	
-	return result;
+	return true;
 }
 
 int MutexUserdata::Mutex(lua_State* L)

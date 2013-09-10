@@ -1,5 +1,10 @@
 #include "DynamicAny.h"
 
+int luaopen_poco_dynamicany(lua_State* L)
+{
+	return LuaPoco::loadConstructor(L, LuaPoco::DynamicAnyUserdata::DynamicAny);
+}
+
 namespace LuaPoco
 {
 
@@ -35,14 +40,6 @@ bool DynamicAnyUserdata::copyToState(lua_State* L)
 // register metatable for this class
 bool DynamicAnyUserdata::registerDynamicAny(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-	
-	// constructor
-	lua_pushcfunction(L, DynamicAny);
-	lua_setfield(L, -2, "DynamicAny");
-	
 	luaL_newmetatable(L, "Poco.DynamicAny.metatable");
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
@@ -86,9 +83,8 @@ bool DynamicAnyUserdata::registerDynamicAny(lua_State* L)
 	lua_pushcfunction(L, metamethod__le);
 	lua_setfield(L, -2, "__le");
 	lua_pop(L, 1);
-	result = true;
 	
-	return result;
+	return true;
 }
 
 // Lua constructor

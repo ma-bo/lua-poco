@@ -1,6 +1,11 @@
 #include "NamedMutex.h"
 #include "Poco/Exception.h"
 
+int luaopen_poco_namedmutex(lua_State* L)
+{
+	return LuaPoco::loadConstructor(L, LuaPoco::NamedMutexUserdata::NamedMutex);
+}
+
 namespace LuaPoco
 {
 
@@ -21,14 +26,6 @@ UserdataType NamedMutexUserdata::getType()
 // register metatable for this class
 bool NamedMutexUserdata::registerNamedMutex(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-	
-	// constructor
-	lua_pushcfunction(L, NamedMutex);
-	lua_setfield(L, -2, "NamedMutex");
-	
 	luaL_newmetatable(L, "Poco.NamedMutex.metatable");
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
@@ -48,9 +45,8 @@ bool NamedMutexUserdata::registerNamedMutex(lua_State* L)
 	lua_pushcfunction(L, unlock);
 	lua_setfield(L, -2, "unlock");
 	lua_pop(L, 1);
-	result = true;
 	
-	return result;
+	return true;
 }
 
 int NamedMutexUserdata::NamedMutex(lua_State* L)

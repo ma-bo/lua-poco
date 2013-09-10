@@ -3,6 +3,11 @@
 #include "Poco/Exception.h"
 #include <cstring>
 
+int luaopen_poco_thread(lua_State* L)
+{
+	return LuaPoco::loadConstructor(L, LuaPoco::ThreadUserdata::Thread);
+}
+
 namespace LuaPoco
 {
 
@@ -28,14 +33,6 @@ UserdataType ThreadUserdata::getType()
 // register metatable for this class
 bool ThreadUserdata::registerThread(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-	
-	// constructor
-	lua_pushcfunction(L, Thread);
-	lua_setfield(L, -2, "Thread");
-	
 	luaL_newmetatable(L, "Poco.Thread.metatable");
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
@@ -64,9 +61,8 @@ bool ThreadUserdata::registerThread(lua_State* L)
 	lua_setfield(L, -2, "priority");
 	
 	lua_pop(L, 1);
-	result = true;
 	
-	return result;
+	return true;
 }
 
 int ThreadUserdata::Thread(lua_State* L)

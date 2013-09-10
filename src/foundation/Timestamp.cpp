@@ -2,6 +2,31 @@
 #include "DynamicAny.h"
 #include <ctime>
 
+int luaopen_poco_timestamp(lua_State* L)
+{
+	int rv = 0;
+	
+	if (LuaPoco::loadMetatables(L))
+	{
+		lua_createtable(L, 0, 1);
+		lua_pushcfunction(L, LuaPoco::TimestampUserdata::Timestamp);
+		lua_setfield(L, -2, "new");
+		lua_pushcfunction(L, LuaPoco::TimestampUserdata::TimestampFromEpoch);
+		lua_setfield(L, -2, "fromEpoch");
+		lua_pushcfunction(L, LuaPoco::TimestampUserdata::TimestampFromUtc);
+		lua_setfield(L, -2, "fromUTC");
+		rv = 1;
+	}
+	else
+	{
+		lua_pushnil(L);
+		lua_pushstring(L, "failed to create required poco metatables");
+		rv = 2;
+	}
+	
+	return rv;
+}
+
 namespace LuaPoco
 {
 
@@ -47,18 +72,6 @@ bool TimestampUserdata::copyToState(lua_State* L)
 // register metatable for this class
 bool TimestampUserdata::registerTimestamp(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-	
-	// constructors
-	lua_pushcfunction(L, Timestamp);
-	lua_setfield(L, -2, "Timestamp");
-	lua_pushcfunction(L, TimestampFromEpoch);
-	lua_setfield(L, -2, "TimestampFromEpoch");
-	lua_pushcfunction(L, TimestampFromUtc);
-	lua_setfield(L, -2, "TimestampFromUtc");
-	
 	luaL_newmetatable(L, "Poco.Timestamp.metatable");
 	// metamethods
 	lua_pushvalue(L, -1);
@@ -95,9 +108,8 @@ bool TimestampUserdata::registerTimestamp(lua_State* L)
 	lua_pushcfunction(L, metamethod__le);
 	lua_setfield(L, -2, "__le");
 	lua_pop(L, 1);
-	result = true;
 	
-	return result;
+	return true;
 }
 
 // standalone functions that create a TimestampUserdata

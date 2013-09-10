@@ -2,6 +2,11 @@
 #include "Poco/Exception.h"
 #include <cstring>
 
+int luaopen_poco_pipe(lua_State* L)
+{
+	return LuaPoco::loadConstructor(L, LuaPoco::PipeUserdata::Pipe);
+}
+
 namespace LuaPoco
 {
 
@@ -42,14 +47,6 @@ bool PipeUserdata::copyToState(lua_State *L)
 // register metatable for this class
 bool PipeUserdata::registerPipe(lua_State* L)
 {
-	bool result = false;
-	if (!lua_istable(L, -1))
-		return result;
-	
-	// constructor
-	lua_pushcfunction(L, Pipe);
-	lua_setfield(L, -2, "Pipe");
-	
 	luaL_newmetatable(L, "Poco.Pipe.metatable");
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
@@ -69,9 +66,8 @@ bool PipeUserdata::registerPipe(lua_State* L)
 	lua_pushcfunction(L, close);
 	lua_setfield(L, -2, "close");
 	lua_pop(L, 1);
-	result = true;
 	
-	return result;
+	return true;
 }
 
 int PipeUserdata::Pipe(lua_State* L)
