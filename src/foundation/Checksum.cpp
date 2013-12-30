@@ -1,3 +1,10 @@
+/// CRC-32 or Adler-32 checksums.
+// A userdata object that generates CRC-32 or Adler-32 checksums.
+// Input can be either a string or an individual character represented as a number.
+//
+// Note: checksum userdata is copyable between poco threads.
+// @module checksum
+
 #include "Checksum.h"
 #include "Poco/Exception.h"
 #include <cstring>
@@ -64,7 +71,11 @@ bool ChecksumUserdata::registerChecksum(lua_State* L)
 	lua_pop(L, 1);
 	return true;
 }
-
+/// construct a new checksum userdata using CRC-32 or Adler-32 (default) algorithms.
+// @string[opt] type "CRC32" or "ADLER32" (default, if not specified)
+// @return userdata or nil. (error)
+// @return error message
+// @function new
 int ChecksumUserdata::Checksum(lua_State* L)
 {
 	int top = lua_gettop(L);
@@ -86,6 +97,9 @@ int ChecksumUserdata::Checksum(lua_State* L)
 }
 
 // metamethod infrastructure
+
+///
+// @type checksum
 int ChecksumUserdata::metamethod__gc(lua_State* L)
 {
 	ChecksumUserdata* csud = reinterpret_cast<ChecksumUserdata*>(
@@ -105,6 +119,10 @@ int ChecksumUserdata::metamethod__tostring(lua_State* L)
 }
 
 // userdata methods
+
+/// updates the checksum with the data passed.
+// @string data a string containing the data or a Lua number to be cast to a char.
+// @function update
 int ChecksumUserdata::update(lua_State* L)
 {
 	ChecksumUserdata* csud = reinterpret_cast<ChecksumUserdata*>(
@@ -128,6 +146,9 @@ int ChecksumUserdata::update(lua_State* L)
 	return 0;
 }
 
+/// returns the current checksum value.
+// @return value as a number.
+// @function checksum
 int ChecksumUserdata::checksum(lua_State* L)
 {
 	ChecksumUserdata* csud = reinterpret_cast<ChecksumUserdata*>(
@@ -137,6 +158,9 @@ int ChecksumUserdata::checksum(lua_State* L)
 	return 1;
 }
 
+/// returns the checksum algorithm in use.
+// @return algorithm name as a string.
+// @function type
 int ChecksumUserdata::type(lua_State* L)
 {
 	ChecksumUserdata* csud = reinterpret_cast<ChecksumUserdata*>(

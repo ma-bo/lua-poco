@@ -1,3 +1,14 @@
+/// Static typed values.
+// A userdata object that can hold POCO static types.  The main reason for this class is to have a mechanism to handle 64-bit integral values used by other classes in the POCO binding, like timestamp.
+//
+// Notes:
+//
+// * dynamicany userdata is copyable between poco threads.
+//
+// * dynamicany userdata can be used with the Lua arithmetic and equality operators.
+// 
+// @module dynamicany
+
 #include "DynamicAny.h"
 
 int luaopen_poco_dynamicany(lua_State* L)
@@ -64,7 +75,7 @@ bool DynamicAnyUserdata::registerDynamicAny(lua_State* L)
 	lua_setfield(L, -2, "isString");
 	lua_pushcfunction(L, toNumber);
 	lua_setfield(L, -2, "toNumber");
-	lua_pushcfunction(L, toNumber);
+	lua_pushcfunction(L, toString);
 	lua_setfield(L, -2, "toString");
 	lua_pushcfunction(L, toBoolean);
 	lua_setfield(L, -2, "toBoolean");
@@ -87,7 +98,11 @@ bool DynamicAnyUserdata::registerDynamicAny(lua_State* L)
 	return true;
 }
 
-// Lua constructor
+/// construct a new userdata from value.
+// @param value of types number, string, boolean, or dynamicany userdata.
+// @return userdata or nil. (error)
+// @return error message.
+// @function new
 int DynamicAnyUserdata::DynamicAny(lua_State* L)
 {
 	int rv = 0;
@@ -152,6 +167,9 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
 	return rv;
 }
 
+///
+// @type dynamicany
+
 // metamethod infrastructure
 int DynamicAnyUserdata::metamethod__gc(lua_State* L)
 {
@@ -172,6 +190,12 @@ int DynamicAnyUserdata::metamethod__tostring(lua_State* L)
 }
 
 // methods
+
+/// converts value to new type.
+// @string toType  "UInt64", "Int64", "UInt32", "Int32", "UInt16", "Int16", "UInt8", "Int8", "double", "float", "string", "bool".
+// @return new userdata or nil. (error)
+// @return error message.
+// @function convert
 int DynamicAnyUserdata::convert(lua_State* L)
 {
 	int rv = 0;
@@ -233,6 +257,9 @@ int DynamicAnyUserdata::convert(lua_State* L)
 	return rv;
 }
 
+/// checks if value is a numeric type.
+// @return boolean
+// @function isNumeric
 int DynamicAnyUserdata::isNumeric(lua_State* L)
 {
 	DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
@@ -244,6 +271,9 @@ int DynamicAnyUserdata::isNumeric(lua_State* L)
 	return 1;
 }
 
+/// checks if value is an integral type.
+// @return boolean
+// @function isInteger
 int DynamicAnyUserdata::isInteger(lua_State* L)
 {
 	DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
@@ -255,6 +285,9 @@ int DynamicAnyUserdata::isInteger(lua_State* L)
 	return 1;
 }
 
+/// checks if value is a signed type.
+// @return boolean. (false if unsigned)
+// @function isSigned
 int DynamicAnyUserdata::isSigned(lua_State* L)
 {
 	DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
@@ -277,6 +310,10 @@ int DynamicAnyUserdata::isString(lua_State* L)
 	return 1;
 }
 
+/// converts value to a Lua number.
+// @return number or nil. (error)
+// @return error message.
+// @function toNumber
 int DynamicAnyUserdata::toNumber(lua_State* L)
 {
 	int rv = 0;
@@ -301,6 +338,10 @@ int DynamicAnyUserdata::toNumber(lua_State* L)
 	return rv;
 }
 
+/// converts value to a Lua string.
+// @return string or nil. (error)
+// @return error message.
+// @function toString
 int DynamicAnyUserdata::toString(lua_State* L)
 {
 	int rv = 0;
@@ -326,6 +367,10 @@ int DynamicAnyUserdata::toString(lua_State* L)
 	return rv;
 }
 
+/// converts value to a Lua boolean.
+// @return boolean or nil. (error)
+// @return error message.
+// @function toBoolean
 int DynamicAnyUserdata::toBoolean(lua_State* L)
 {
 	int rv = 0;
@@ -350,6 +395,7 @@ int DynamicAnyUserdata::toBoolean(lua_State* L)
 	
 	return rv;
 }
+
 
 int DynamicAnyUserdata::metamethod__add(lua_State* L)
 {
