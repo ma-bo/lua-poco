@@ -36,7 +36,6 @@ bool loadMetatables(lua_State* L)
 			NamedEventUserdata::registerNamedEvent(L) && 
 			NamedMutexUserdata::registerNamedMutex(L) &&
 			ProcessHandleUserdata::registerProcessHandle(L) &&
-			Process::registerProcess(L) &&
 			SemaphoreUserdata::registerSemaphore(L) &&
 			FastMutexUserdata::registerFastMutex(L) &&
 			MutexUserdata::registerMutex(L) &&
