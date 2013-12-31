@@ -1,3 +1,7 @@
+/// Synchronization mechanism used to control access to a shared resource.
+// Note: Mutexes are recursive, that is, the same mutex can be locked multiple times by the same thread (but, of course, not by other threads).  Also note that recursive mutexes are heavier and slower than the fastmutex module.
+// @module mutex
+
 #include "Mutex.h"
 #include "Poco/Exception.h"
 
@@ -70,6 +74,10 @@ bool MutexUserdata::registerMutex(lua_State* L)
 	return true;
 }
 
+/// create a new mutex userdata.
+// @return userdata or nil. (error)
+// @return error message.
+// @function new
 int MutexUserdata::Mutex(lua_State* L)
 {
 	int rv = 0;
@@ -92,6 +100,9 @@ int MutexUserdata::Mutex(lua_State* L)
 	return rv;
 }
 
+///
+// @type mutex
+
 // metamethod infrastructure
 int MutexUserdata::metamethod__gc(lua_State* L)
 {
@@ -111,40 +122,37 @@ int MutexUserdata::metamethod__tostring(lua_State* L)
 	return 1;
 }
 
+/// Locks the mutex. Blocks if the mutex is held by another thread.
+// @function lock
+
 // userdata methods
 int MutexUserdata::lock(lua_State* L)
 {
 	int rv = 0;
 	MutexUserdata* mud = reinterpret_cast<MutexUserdata*>(
 		luaL_checkudata(L, 1, "Poco.Mutex.metatable"));
-	int top = lua_gettop(L);
-	
-	long ms;
-	if (top > 1)
-		ms = luaL_checkinteger(L, 2);
-	
 	try
 	{
-		if (top > 1)
-			mud->mMutex->lock(ms);
-		else
-			mud->mMutex->lock();
-		
-		lua_pushboolean(L, 1);
-		rv = 1;
+		mud->mMutex->lock();
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Attempts to lock the mutex.
+// @int[opt] ms optional number of milliseconds to try to acquire the mutex.
+// @return boolean indicating if lock was acquired or timeout occured.
+// @function tryLock
 int MutexUserdata::tryLock(lua_State* L)
 {
 	int rv = 0;
@@ -179,6 +187,8 @@ int MutexUserdata::tryLock(lua_State* L)
 	return rv;
 }
 
+/// Unlocks the mutex so that it can be acquired by other threads. 
+// @function unlock
 int MutexUserdata::unlock(lua_State* L)
 {
 	int rv = 0;
