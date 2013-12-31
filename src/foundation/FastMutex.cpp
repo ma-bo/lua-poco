@@ -1,3 +1,7 @@
+/// Non-recursive synchronization mechanism used to control access to a shared resource.
+// Note: A deadlock will occur if the same thread tries to lock a mutex that has already locked.
+// @module fastmutex
+
 #include "FastMutex.h"
 #include "Poco/Exception.h"
 
@@ -14,7 +18,7 @@ FastMutexUserdata::FastMutexUserdata() :
 {
 }
 
-// construct new Ud from existing SharedPtr (only useful for 
+// construct new Ud from existing SharedPtr
 FastMutexUserdata::FastMutexUserdata(const Poco::SharedPtr<Poco::FastMutex>& fm) :
 	mFastMutex(fm)
 {
@@ -70,6 +74,10 @@ bool FastMutexUserdata::registerFastMutex(lua_State* L)
 	return true;
 }
 
+/// constructs a new fastmutex userdata.
+// @return userdata or nil. (error)
+// @return error message
+// @function new
 int FastMutexUserdata::FastMutex(lua_State* L)
 {
 	int rv = 0;
@@ -92,6 +100,9 @@ int FastMutexUserdata::FastMutex(lua_State* L)
 	return rv;
 }
 
+///
+// @type fastmutex
+
 // metamethod infrastructure
 int FastMutexUserdata::metamethod__gc(lua_State* L)
 {
@@ -111,40 +122,38 @@ int FastMutexUserdata::metamethod__tostring(lua_State* L)
 	return 1;
 }
 
+/// Locks the mutex. Blocks if the mutex is already held.
+// @function lock
+
 // userdata methods
 int FastMutexUserdata::lock(lua_State* L)
 {
 	int rv = 0;
 	FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
 		luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
-	int top = lua_gettop(L);
-	
-	long ms;
-	if (top > 1)
-		ms = luaL_checkinteger(L, 2);
 	
 	try
 	{
-		if (top > 1)
-			fmud->mFastMutex->lock(ms);
-		else
-			fmud->mFastMutex->lock();
-		
-		lua_pushboolean(L, 1);
-		rv = 1;
+		fmud->mFastMutex->lock();
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Attempts to lock the mutex.
+// @int[opt] ms optional number of milliseconds to try to acquire the mutex.
+// @return boolean indicating if lock was acquired or timeout occured.
+// @function tryLock
 int FastMutexUserdata::tryLock(lua_State* L)
 {
 	int rv = 0;
@@ -179,6 +188,8 @@ int FastMutexUserdata::tryLock(lua_State* L)
 	return rv;
 }
 
+/// Unlocks the mutex so that it can be acquired by other threads. 
+// @function unlock
 int FastMutexUserdata::unlock(lua_State* L)
 {
 	int rv = 0;
@@ -188,16 +199,16 @@ int FastMutexUserdata::unlock(lua_State* L)
 	try
 	{
 		fmud->mFastMutex->unlock();
-		lua_pushboolean(L, 1);
-		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
