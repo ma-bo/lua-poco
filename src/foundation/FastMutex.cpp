@@ -1,5 +1,6 @@
 /// Non-recursive synchronization mechanism used to control access to a shared resource.
 // Note: A deadlock will occur if the same thread tries to lock a mutex that has already locked.
+// Note: fastmutex userdata are copyable/sharable between threads.
 // @module fastmutex
 
 #include "FastMutex.h"

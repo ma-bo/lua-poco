@@ -1,5 +1,6 @@
 /// Synchronization mechanism used to control access to a shared resource.
 // Note: Mutexes are recursive, that is, the same mutex can be locked multiple times by the same thread (but, of course, not by other threads).  Also note that recursive mutexes are heavier and slower than the fastmutex module.
+// Note: mutex userdata are copyable/sharable between threads.
 // @module mutex
 
 #include "Mutex.h"
