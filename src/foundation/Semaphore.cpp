@@ -1,3 +1,9 @@
+/// Synchronization mechanism used to control access to a shared resource.
+// A semaphore has a value that is constrained to be a non-negative integer and two atomic operations. The allowable operations are V (here called set()) and P (here called wait()). A V (set()) operation increases the value of the semaphore by one. A P (wait()) operation decreases the value of the semaphore by one, provided that can be done without violating the constraint that the value be non-negative. A P (wait()) operation that is initiated when the value of the semaphore is 0 suspends the calling thread. The calling thread may continue when the value becomes positive again. 
+//
+// Note: semaphore userdata are copyable/sharable between threads.
+// @module semaphore
+
 #include "Semaphore.h"
 #include "Poco/Exception.h"
 
@@ -75,6 +81,12 @@ bool SemaphoreUserdata::registerSemaphore(lua_State* L)
 	return true;
 }
 
+/// constructs a new semaphore userdata.
+// @int n current value of the semaphore.
+// @int[opt] max optional maximum value of the semaphore.
+// @return userdata or nil. (error)
+// @return error message.
+// @function new
 int SemaphoreUserdata::Semaphore(lua_State* L)
 {
 	int rv = 0;
@@ -107,6 +119,9 @@ int SemaphoreUserdata::Semaphore(lua_State* L)
 	return rv;
 }
 
+///
+// @type semaphore
+
 // metamethod infrastructure
 int SemaphoreUserdata::metamethod__gc(lua_State* L)
 {
@@ -126,6 +141,10 @@ int SemaphoreUserdata::metamethod__tostring(lua_State* L)
 	return 1;
 }
 
+/// Increments the semaphore's value and signals the semaphore. 
+// Another thread waiting will continue.
+// @function set
+
 // userdata methods
 int SemaphoreUserdata::set(lua_State* L)
 {
@@ -135,21 +154,26 @@ int SemaphoreUserdata::set(lua_State* L)
 	try
 	{
 		sud->mSemaphore->set();
-		lua_pushboolean(L, 1);
-		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
 		rv = pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Attempts to wait for the semaphore to become signaled.
+// To become signaled, a semaphore's value must be greater than zero. Returns true if the semaphore became signaled within the specified time interval, false otherwise. Decrements the semaphore's value by one if successful.
+// @int millisecs
+// @return boolean
+// @function tryWait
 int SemaphoreUserdata::tryWait(lua_State* L)
 {
 	int rv = 0;
@@ -165,16 +189,20 @@ int SemaphoreUserdata::tryWait(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
-
+/// Waits for the semaphore to become signaled.
+// To become signaled, a semaphore's value must be greater than zero. Decrements the semaphore's value by one. 
+// @function wait
 int SemaphoreUserdata::wait(lua_State* L)
 {
 	int rv = 0;
@@ -184,16 +212,16 @@ int SemaphoreUserdata::wait(lua_State* L)
 	try
 	{
 		sud->mSemaphore->wait();
-		lua_pushboolean(L, 1);
-		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
