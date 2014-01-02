@@ -1,3 +1,14 @@
+/// A platform-independent wrapper to an operating system thread.
+// Every thread userdata gets a unique (within its process) numeric thread ID. Furthermore, a thread can be assigned a name. The name of a thread can be changed at any time. 
+//
+// Note: Threads are implemented using separate Lua states.  
+// Lua code is run in the thread by dumping a function from one state, and loading it into the thread's state. Upvalues are not dumped.
+// Basic Lua types like booleans, numbers, strings, and tables can be copied to the new thread.
+// Userdata from the poco module that are noted to be copyable/sharable are also able to be passed to a new thread.
+//
+// Note: Synchronization mechanisms like fastmutex, mutex, and semaphore can be used to communicate, but IPC mechanisms that avoid locking complications like pipes, sockets, and notifications are recommended instead.
+// @module thread
+
 #include "Thread.h"
 #include "StateTransfer.h"
 #include "Poco/Exception.h"
@@ -64,7 +75,12 @@ bool ThreadUserdata::registerThread(lua_State* L)
 	
 	return true;
 }
-
+/// constructs a new thread userdata.
+// @string[opt] priority a string indicating thread priority, "lowest", "low", "normal", "high", "highest", default is "normal".
+// @string[opt] name the name of the thread, default is no name.
+// @int[opt] stackSize the size of the stack for the thread, default is platform defined.
+// @return thread userdata or nil. (error)
+// @function new
 int ThreadUserdata::Thread(lua_State* L)
 {
 	int rv = 0;
@@ -128,6 +144,9 @@ int ThreadUserdata::Thread(lua_State* L)
 	return rv;
 }
 
+///
+// @type thread
+
 // metamethod infrastructure
 int ThreadUserdata::metamethod__gc(lua_State* L)
 {
@@ -148,6 +167,12 @@ int ThreadUserdata::metamethod__tostring(lua_State* L)
 }
 
 // userdata methods
+
+/// Get or set the thread's name.
+// Pass no value to get the thread name.
+// @string name if name is passed, the thread's name is set, otherwise the current name is returned.
+// @return name as a string.
+// @function name
 int ThreadUserdata::name(lua_State* L)
 {
 	int rv = 0;
@@ -177,16 +202,23 @@ int ThreadUserdata::name(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Get or set the thread's priority.
+// Pass no value to get the thread's priority.
+// @string[opt] priority if priority is passed "lowest", "low", "normal", "high", or "highest", the priority will be set, otherwise the current priority is returned.
+// @return priority as a string.
+// @function priority
 int ThreadUserdata::priority(lua_State* L)
 {
 	int rv = 0;
@@ -249,16 +281,21 @@ int ThreadUserdata::priority(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Get the thread's numerical id.
+// @return id as a number.
+// @function id
 int ThreadUserdata::id(lua_State* L)
 {
 	int rv = 0;
@@ -283,6 +320,8 @@ int ThreadUserdata::id(lua_State* L)
 	return rv;
 }
 
+/// Gets the threads running state.
+// @return boolean indicating running or not.
 int ThreadUserdata::isRunning(lua_State* L)
 {
 	int rv = 0;
@@ -297,36 +336,31 @@ int ThreadUserdata::isRunning(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Waits until the thread completes execution.
+// @function join
 int ThreadUserdata::join(lua_State* L)
 {
 	int rv = 0;
 	ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
 		luaL_checkudata(L, 1, "Poco.Thread.metatable"));
-		
-	int top = lua_gettop(L);
-	int ms = 0;
-	
-	if (top > 1)
-		ms = luaL_checkinteger(L, 2);
 	
 	try
 	{
 		if (thud->mStarted && !thud->mJoined)
 		{
-			if (top > 1)
-				thud->mThread.join(ms);
-			else
-				thud->mThread.join();
+			thud->mThread.join();
 			
 			thud->mJoined = true;
 			
@@ -362,6 +396,11 @@ int ThreadUserdata::join(lua_State* L)
 	return rv;
 }
 
+/// Get or set the thread's stack size.
+// Pass no value to get the thread's stack size.
+// @int[opt] stackSize if stackSize is passed as a number, the priority will be set, otherwise the current stackSize is returned.
+// @return stackSize as a number.
+// @function stackSize
 int ThreadUserdata::stackSize(lua_State* L)
 {
 	int rv = 0;
@@ -401,6 +440,12 @@ int ThreadUserdata::stackSize(lua_State* L)
 	return rv;
 }
 
+/// Start a a new thread with a Lua function. 
+// @param threadStart a function to be copied to the new state.  Upvalues are ignored.
+// @param ... A variable list of basic Lua types or poco userdata that are noted to be copyable/sharable between threads.
+// @return true or nil. (error)
+// @return error message.
+// @function start
 int ThreadUserdata::start(lua_State* L)
 {
 	int rv = 0;
@@ -412,7 +457,7 @@ int ThreadUserdata::start(lua_State* L)
 	
 	thud->mThreadState = luaL_newstate();
 	luaL_openlibs(thud->mThreadState);
-	if (luaL_dostring(thud->mThreadState, "require('poco')") != 0)
+	if (!loadMetatables(thud->mThreadState))
 	{
 		lua_pushnil(L);
 		lua_pushstring(L, "could not load poco library into thread's state.");
@@ -451,6 +496,7 @@ int ThreadUserdata::start(lua_State* L)
 	return rv;
 }
 
+// ThreadUserdata is a Poco::Runnable, so this is executed as part of Poco::Thread::start().
 void ThreadUserdata::run()
 {
 	const char* msg;
