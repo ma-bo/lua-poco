@@ -1,3 +1,7 @@
+/// A userdata handle for a process created with poco.process.launch().
+// This handle can be used to determine the process ID of the newly created process and it can be used to wait for the completion of a process.
+// @module processhandle
+
 #include "ProcessHandle.h"
 #include "Poco/Exception.h"
 
@@ -44,6 +48,9 @@ bool ProcessHandleUserdata::registerProcessHandle(lua_State* L)
 	return true;
 }
 
+///
+// @type processhandle
+
 // metamethod infrastructure
 int ProcessHandleUserdata::metamethod__gc(lua_State* L)
 {
@@ -77,6 +84,10 @@ int ProcessHandleUserdata::metamethod__tostring(lua_State* L)
 }
 
 // userdata methods
+
+/// Gets the process id associated with the handle.
+// @return id as a Lua number.
+// @function id
 int ProcessHandleUserdata::id(lua_State* L)
 {
 	int rv = 0;
@@ -99,6 +110,9 @@ int ProcessHandleUserdata::id(lua_State* L)
 	return rv;
 }
 
+/// Waits for the process to terminate and returns the exit code of the process.
+// @return exit code as a Lua number.
+// @function wait
 int ProcessHandleUserdata::wait(lua_State* L)
 {
 	ProcessHandleUserdata* phud = reinterpret_cast<ProcessHandleUserdata*>(
@@ -109,6 +123,9 @@ int ProcessHandleUserdata::wait(lua_State* L)
 	return 1;
 }
 
+/// Kills the process associated with the handle.
+// This is preferable on Windows where process IDs may be reused.
+// @function kill
 int ProcessHandleUserdata::kill(lua_State* L)
 {
 	ProcessHandleUserdata* phud = reinterpret_cast<ProcessHandleUserdata*>(
