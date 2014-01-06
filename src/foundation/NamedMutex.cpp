@@ -1,3 +1,7 @@
+/// Global synchronization mechanism used to control access to a shared resource.
+// Note: There should not be more than one instance of namedmutex for a given name in a process. Otherwise, the instances may interfere with each other.
+// @module namedmutex
+
 #include "NamedMutex.h"
 #include "Poco/Exception.h"
 
@@ -49,6 +53,10 @@ bool NamedMutexUserdata::registerNamedMutex(lua_State* L)
 	return true;
 }
 
+/// constructs a new namedevent userdata.
+// @string name global mutex name.
+// @return userdata.
+// @function new
 int NamedMutexUserdata::NamedMutex(lua_State* L)
 {
 	const char* name = luaL_checkstring(L, 1);
@@ -60,6 +68,9 @@ int NamedMutexUserdata::NamedMutex(lua_State* L)
 	NamedMutexUserdata* nmud = new(ud) NamedMutexUserdata(name);
 	return 1;
 }
+
+///
+// @type namedmutex
 
 // metamethod infrastructure
 int NamedMutexUserdata::metamethod__gc(lua_State* L)
@@ -81,6 +92,10 @@ int NamedMutexUserdata::metamethod__tostring(lua_State* L)
 }
 
 // userdata methods
+
+/// Locks the namedmutex.
+// Blocks if the mutex is held by another thread.
+// @function lock
 int NamedMutexUserdata::lock(lua_State* L)
 {
 	NamedMutexUserdata* nmud = reinterpret_cast<NamedMutexUserdata*>(
@@ -91,6 +106,10 @@ int NamedMutexUserdata::lock(lua_State* L)
 	return 0;
 }
 
+/// Attempts to lock the namedmutex.
+// Returns false immediately if the mutex is already held by another process.
+// @return boolean indicating if lock was acquired or not.
+// @function tryLock
 int NamedMutexUserdata::tryLock(lua_State* L)
 {
 	NamedMutexUserdata* nmud = reinterpret_cast<NamedMutexUserdata*>(
@@ -102,6 +121,8 @@ int NamedMutexUserdata::tryLock(lua_State* L)
 	return 1;
 }
 
+/// Unlocks the mutex so that it can be acquired by other threads. 
+// @function unlock
 int NamedMutexUserdata::unlock(lua_State* L)
 {
 	NamedMutexUserdata* nmud = reinterpret_cast<NamedMutexUserdata*>(
