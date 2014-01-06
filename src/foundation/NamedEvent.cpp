@@ -1,3 +1,9 @@
+/// Global synchronization object for one process to signal another of an event.
+// Note: namedevent is always autoresetting.
+//
+// Note: There should not be more than one instance of namedevent for a given name in a process. Otherwise, the instances may interfere with each other.
+// @module namedevent
+
 #include "NamedEvent.h"
 #include "Poco/Exception.h"
 #include <cstring>
@@ -48,6 +54,11 @@ bool NamedEventUserdata::registerNamedEvent(lua_State* L)
 	return true;
 }
 
+/// constructs a new namedevent userdata.
+// @string name global event name.
+// @return userdata.
+// @function new
+
 int NamedEventUserdata::NamedEvent(lua_State* L)
 {
 	const char* name = luaL_checkstring(L, 1);
@@ -59,6 +70,9 @@ int NamedEventUserdata::NamedEvent(lua_State* L)
 	NamedEventUserdata* neud = new(ud) NamedEventUserdata(name);
 	return 1;
 }
+
+///
+// @type namedevent
 
 // metamethod infrastructure
 int NamedEventUserdata::metamethod__gc(lua_State* L)
@@ -80,6 +94,10 @@ int NamedEventUserdata::metamethod__tostring(lua_State* L)
 }
 
 // userdata methods
+
+/// Signals the event.
+// The process waiting for the event can resume execution.
+// @function set
 int NamedEventUserdata::set(lua_State* L)
 {
 	NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
@@ -90,6 +108,9 @@ int NamedEventUserdata::set(lua_State* L)
 	return 0;
 }
 
+/// Waits for the event to become signaled.
+// Blocks the process until the event has become signaled.
+// @function wait
 int NamedEventUserdata::wait(lua_State* L)
 {
 	NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
