@@ -1,3 +1,6 @@
+/// Functions for working with processes.
+// @module process
+
 #include "Process.h"
 #include "ProcessHandle.h"
 #include "Pipe.h"
@@ -25,6 +28,10 @@ int luaopen_poco_process(lua_State* L)
 namespace LuaPoco
 {
 
+/// Kills the process with the given pid.
+// @int processId
+// @return true or nil. (error)
+// @function kill
 int Process::kill(lua_State* L)
 {
 	int rv = 0;
@@ -47,6 +54,9 @@ int Process::kill(lua_State* L)
 	return rv;
 }
 
+/// Gets the pid for the current process.
+// @return pid as a Lua number.
+// @function id
 int Process::id(lua_State* L)
 {
 	int rv = 0;
@@ -68,6 +78,13 @@ int Process::id(lua_State* L)
 	return rv;
 }
 
+/// Requests termination of the process with the give process id. 
+// On Unix platforms, this will send a SIGINT to the process and thus work with arbitrary processes.
+// On other platforms, a global event flag will be set. Setting the flag will cause serverapp:waitForTerminationRequest() to return.
+// Therefore this will only work with applications based on poco.serverapp
+// @int pid process id to request to terminate.
+// @return true or nil. (error)
+// @function requestTermination
 int Process::requestTermination(lua_State* L)
 {
 	int rv = 0;
@@ -90,6 +107,10 @@ int Process::requestTermination(lua_State* L)
 	return rv;
 }
 
+/// Returns the number of seconds spent by the current process in user and kernel mode.
+// @return usertime as a Lua number.
+// @return kernel as a Lua number.
+// @function times
 int Process::times(lua_State* L)
 {
 	int rv = 0;
@@ -237,6 +258,13 @@ void getArgs(lua_State* L, Poco::Process::Args& args)
 }
 
 }
+
+/// Launches a new process with command and returns a processhandle userdata.
+// The new program is launched directly; the command shell is not invoked.
+// @param lauchParam table of parameters for launch.
+// @return processhandle userdata or nil. (error)
+// @return error message.
+// @function launch
 
 int Process::launch(lua_State* L)
 {
