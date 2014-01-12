@@ -259,13 +259,22 @@ void getArgs(lua_State* L, Poco::Process::Args& args)
 
 }
 
+///
+// @field command the program to launch.
+// @field workingDir [optional] a path to be used as the working directory for the command.
+// @field inPipe [optional] a poco.pipe userdata that will be attached to the commands stdin.
+// @field outPipe [optional] a poco.pipe userdata that will be attached to the commands stdout.
+// @field errPipe [optional] a poco.pipe userdata that will be attached to the commands stderr.
+// @field env [optional] a table representing key/value pairs for the commands process environment.
+// @table launchParam
+
 /// Launches a new process with command and returns a processhandle userdata.
 // The new program is launched directly; the command shell is not invoked.
 // @param lauchParam table of parameters for launch.
 // @return processhandle userdata or nil. (error)
 // @return error message.
 // @function launch
-
+// @see launchParam
 int Process::launch(lua_State* L)
 {
 	int rv = 0;
