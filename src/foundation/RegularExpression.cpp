@@ -1,3 +1,7 @@
+/// Regular expressions
+// Regular expressions implemented by the PCRE library.
+// @module regex
+
 #include "RegularExpression.h"
 #include "Poco/Exception.h"
 #include <iostream>
@@ -113,6 +117,14 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 }
 
 // constructor function
+
+/// Constructs a new regex userdata
+// @string pattern the regular expression pattern
+// @string[opt] options 
+// @string[opt] study 
+// @return userdata or nil. (error)
+// @return error message.
+// @function new
 int RegularExpressionUserdata::RegularExpression(lua_State* L)
 {
 	int rv = 0;
@@ -151,6 +163,9 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
 	return rv;
 }
 
+///
+// @type regex
+
 // metamethod infrastructure
 int RegularExpressionUserdata::metamethod__gc(lua_State* L)
 {
@@ -169,6 +184,15 @@ int RegularExpressionUserdata::metamethod__tostring(lua_State* L)
 }
 
 // userdata methods
+
+/// Extracts the primary regex match.
+// Subgroups are returned in the match count, but only the primary match is extracted.
+// @string subject the string which will be processed with the regex.
+// @string[opt] options regex options for the match.
+// @int[opt] startPos the position to start the match.
+// @return the count of matches as a number, or nil. (error)
+// @return the substring matched by the expression, or error message.
+// @function extract
 int RegularExpressionUserdata::extract(lua_State* L)
 {
 	int rv = 0;
@@ -211,6 +235,14 @@ int RegularExpressionUserdata::extract(lua_State* L)
 	return rv;
 }
 
+/// Matches pattern against string.
+// Returns match position and length.
+// @string subject attempt to match the pattern against subject string.
+// @string[opt] regex options for the match.
+// @int[opt] startPos starting position for the match.
+// @return the starting position of the match as a number or nil. (error)
+// @return the length of the match or error message.
+// @function match
 int RegularExpressionUserdata::match(lua_State* L)
 {
 	int rv = 0;
@@ -264,6 +296,14 @@ int RegularExpressionUserdata::match(lua_State* L)
 	return rv;
 }
 
+/// Replace match in string with a substitute.
+// @string subject attempt to match the pattern against subject string.
+// @string replacement string that will be used to replace the matched pattern.
+// @string[opt] options regex options for the match.
+// @int[opt] startPos starting position for the match.
+// @return the count of matches replaced or nil. (error)
+// @return the newly replaced string or error message.
+// @function substitute
 int RegularExpressionUserdata::substitute(lua_State* L)
 {
 	int rv = 0;
@@ -310,6 +350,18 @@ int RegularExpressionUserdata::substitute(lua_State* L)
 	return rv;
 }
 
+/// Extracts all matches into supplied table.
+//
+// Note: matches are written to the table starting at index 1.
+// It is up to the user to clear the table before calling this function, or 
+// observe the return value when iterating the table.
+// @string subject attempt to match the pattern against subject string.
+// @param extractTable a table where matches will be stored starting at index 1.
+// @string[opt] regex options for the match.
+// @int[opt] startPos starting position for the match.
+// @return the count of matches replaced or nil. (error)
+// @return error message.
+// @function extractCaptures
 int RegularExpressionUserdata::extractCaptures(lua_State* L)
 {
 	int rv = 0;
@@ -362,6 +414,18 @@ int RegularExpressionUserdata::extractCaptures(lua_State* L)
 	return rv;
 }
 
+/// Extracts all match positions into the supplied table.
+//
+// Note: positions are written to the table starting at index 1.
+// It is up to the user to clear the table before calling this function, or 
+// observe the return value when iterating the table.
+// @string subject attempt to match the pattern against subject string.
+// @param extractTable a table where matches will be stored starting at index 1.
+// @string[opt] regex options for the match.
+// @int[opt] startPos starting position for the match.
+// @return the count of matches replaced or nil. (error)
+// @return error message.
+// @function extractPositions
 int RegularExpressionUserdata::extractPositions(lua_State* L)
 {
 	int rv = 0;
