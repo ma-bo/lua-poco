@@ -36,12 +36,9 @@ private:
 	static int metamethod__tostring(lua_State* L);
 	
 	// userdata methods
-	static int read(lua_State* L);
-	static int write(lua_State* L);
+	static int readBytes(lua_State* L);
+	static int writeBytes(lua_State* L);
 	static int close(lua_State* L);
-	
-	Poco::PipeInputStream mReadStream;
-	Poco::PipeOutputStream mWriteStream;
 };
 
 } // LuaPoco

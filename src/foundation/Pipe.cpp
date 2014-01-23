@@ -1,3 +1,8 @@
+/// Pipe IPC
+// Anonymous pipes.
+// Note: pipe's are sharable between threads.
+// @module pipe
+
 #include "Pipe.h"
 #include "Poco/Exception.h"
 #include <cstring>
@@ -11,12 +16,12 @@ namespace LuaPoco
 {
 
 PipeUserdata::PipeUserdata() :
-	mPipe(), mReadStream(mPipe), mWriteStream(mPipe)
+	mPipe()
 {
 }
 
 PipeUserdata::PipeUserdata(const Poco::Pipe& p) :
-	mPipe(p), mReadStream(mPipe), mWriteStream(mPipe)
+	mPipe(p)
 {
 }
 
@@ -59,10 +64,10 @@ bool PipeUserdata::registerPipe(lua_State* L)
 	lua_setfield(L, -2, "poco.userdata");
 	
 	// methods
-	lua_pushcfunction(L, read);
-	lua_setfield(L, -2, "read");
-	lua_pushcfunction(L, write);
-	lua_setfield(L, -2, "write");
+	lua_pushcfunction(L, readBytes);
+	lua_setfield(L, -2, "readBytes");
+	lua_pushcfunction(L, writeBytes);
+	lua_setfield(L, -2, "writeBytes");
 	lua_pushcfunction(L, close);
 	lua_setfield(L, -2, "close");
 	lua_pop(L, 1);
@@ -70,6 +75,10 @@ bool PipeUserdata::registerPipe(lua_State* L)
 	return true;
 }
 
+/// Constructs a new pipe userdata
+// @return userdata or nil. (error)
+// @return error message.
+// @function new
 int PipeUserdata::Pipe(lua_State* L)
 {
 	void* ud = lua_newuserdata(L, sizeof(PipeUserdata));
@@ -100,123 +109,35 @@ int PipeUserdata::metamethod__tostring(lua_State* L)
 }
 
 // userdata methods
-int PipeUserdata::read(lua_State* L)
+
+/// Reads bytes from pipe.
+// @int[opt] amount number of bytes to read as a number.
+// @return string or nil. (error)
+// @return error message.
+// @function readBytes
+int PipeUserdata::readBytes(lua_State* L)
 {
 	int rv = 0;
 	PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
 		luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
 	
-	size_t readAmount = 0;
-	const char* readType = NULL;
+	char readBuffer[1024];
+	size_t bytesToRead = sizeof readBuffer;
+	size_t bytesRead = 0;
 	
-	if (lua_gettop(L) > 1)
+	if (lua_gettop(L) > 1 && lua_isnumber(L, 2))
 	{
-		if (lua_isnumber(L, 2))
-			readAmount = lua_tonumber(L, 2);
-		else
-			readType = lua_tostring(L, 2);
-	}
-	
-	if (readAmount > 0)
-	{
-		luaL_Buffer lb;
-		luaL_buffinit(L, &lb);
-		
-		size_t total = 0;
-		char buffer[500];
-		do
-		{
-			size_t toRead = readAmount > sizeof buffer ? sizeof buffer : readAmount;
-			pud->mReadStream.read(buffer, toRead);
-			if (pud->mReadStream.good())
-			{
-				luaL_addlstring(&lb, buffer, toRead);
-				readAmount -= toRead;
-			}
-			else
-				break;
-		} while (readAmount > 0);
-		luaL_pushresult(&lb);
-		
-		if (pud->mReadStream.good())
-		{
-			rv = 1;
-		}
-		else if (pud->mReadStream.eof())
-		{
-			lua_pushnil(L);
-			lua_pushstring(L, "eof");
-			rv = 2;
-		}
-		else
-		{
-			lua_pushnil(L);
-			lua_pushstring(L, "failed to write to pipe");
-			rv = 2;
-		}
-	}
-	else if (readType && std::strcmp(readType, "*l") != 0)
-	{
-		lua_pushnil(L);
-		lua_pushstring(L, "invalid read format.");
-		rv = 2;
-	}
-	else
-	{
-		std::string line;
-		if (std::getline(pud->mReadStream, line).good())
-		{
-			lua_pushlstring(L, line.data(), line.size());
-			rv = 1;
-		}
-	}
-	
-	return rv;
-}
-
-int PipeUserdata::write(lua_State* L)
-{
-	int rv = 0;
-	PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
-
-	size_t strSize = 0;
-	const char* str = luaL_checklstring(L, 2, &strSize);
-	size_t startIdx = 0;
-	size_t endIdx = strSize;
-	
-	int top = lua_gettop(L);
-	if (top > 2)
-	{
-		lua_Integer startPos = luaL_checkinteger(L, 3) - 1;
-		startIdx = startPos < 0 ? 0 : startPos;
-		if (top > 3)
-		{
-			endIdx = luaL_checkinteger(L, 4);
-			endIdx = endIdx > strSize ? strSize : endIdx;
-		}
+		size_t requestedAmount = lua_tonumber(L, 2);
+		bytesToRead = requestedAmount <= bytesToRead ? requestedAmount : bytesToRead;
 	}
 	
 	try
 	{
-		pud->mWriteStream.write(&str[startIdx], endIdx - startIdx);
-		if (pud->mWriteStream.good())
-		{
-			lua_pushboolean(L, 1);
-			rv = 1;
-		}
-		else if (pud->mWriteStream.eof())
-		{
-			lua_pushnil(L);
-			lua_pushstring(L, "eof");
-			rv = 2;
-		}
-		else
-		{
-			lua_pushnil(L);
-			lua_pushstring(L, "failed to write to pipe");
-			rv = 2;
-		}
+		bytesRead = pud->mPipe.readBytes(readBuffer, bytesToRead);
+		luaL_Buffer lb;
+		luaL_buffinit(L, &lb);
+		luaL_addlstring(&lb, readBuffer, bytesRead);
+		rv = 1;
 	}
 	catch (const Poco::Exception& e)
 	{
@@ -230,6 +151,45 @@ int PipeUserdata::write(lua_State* L)
 	return rv;
 }
 
+/// Writes string of bytes to pipe.
+// @string string containing bytes to write.
+// @return true or nil. (error)
+// @return error message.
+// @function writeBytes
+int PipeUserdata::writeBytes(lua_State* L)
+{
+	int rv = 0;
+	PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
+		luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+	
+	size_t writeIndex = 0;
+	size_t strSize = 0;
+	const char* str = luaL_checklstring(L, 2, &strSize);
+	
+	try
+	{
+		while (writeIndex != strSize)
+		{
+			writeIndex += pud->mPipe.writeBytes(&str[writeIndex], strSize - writeIndex);
+		}
+		lua_pushboolean(L, 1);
+		rv = 1;
+	}
+	catch (const Poco::Exception& e)
+	{
+		rv = pushPocoException(L, e);
+	}
+	catch (...)
+	{
+		rv = pushUnknownException(L);
+	}
+	
+	return rv;
+}
+
+/// Closes pipe.
+// @string[opt] end which end of the pipe to close. "read", "write", or "both" (default)
+// @function close
 int PipeUserdata::close(lua_State* L)
 {
 	int rv = 0;
@@ -242,16 +202,13 @@ int PipeUserdata::close(lua_State* L)
 		closeEnd = luaL_checkstring(L, 2);
 	
 	if (std::strcmp(closeEnd, "read") == 0)
-		pud->mReadStream.close();
+		pud->mPipe.close(Poco::Pipe::CLOSE_READ);
 	else if (std::strcmp(closeEnd, "write") == 0)
-		pud->mWriteStream.close();
+		pud->mPipe.close(Poco::Pipe::CLOSE_WRITE);
 	else
-	{
-		pud->mReadStream.close();
-		pud->mWriteStream.close();
-	}
+		pud->mPipe.close(Poco::Pipe::CLOSE_BOTH);
 	
-	return 1;
+	return rv;
 }
 
 } // LuaPoco
