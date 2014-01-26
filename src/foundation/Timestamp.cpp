@@ -1,3 +1,9 @@
+/// Timestamps.
+// Stores a monotonic* time value with (theoretical) microseconds resolution. Timestamps can be compared with each other and simple arithmetic is supported.
+// Note: Timestamp values are only monotonic as long as the systems's clock is monotonic as well (and not, e.g. set back).
+// Note: Timestamps are UTC (Coordinated Universal Time) based.
+// @module timestamp
+
 #include "Timestamp.h"
 #include "DynamicAny.h"
 #include <ctime>
@@ -113,6 +119,12 @@ bool TimestampUserdata::registerTimestamp(lua_State* L)
 }
 
 // standalone functions that create a TimestampUserdata
+
+/// Constructs a new timestamp userdata from epoch value.
+// @int epoch value used to create timestamp.
+// @return userdata or nil. (error)
+// @return error message.
+// @function fromEpoch
 int TimestampUserdata::TimestampFromEpoch(lua_State* L)
 {
 	int rv = 0;
@@ -137,6 +149,11 @@ int TimestampUserdata::TimestampFromEpoch(lua_State* L)
 	return rv;
 }
 
+/// Constructs a new timestamp userdata from UTC value.
+// @int utc value used to create timestamp.
+// @return userdata or nil. (error)
+// @return error message.
+// @function fromEpoch
 int TimestampUserdata::TimestampFromUtc(lua_State* L)
 {
 	int rv = 0;
@@ -166,35 +183,17 @@ int TimestampUserdata::TimestampFromUtc(lua_State* L)
 }
 
 // Lua constructor
+
+/// Constructs a new timestamp userdata from current time.
+// @return userdata or nil. (error)
+// @return error message.
+// @function new
 int TimestampUserdata::Timestamp(lua_State* L)
 {
 	int rv = 0;
 	int top = lua_gettop(L);
 	
-	if (top > 0)
-	{
-		Poco::Int64 val = 0;
-		DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-			luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
-		try
-		{
-			daud->mDynamicAny.convert(val);
-			void *ud = lua_newuserdata(L, sizeof(TimestampUserdata));
-			luaL_getmetatable(L, "Poco.Timestamp.metatable");
-			lua_setmetatable(L, -2);
-			TimestampUserdata* tsud = new (ud) TimestampUserdata(val);
-			rv = 1;
-		}
-		catch (const Poco::Exception& e)
-		{
-			rv = pushPocoException(L, e);
-		}
-		catch (...)
-		{
-			rv = pushUnknownException(L);
-		}
-	}
-	else
+	try
 	{
 		void *ud = lua_newuserdata(L, sizeof(TimestampUserdata));
 		luaL_getmetatable(L, "Poco.Timestamp.metatable");
@@ -202,11 +201,21 @@ int TimestampUserdata::Timestamp(lua_State* L)
 		TimestampUserdata* tsud = new (ud) TimestampUserdata();
 		rv = 1;
 	}
+	catch (const Poco::Exception& e)
+	{
+		rv = pushPocoException(L, e);
+	}
+	catch (...)
+	{
+		rv = pushUnknownException(L);
+	}
 	
 	return rv;
 }
 
-	
+///
+// @type timestamp
+
 // metamethod infrastructure
 int TimestampUserdata::metamethod__gc(lua_State* L)
 {
@@ -372,6 +381,14 @@ int TimestampUserdata::metamethod__le(lua_State* L)
 }
 
 // userdata methods
+
+
+/// Get time elapsed since time denoted by timestamp in microseconds.
+// The value returned is stored within a dynamicany userdata as an Int64.
+// @see dynamicany
+// @return dynamicany userdata or nil. (error)
+// @return error message.
+// @function elapsed
 int TimestampUserdata::elapsed(lua_State* L)
 {
 	int rv = 0;
@@ -400,6 +417,12 @@ int TimestampUserdata::elapsed(lua_State* L)
 	return rv;
 }
 
+/// Get the timestamp expressed in microseconds since the Unix epoch, midnight, January 1, 1970.
+// The value returned is stored within a dynamicany userdata as an Int64.
+// @see dynamicany
+// @return dynamicany userdata or nil. (error)
+// @return error message.
+// @function epochMicroseconds
 int TimestampUserdata::epochMicroseconds(lua_State* L)
 {
 	int rv = 0;
@@ -430,6 +453,12 @@ int TimestampUserdata::epochMicroseconds(lua_State* L)
 	return rv;
 }
 
+/// Gets the timestamp expressed in time_t (a Lua number). time_t base time is midnight, January 1, 1970. Resolution is one second.
+// The value returned is stored within a dynamicany userdata as an Int64.
+// @see dynamicany
+// @return dynamicany userdata or nil. (error)
+// @return error message.
+// @function epochTime
 int TimestampUserdata::epochTime(lua_State* L)
 {
 	TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
@@ -441,6 +470,11 @@ int TimestampUserdata::epochTime(lua_State* L)
 	return 1;
 }
 
+/// Gets the timestamp expressed in time_t (a Lua number). time_t base time is midnight, January 1, 1970. Resolution is one second.
+// The value returned is stored within a dynamicany userdata as an Int64.
+// @see dynamicany
+// @return boolean
+// @function isElapsed
 int TimestampUserdata::isElapsed(lua_State* L)
 {
 	TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
@@ -460,11 +494,13 @@ int TimestampUserdata::isElapsed(lua_State* L)
 		}
 		catch (const Poco::Exception& e)
 		{
-			return pushPocoException(L, e);
+			pushPocoException(L, e);
+			return lua_error(L);
 		}
 		catch (...)
 		{
-			return pushUnknownException(L);
+			pushUnknownException(L);
+			return lua_error(L);
 		}
 	}
 	
@@ -474,6 +510,9 @@ int TimestampUserdata::isElapsed(lua_State* L)
 	return 1;
 }
 
+/// Gets the resolution in units per second. Since the timestamp has microsecond resolution, the returned value is always 1000000.
+// @return number
+// @function resolution
 int TimestampUserdata::resolution(lua_State* L)
 {
 	TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
@@ -495,6 +534,12 @@ int TimestampUserdata::update(lua_State* L)
 	return 0;
 }
 
+/// Gets the timestamp expressed in UTC-based time. UTC base time is midnight, October 15, 1582. Resolution is 100 nanoseconds.
+// The value returned is stored within a dynamicany userdata as an Int64.
+// @see dynamicany
+// @return dynamicany userdata or nil. (error)
+// @return error message.
+// @function utcTime
 int TimestampUserdata::utcTime(lua_State* L)
 {
 	int rv = 0;
