@@ -611,6 +611,7 @@ int FileUserdata::canWrite(lua_State* L)
 }
 
 /// Gets the creation date of the file userdata as a timestamp userdata.
+// @see timestamp
 // @return timestamp userdata or nil. (error)
 // @return error message.
 // @function created
@@ -671,6 +672,7 @@ int FileUserdata::exists(lua_State* L)
 }
 
 /// Gets the last modified date of the file userdata as a timestamp userdata.
+// @see timestamp
 // @return timestamp userdata or nil. (error)
 // @return error message.
 // @function lastModified
@@ -931,7 +933,8 @@ int FileUserdata::setExecutable(lua_State* L)
 	return rv;
 }
 
-/// Sets the modification date of the file path. 
+/// Sets the modification date of the file path.
+// @see timestamp
 // @param timestamp userdata representing the last modified time.
 // @return true or nil. (error)
 // @return error message.
