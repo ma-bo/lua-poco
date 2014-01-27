@@ -1,3 +1,7 @@
+/// Filesystem access.
+// File attributes, listings, coping, moving, deletion, etc.
+// @module file
+
 #include "File.h"
 #include "Timestamp.h"
 #include <Poco/Exception.h>
@@ -120,7 +124,14 @@ bool FileUserdata::registerFile(lua_State* L)
 }
 
 // lua_Cfunctions registered in the lua_State
-// poco.File() constructor
+// Constructor
+
+/// Constructs a new regex userdata
+// @string filePath path to the file
+// @return userdata or nil. (error)
+// @return error message.
+// @function new
+
 int FileUserdata::File(lua_State* L)
 {
 	int rv = 0;
@@ -158,6 +169,9 @@ int FileUserdata::File(lua_State* L)
 	return rv;
 }
 
+///
+// @type file
+
 // metamethods
 int FileUserdata::metamethod__gc(lua_State* L)
 {
@@ -178,6 +192,13 @@ int FileUserdata::metamethod__tostring(lua_State* L)
 }
 
 // methods
+
+/// Copies the file (or directory) to the given path. The target path can be a directory.
+// A directory is copied recursively.
+// @string destination path to copy the entry to.
+// @return userdata or nil. (error)
+// @return error message.
+// @function copyTo
 int FileUserdata::copyTo(lua_State* L)
 {
 	int rv = 0;
@@ -214,6 +235,10 @@ int FileUserdata::copyTo(lua_State* L)
 	return rv;
 }
 
+/// Creates a directory (and all parent directories if necessary).
+// @return true or nil. (error)
+// @return error message.
+// @function createDirectories
 int FileUserdata::createDirectories(lua_State* L)
 {
 	int rv = 0;
@@ -238,6 +263,11 @@ int FileUserdata::createDirectories(lua_State* L)
 	return rv;
 }
 
+
+/// Creates a directory. Returns true if the directory has been created and false if it already exists.
+// @return true or nil. (error)
+// @return error message.
+// @function createDirectory
 int FileUserdata::createDirectory(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
@@ -264,6 +294,10 @@ int FileUserdata::createDirectory(lua_State* L)
 	return rv;
 }
 
+/// Creates a new, empty file in an atomic operation. Returns true if the file has been created and false if the file already exists.
+// @return true or nil. (error)
+// @return error message.
+// @function createFile
 int FileUserdata::createFile(lua_State* L)
 {
 	int rv = 0;
@@ -290,6 +324,10 @@ int FileUserdata::createFile(lua_State* L)
 	return rv;
 }
 
+/// Get a table (array) of strings for each entry in the directory.
+// @return table or nil. (error)
+// @return error message.
+// @function listNames
 int FileUserdata::listNames(lua_State* L)
 {
 	int rv = 0;
@@ -325,6 +363,10 @@ int FileUserdata::listNames(lua_State* L)
 	return rv;
 }
 
+/// Get a table (array) of file userdata for each entry in the directory.
+// @return table or nil. (error)
+// @return error message.
+// @function listFiles
 int FileUserdata::listFiles(lua_State* L)
 {
 	int rv = 0;
@@ -364,6 +406,12 @@ int FileUserdata::listFiles(lua_State* L)
 	return rv;
 }
 
+/// Copies the file (or directory) to the given path and removes the original file.
+// The target path can be a directory.
+// @string destination the file or directory path to move the file to.
+// @return true or nil. (error)
+// @return error message.
+// @function moveTo
 int FileUserdata::moveTo(lua_State* L)
 {
 	int rv = 0;
@@ -398,6 +446,11 @@ int FileUserdata::moveTo(lua_State* L)
 	return rv;
 }
 
+/// Delete's the file or directory.
+// @bool[opt] recursive delete all sub files and directories recursively.
+// @return true or nil. (error)
+// @return error message.
+// @function remove
 int FileUserdata::remove(lua_State* L)
 {
 	int rv = 0;
@@ -427,6 +480,11 @@ int FileUserdata::remove(lua_State* L)
 	return rv;
 }
 
+/// Renames the file to the new name. 
+// @string destination the file or directory path to move the file to.
+// @return true or nil. (error)
+// @return error message.
+// @function renameTo
 int FileUserdata::renameTo(lua_State* L)
 {
 	int rv = 0;
@@ -461,6 +519,10 @@ int FileUserdata::renameTo(lua_State* L)
 	return rv;
 }
 
+/// Checks if the file is executable.
+// On Windows and OpenVMS, the file must have the extension ".EXE" to be executable. On Unix platforms, the executable permission bit must be set.
+// @return boolean
+// @function canExecute
 int FileUserdata::canExecute(lua_State* L)
 {
 	int rv = 0;
@@ -476,16 +538,21 @@ int FileUserdata::canExecute(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
 		rv = pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Checks if the file can be read.
+// @return boolean
+// @function canRead
 int FileUserdata::canRead(lua_State* L)
 {
 	int rv = 0;
@@ -501,16 +568,21 @@ int FileUserdata::canRead(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Checks if the file can be read.
+// @return boolean
+// @function canWrite
 int FileUserdata::canWrite(lua_State* L)
 {
 	int rv = 0;
@@ -526,16 +598,22 @@ int FileUserdata::canWrite(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Gets the creation date of the file userdata as a timestamp userdata.
+// @return timestamp userdata or nil. (error)
+// @return error message.
+// @function created
 int FileUserdata::created(lua_State* L)
 {
 	int rv = 0;
@@ -563,6 +641,9 @@ int FileUserdata::created(lua_State* L)
 	return rv;
 }
 
+/// Checks if the file path exists.
+// @return boolean
+// @function exists
 int FileUserdata::exists(lua_State* L)
 {
 	int rv = 0;
@@ -577,16 +658,22 @@ int FileUserdata::exists(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Gets the last modified date of the file userdata as a timestamp userdata.
+// @return timestamp userdata or nil. (error)
+// @return error message.
+// @function lastModified
 int FileUserdata::getLastModified(lua_State* L)
 {
 	int rv = 0;
@@ -614,6 +701,9 @@ int FileUserdata::getLastModified(lua_State* L)
 	return rv;
 }
 
+/// Gets the size of the file path entry as a number.
+// @return number file size.
+// @function size
 int FileUserdata::getSize(lua_State* L)
 {
 	int rv = 0;
@@ -630,16 +720,21 @@ int FileUserdata::getSize(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Checks if the file path is a device.
+// @return boolean
+// @function isDevice
 int FileUserdata::isDevice(lua_State* L)
 {
 	int rv = 0;
@@ -655,16 +750,21 @@ int FileUserdata::isDevice(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Checks if the file path is a directory.
+// @return boolean
+// @function isDirectory
 int FileUserdata::isDirectory(lua_State* L)
 {
 	int rv = 0;
@@ -680,16 +780,21 @@ int FileUserdata::isDirectory(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Checks if the file path is a file.
+// @return boolean
+// @function isFile
 int FileUserdata::isFile(lua_State* L)
 {
 	int rv = 0;
@@ -705,16 +810,23 @@ int FileUserdata::isFile(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Checks if the file path is hidden.
+// On Windows platforms, the file's hidden attribute is set for this to be true.
+// On Unix platforms, the file name must begin with a period for this to be true.
+// @return boolean
+// @function isHidden
 int FileUserdata::isHidden(lua_State* L)
 {
 	int rv = 0;
@@ -730,16 +842,21 @@ int FileUserdata::isHidden(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Checks if the file path is a symbolic link.
+// @return boolean
+// @function isLink
 int FileUserdata::isLink(lua_State* L)
 {
 	int rv = 0;
@@ -755,16 +872,21 @@ int FileUserdata::isLink(lua_State* L)
 	}
 	catch (const Poco::Exception& e)
 	{
-		rv = pushPocoException(L, e);
+		pushPocoException(L, e);
+		lua_error(L);
 	}
 	catch (...)
 	{
-		rv = pushUnknownException(L);
+		pushUnknownException(L);
+		lua_error(L);
 	}
 	
 	return rv;
 }
 
+/// Gets the file path as a string.
+// @return path as a string.
+// @function path
 int FileUserdata::path(lua_State* L)
 {
 	FileUserdata* fud = reinterpret_cast<FileUserdata*>(
@@ -776,6 +898,12 @@ int FileUserdata::path(lua_State* L)
 	return 1;
 }
 
+/// Makes the file executable (if flag is true), or non-executable (if flag is false).
+// Does nothing on Windows and OpenVMS.
+// @bool[opt] executable indicates if file should be executable. (default = true)
+// @return true or nil. (error)
+// @return error message.
+// @function setExecutable
 int FileUserdata::setExecutable(lua_State* L)
 {
 	int rv = 0;
@@ -803,6 +931,11 @@ int FileUserdata::setExecutable(lua_State* L)
 	return rv;
 }
 
+/// Sets the modification date of the file path. 
+// @param timestamp userdata representing the last modified time.
+// @return true or nil. (error)
+// @return error message.
+// @function setLastModified
 int FileUserdata::setLastModified(lua_State* L)
 {
 	int rv = 0;
@@ -829,6 +962,11 @@ int FileUserdata::setLastModified(lua_State* L)
 	return rv;
 }
 
+/// Makes the file non-writeable (if flag is true), or writable (if flag is false).
+// @bool readOnly boolean indicating if the file should be marked read only or not. (default = true)
+// @return true or nil. (error)
+// @return error message.
+// @function setReadOnly
 int FileUserdata::setReadOnly(lua_State* L)
 {
 	int rv = 0;
@@ -858,6 +996,11 @@ int FileUserdata::setReadOnly(lua_State* L)
 	return rv;
 }
 
+/// ets the size of the file in bytes. Can be used to truncate a file. 
+// @int size the new size of the file path.
+// @return true or nil. (error)
+// @return error message.
+// @function setSize
 int FileUserdata::setSize(lua_State* L)
 {
 	int rv = 0;
@@ -884,6 +1027,11 @@ int FileUserdata::setSize(lua_State* L)
 	return rv;
 }
 
+/// Makes the file writeable (if flag is true), or non-writeable (if flag is false).
+// @bool[opt] writable boolean indicating if the file should be marked writable. (default = true)
+// @return true or nil. (error)
+// @return error message.
+// @function setWritable
 int FileUserdata::setWritable(lua_State* L)
 {
 	int rv = 0;
