@@ -19,6 +19,7 @@ set(FOUNDATION_SRC
 	foundation/FastMutex.cpp
 	foundation/Mutex.cpp
 	foundation/Thread.cpp
+	foundation/Event.cpp
 	)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

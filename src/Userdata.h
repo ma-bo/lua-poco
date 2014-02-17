@@ -22,7 +22,8 @@ enum UserdataType
 	Userdata_Semaphore,
 	Userdata_FastMutex,
 	Userdata_Mutex,
-	Userdata_Thread
+	Userdata_Thread,
+	Userdata_Event
 };
 
 enum BaseType

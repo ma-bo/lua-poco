@@ -14,6 +14,7 @@
 #include "foundation/FastMutex.h"
 #include "foundation/Mutex.h"
 #include "foundation/Thread.h"
+#include "foundation/Event.h"
 
 namespace LuaPoco
 {
@@ -39,7 +40,8 @@ bool loadMetatables(lua_State* L)
 			SemaphoreUserdata::registerSemaphore(L) &&
 			FastMutexUserdata::registerFastMutex(L) &&
 			MutexUserdata::registerMutex(L) &&
-			ThreadUserdata::registerThread(L)
+			ThreadUserdata::registerThread(L) &&
+			EventUserdata::registerEvent(L)
 		)
 		{
 			rv = true;
