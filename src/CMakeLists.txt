@@ -20,6 +20,7 @@ set(FOUNDATION_SRC
 	foundation/Mutex.cpp
 	foundation/Thread.cpp
 	foundation/Event.cpp
+	foundation/IStream.cpp
 	)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
