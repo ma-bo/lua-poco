@@ -21,6 +21,7 @@ set(FOUNDATION_SRC
 	foundation/Thread.cpp
 	foundation/Event.cpp
 	foundation/IStream.cpp
+	foundation/OStream.cpp
 	)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
