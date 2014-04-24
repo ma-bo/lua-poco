@@ -12,15 +12,15 @@ namespace LuaPoco
 class IStream
 {
 public:
-	virtual std::istream& getHandle() = 0;
-	// register metatable
-	static bool registerIStream(lua_State* L);
+    virtual std::istream& getHandle() = 0;
+    // register metatable
+    static bool registerIStream(lua_State* L);
 private:
-	// userdata methods
-	static int read(lua_State* L);
-	static int lines(lua_State* L);
-	static int seek(lua_State* L);
-	static int setvbuf(lua_State* L);
+    // userdata methods
+    static int read(lua_State* L);
+    static int lines(lua_State* L);
+    static int seek(lua_State* L);
+    static int setvbuf(lua_State* L);
 };
 
 } // LuaPoco

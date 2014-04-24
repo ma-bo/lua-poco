@@ -18,25 +18,25 @@ namespace LuaPoco
 class NamedMutexUserdata : public Userdata
 {
 public:
-	NamedMutexUserdata(const std::string& name);
-	virtual ~NamedMutexUserdata();
-	virtual UserdataType getType();
-	// register metatable for this class
-	static bool registerNamedMutex(lua_State* L);
-	// constructor function 
-	static int NamedMutex(lua_State* L);
-	
+    NamedMutexUserdata(const std::string& name);
+    virtual ~NamedMutexUserdata();
+    virtual UserdataType getType();
+    // register metatable for this class
+    static bool registerNamedMutex(lua_State* L);
+    // constructor function 
+    static int NamedMutex(lua_State* L);
+    
 private:
-	// metamethod infrastructure
-	static int metamethod__gc(lua_State* L);
-	static int metamethod__tostring(lua_State* L);
-	
-	// userdata methods
-	static int lock(lua_State* L);
-	static int tryLock(lua_State* L);
-	static int unlock(lua_State* L);
-	
-	Poco::NamedMutex mNamedMutex;
+    // metamethod infrastructure
+    static int metamethod__gc(lua_State* L);
+    static int metamethod__tostring(lua_State* L);
+    
+    // userdata methods
+    static int lock(lua_State* L);
+    static int tryLock(lua_State* L);
+    static int unlock(lua_State* L);
+    
+    Poco::NamedMutex mNamedMutex;
 };
 
 } // LuaPoco

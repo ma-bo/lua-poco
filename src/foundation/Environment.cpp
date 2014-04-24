@@ -7,31 +7,31 @@
 
 int luaopen_poco_env(lua_State* L)
 {
-	lua_createtable(L, 0, 11);
-	lua_pushcfunction(L, LuaPoco::Environment::get);
-	lua_setfield(L, -2, "get");
-	lua_pushcfunction(L, LuaPoco::Environment::has);
-	lua_setfield(L, -2, "has");
-	lua_pushcfunction(L, LuaPoco::Environment::set);
-	lua_setfield(L, -2, "set");
-	lua_pushcfunction(L, LuaPoco::Environment::libraryVersion);
-	lua_setfield(L, -2, "libraryVersion");
-	lua_pushcfunction(L, LuaPoco::Environment::nodeId);
-	lua_setfield(L, -2, "nodeId");
-	lua_pushcfunction(L, LuaPoco::Environment::nodeName);
-	lua_setfield(L, -2, "nodeName");
-	lua_pushcfunction(L, LuaPoco::Environment::osArchitecture);
-	lua_setfield(L, -2, "osArchitecture");
-	lua_pushcfunction(L, LuaPoco::Environment::osDisplayName);
-	lua_setfield(L, -2, "osDisplayName");
-	lua_pushcfunction(L, LuaPoco::Environment::osName);
-	lua_setfield(L, -2, "osName");
-	lua_pushcfunction(L, LuaPoco::Environment::osVersion);
-	lua_setfield(L, -2, "osVersion");
-	lua_pushcfunction(L, LuaPoco::Environment::processorCount);
-	lua_setfield(L, -2, "processorCount");
-	
-	return 1;
+    lua_createtable(L, 0, 11);
+    lua_pushcfunction(L, LuaPoco::Environment::get);
+    lua_setfield(L, -2, "get");
+    lua_pushcfunction(L, LuaPoco::Environment::has);
+    lua_setfield(L, -2, "has");
+    lua_pushcfunction(L, LuaPoco::Environment::set);
+    lua_setfield(L, -2, "set");
+    lua_pushcfunction(L, LuaPoco::Environment::libraryVersion);
+    lua_setfield(L, -2, "libraryVersion");
+    lua_pushcfunction(L, LuaPoco::Environment::nodeId);
+    lua_setfield(L, -2, "nodeId");
+    lua_pushcfunction(L, LuaPoco::Environment::nodeName);
+    lua_setfield(L, -2, "nodeName");
+    lua_pushcfunction(L, LuaPoco::Environment::osArchitecture);
+    lua_setfield(L, -2, "osArchitecture");
+    lua_pushcfunction(L, LuaPoco::Environment::osDisplayName);
+    lua_setfield(L, -2, "osDisplayName");
+    lua_pushcfunction(L, LuaPoco::Environment::osName);
+    lua_setfield(L, -2, "osName");
+    lua_pushcfunction(L, LuaPoco::Environment::osVersion);
+    lua_setfield(L, -2, "osVersion");
+    lua_pushcfunction(L, LuaPoco::Environment::processorCount);
+    lua_setfield(L, -2, "processorCount");
+    
+    return 1;
 }
 
 namespace LuaPoco
@@ -44,24 +44,24 @@ namespace LuaPoco
 // @function get
 int Environment::get(lua_State* L)
 {
-	int rv = 0;
-	try
-	{
-		const char* key = luaL_checkstring(L, 1);
-		std::string value = Poco::Environment::get(key);
-		lua_pushlstring(L, value.c_str(), value.size());
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    try
+    {
+        const char* key = luaL_checkstring(L, 1);
+        std::string value = Poco::Environment::get(key);
+        lua_pushlstring(L, value.c_str(), value.size());
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// checks for environment variables existence.
@@ -71,24 +71,24 @@ int Environment::get(lua_State* L)
 // @function has
 int Environment::has(lua_State* L)
 {
-	int rv = 0;
-	try
-	{
-		const char* key = luaL_checkstring(L, 1);
-		bool result = Poco::Environment::has(key);
-		lua_pushboolean(L, result);
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    try
+    {
+        const char* key = luaL_checkstring(L, 1);
+        bool result = Poco::Environment::has(key);
+        lua_pushboolean(L, result);
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// sets an environment variable's associated value.
@@ -98,25 +98,25 @@ int Environment::has(lua_State* L)
 // @function set
 int Environment::set(lua_State* L)
 {
-	int rv = 0;
-	try
-	{
-		const char* key = luaL_checkstring(L, 1);
-		const char* val = luaL_checkstring(L, 2);
-		Poco::Environment::set(key, val);
-		lua_pushboolean(L, 1);
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    try
+    {
+        const char* key = luaL_checkstring(L, 1);
+        const char* val = luaL_checkstring(L, 2);
+        Poco::Environment::set(key, val);
+        lua_pushboolean(L, 1);
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// gets the POCO C++ library version. 
@@ -127,32 +127,32 @@ int Environment::set(lua_State* L)
 // @function libraryVersion
 int Environment::libraryVersion(lua_State* L)
 {
-	Poco::Int32 ver = Poco::Environment::libraryVersion();
-	lua_pushinteger(L, ver);
-	return 1;
+    Poco::Int32 ver = Poco::Environment::libraryVersion();
+    lua_pushinteger(L, ver);
+    return 1;
 }
 /// gets the ethernet address of the first ethernet adapter found on the system.
 // @return string of bytes representing MAC address.
 // @function nodeId
 int Environment::nodeId(lua_State* L)
 {
-	int rv = 0;
-	try
-	{
-		std::string value = Poco::Environment::nodeId();
-		lua_pushlstring(L, value.c_str(), value.size());
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    try
+    {
+        std::string value = Poco::Environment::nodeId();
+        lua_pushlstring(L, value.c_str(), value.size());
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// gets the node (or host) name.
@@ -160,23 +160,23 @@ int Environment::nodeId(lua_State* L)
 // @function nodeName
 int Environment::nodeName(lua_State* L)
 {
-	int rv = 0;
-	try
-	{
-		std::string value = Poco::Environment::nodeName();
-		lua_pushlstring(L, value.c_str(), value.size());
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    try
+    {
+        std::string value = Poco::Environment::nodeName();
+        lua_pushlstring(L, value.c_str(), value.size());
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// gets the operating system architecture.
@@ -184,23 +184,23 @@ int Environment::nodeName(lua_State* L)
 // @function osArchitecture
 int Environment::osArchitecture(lua_State* L)
 {
-	int rv = 0;
-	try
-	{
-		std::string value = Poco::Environment::osArchitecture();
-		lua_pushlstring(L, value.c_str(), value.size());
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    try
+    {
+        std::string value = Poco::Environment::osArchitecture();
+        lua_pushlstring(L, value.c_str(), value.size());
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// gets the operating system name in a "user-friendly" way.
@@ -208,23 +208,23 @@ int Environment::osArchitecture(lua_State* L)
 // @function osDisplayName
 int Environment::osDisplayName(lua_State* L)
 {
-	int rv = 0;
-	try
-	{
-		std::string value = Poco::Environment::osDisplayName();
-		lua_pushlstring(L, value.c_str(), value.size());
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    try
+    {
+        std::string value = Poco::Environment::osDisplayName();
+        lua_pushlstring(L, value.c_str(), value.size());
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// gets the operating system name.
@@ -232,23 +232,23 @@ int Environment::osDisplayName(lua_State* L)
 // @function osName
 int Environment::osName(lua_State* L)
 {
-	int rv = 0;
-	try
-	{
-		std::string value = Poco::Environment::osName();
-		lua_pushlstring(L, value.c_str(), value.size());
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    try
+    {
+        std::string value = Poco::Environment::osName();
+        lua_pushlstring(L, value.c_str(), value.size());
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// gets the operating system version.
@@ -256,23 +256,23 @@ int Environment::osName(lua_State* L)
 // @function osVersion
 int Environment::osVersion(lua_State* L)
 {
-	int rv = 0;
-	try
-	{
-		std::string value = Poco::Environment::osVersion();
-		lua_pushlstring(L, value.c_str(), value.size());
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    try
+    {
+        std::string value = Poco::Environment::osVersion();
+        lua_pushlstring(L, value.c_str(), value.size());
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// gets the number of processors installed in the system.
@@ -280,9 +280,9 @@ int Environment::osVersion(lua_State* L)
 // @processorCount
 int Environment::processorCount(lua_State* L)
 {
-	lua_Number count = Poco::Environment::processorCount();
-	lua_pushnumber(L, count);
-	return 1;
+    lua_Number count = Poco::Environment::processorCount();
+    lua_pushnumber(L, count);
+    return 1;
 }
 
 } // LuaPoco

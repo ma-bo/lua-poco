@@ -8,19 +8,19 @@
 
 LUA_API int luaopen_poco_event(lua_State* L)
 {
-	return LuaPoco::loadConstructor(L, LuaPoco::EventUserdata::Event);
+    return LuaPoco::loadConstructor(L, LuaPoco::EventUserdata::Event);
 }
 
 namespace LuaPoco
 {
 
 EventUserdata::EventUserdata() :
-	mEvent(new Poco::Event())
+    mEvent(new Poco::Event())
 {
 }
 
 EventUserdata::EventUserdata(const Poco::SharedPtr<Poco::Event>& fm) :
-	mEvent(fm)
+    mEvent(fm)
 {
 }
 
@@ -30,50 +30,50 @@ EventUserdata::~EventUserdata()
 
 UserdataType EventUserdata::getType()
 {
-	return Userdata_Event;
+    return Userdata_Event;
 }
 
 bool EventUserdata::isCopyable()
 {
-	return true;
+    return true;
 }
 
 bool EventUserdata::copyToState(lua_State *L)
 {
-	void* ud = lua_newuserdata(L, sizeof(EventUserdata));
-	luaL_getmetatable(L, "Poco.Event.metatable");
-	lua_setmetatable(L, -2);
-	
-	EventUserdata* mud = new(ud) EventUserdata(mEvent);
-	return true;
+    void* ud = lua_newuserdata(L, sizeof(EventUserdata));
+    luaL_getmetatable(L, "Poco.Event.metatable");
+    lua_setmetatable(L, -2);
+    
+    EventUserdata* mud = new(ud) EventUserdata(mEvent);
+    return true;
 }
 
 // register metatable for this class
 bool EventUserdata::registerEvent(lua_State* L)
 {
-	luaL_newmetatable(L, "Poco.Event.metatable");
-	lua_pushvalue(L, -1);
-	lua_setfield(L, -2, "__index");
-	lua_pushcfunction(L, metamethod__gc);
-	lua_setfield(L, -2, "__gc");
-	lua_pushcfunction(L, metamethod__tostring);
-	lua_setfield(L, -2, "__tostring");
-	
-	lua_pushstring(L, "Poco.Event.metatable");
-	lua_setfield(L, -2, "poco.userdata");
-	
-	// methods
-	lua_pushcfunction(L, set);
-	lua_setfield(L, -2, "set");
-	lua_pushcfunction(L, tryWait);
-	lua_setfield(L, -2, "tryWait");
-	lua_pushcfunction(L, wait);
-	lua_setfield(L, -2, "wait");
-	lua_pushcfunction(L, reset);
-	lua_setfield(L, -2, "reset");
-	lua_pop(L, 1);
-	
-	return true;
+    luaL_newmetatable(L, "Poco.Event.metatable");
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    lua_pushcfunction(L, metamethod__gc);
+    lua_setfield(L, -2, "__gc");
+    lua_pushcfunction(L, metamethod__tostring);
+    lua_setfield(L, -2, "__tostring");
+    
+    lua_pushstring(L, "Poco.Event.metatable");
+    lua_setfield(L, -2, "poco.userdata");
+    
+    // methods
+    lua_pushcfunction(L, set);
+    lua_setfield(L, -2, "set");
+    lua_pushcfunction(L, tryWait);
+    lua_setfield(L, -2, "tryWait");
+    lua_pushcfunction(L, wait);
+    lua_setfield(L, -2, "wait");
+    lua_pushcfunction(L, reset);
+    lua_setfield(L, -2, "reset");
+    lua_pop(L, 1);
+    
+    return true;
 }
 
 /// create a new event userdata.
@@ -84,32 +84,32 @@ bool EventUserdata::registerEvent(lua_State* L)
 // @function new
 int EventUserdata::Event(lua_State* L)
 {
-	int rv = 0;
-	void* ud = lua_newuserdata(L, sizeof(EventUserdata));
-	luaL_getmetatable(L, "Poco.Event.metatable");
-	lua_setmetatable(L, -2);
-	
-	bool autoReset = true;
-	if (lua_gettop(L) > 1)
-	{
-		luaL_checktype(L, 2, LUA_TBOOLEAN);
-		autoReset = lua_toboolean(L, 2);
-	}
-	
-	try
-	{
-		rv = 1;
-		EventUserdata* mud = new(ud) EventUserdata();
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	return rv;
+    int rv = 0;
+    void* ud = lua_newuserdata(L, sizeof(EventUserdata));
+    luaL_getmetatable(L, "Poco.Event.metatable");
+    lua_setmetatable(L, -2);
+    
+    bool autoReset = true;
+    if (lua_gettop(L) > 1)
+    {
+        luaL_checktype(L, 2, LUA_TBOOLEAN);
+        autoReset = lua_toboolean(L, 2);
+    }
+    
+    try
+    {
+        rv = 1;
+        EventUserdata* mud = new(ud) EventUserdata();
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    return rv;
 }
 
 ///
@@ -118,20 +118,20 @@ int EventUserdata::Event(lua_State* L)
 // metamethod infrastructure
 int EventUserdata::metamethod__gc(lua_State* L)
 {
-	EventUserdata* mud = reinterpret_cast<EventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Event.metatable"));
-	mud->~EventUserdata();
-	
-	return 0;
+    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    mud->~EventUserdata();
+    
+    return 0;
 }
 
 int EventUserdata::metamethod__tostring(lua_State* L)
 {
-	EventUserdata* mud = reinterpret_cast<EventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Event.metatable"));
-	
-	lua_pushfstring(L, "Poco.Event (%p)", reinterpret_cast<void*>(mud));
-	return 1;
+    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    
+    lua_pushfstring(L, "Poco.Event (%p)", reinterpret_cast<void*>(mud));
+    return 1;
 }
 
 // userdata methods
@@ -141,25 +141,25 @@ int EventUserdata::metamethod__tostring(lua_State* L)
 // @function set
 int EventUserdata::set(lua_State* L)
 {
-	int rv = 0;
-	EventUserdata* mud = reinterpret_cast<EventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Event.metatable"));
-	try
-	{
-		mud->mEvent->set();
-	}
-	catch (const Poco::Exception& e)
-	{
-		pushPocoException(L, e);
-		lua_error(L);
-	}
-	catch (...)
-	{
-		pushUnknownException(L);
-		lua_error(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    try
+    {
+        mud->mEvent->set();
+    }
+    catch (const Poco::Exception& e)
+    {
+        pushPocoException(L, e);
+        lua_error(L);
+    }
+    catch (...)
+    {
+        pushUnknownException(L);
+        lua_error(L);
+    }
+    
+    return rv;
 }
 
 /// Attempts to wait for the event.
@@ -168,84 +168,84 @@ int EventUserdata::set(lua_State* L)
 // @function tryWait
 int EventUserdata::tryWait(lua_State* L)
 {
-	int rv = 0;
-	EventUserdata* mud = reinterpret_cast<EventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Event.metatable"));
-	long ms = luaL_checkinteger(L, 2);
-	
-	try
-	{
-		bool result = false;
-		result = mud->mEvent->tryWait(ms);
-		
-		lua_pushboolean(L, result);
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		pushPocoException(L, e);
-		lua_error(L);
-	}
-	catch (...)
-	{
-		pushUnknownException(L);
-		lua_error(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    long ms = luaL_checkinteger(L, 2);
+    
+    try
+    {
+        bool result = false;
+        result = mud->mEvent->tryWait(ms);
+        
+        lua_pushboolean(L, result);
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        pushPocoException(L, e);
+        lua_error(L);
+    }
+    catch (...)
+    {
+        pushUnknownException(L);
+        lua_error(L);
+    }
+    
+    return rv;
 }
 
 /// Waits for the event to become signaled.
 // @function wait
 int EventUserdata::wait(lua_State* L)
 {
-	int rv = 0;
-	EventUserdata* mud = reinterpret_cast<EventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Event.metatable"));
-	
-	try
-	{
-		mud->mEvent->wait();
-		lua_pushboolean(L, 1);
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		pushPocoException(L, e);
-		lua_error(L);
-	}
-	catch (...)
-	{
-		pushUnknownException(L);
-		lua_error(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    
+    try
+    {
+        mud->mEvent->wait();
+        lua_pushboolean(L, 1);
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        pushPocoException(L, e);
+        lua_error(L);
+    }
+    catch (...)
+    {
+        pushUnknownException(L);
+        lua_error(L);
+    }
+    
+    return rv;
 }
 
 /// Resets the event to unsignaled state. 
 // @function reset
 int EventUserdata::reset(lua_State* L)
 {
-	int rv = 0;
-	EventUserdata* mud = reinterpret_cast<EventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Event.metatable"));
-	try
-	{
-		mud->mEvent->reset();
-	}
-	catch (const Poco::Exception& e)
-	{
-		pushPocoException(L, e);
-		lua_error(L);
-	}
-	catch (...)
-	{
-		pushUnknownException(L);
-		lua_error(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    try
+    {
+        mud->mEvent->reset();
+    }
+    catch (const Poco::Exception& e)
+    {
+        pushPocoException(L, e);
+        lua_error(L);
+    }
+    catch (...)
+    {
+        pushUnknownException(L);
+        lua_error(L);
+    }
+    
+    return rv;
 }
 
 } // LuaPoco

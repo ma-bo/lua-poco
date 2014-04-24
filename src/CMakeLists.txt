@@ -1,28 +1,28 @@
 set(LUAPOCO_SRC
-	Loader.cpp
-	Userdata.cpp
-	StateTransfer.cpp)
-	
+    Loader.cpp
+    Userdata.cpp
+    StateTransfer.cpp)
+    
 set(FOUNDATION_SRC
-	foundation/File.cpp
-	foundation/Timestamp.cpp
-	foundation/DynamicAny.cpp
-	foundation/RegularExpression.cpp
-	foundation/Checksum.cpp
-	foundation/Environment.cpp
-	foundation/Pipe.cpp
-	foundation/NamedEvent.cpp
-	foundation/NamedMutex.cpp
-	foundation/ProcessHandle.cpp
-	foundation/Process.cpp
-	foundation/Semaphore.cpp
-	foundation/FastMutex.cpp
-	foundation/Mutex.cpp
-	foundation/Thread.cpp
-	foundation/Event.cpp
-	foundation/IStream.cpp
-	foundation/OStream.cpp
-	)
+    foundation/File.cpp
+    foundation/Timestamp.cpp
+    foundation/DynamicAny.cpp
+    foundation/RegularExpression.cpp
+    foundation/Checksum.cpp
+    foundation/Environment.cpp
+    foundation/Pipe.cpp
+    foundation/NamedEvent.cpp
+    foundation/NamedMutex.cpp
+    foundation/ProcessHandle.cpp
+    foundation/Process.cpp
+    foundation/Semaphore.cpp
+    foundation/FastMutex.cpp
+    foundation/Mutex.cpp
+    foundation/Thread.cpp
+    foundation/Event.cpp
+    foundation/IStream.cpp
+    foundation/OStream.cpp
+    )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 

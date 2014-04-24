@@ -10,14 +10,14 @@
 
 int luaopen_poco_namedevent(lua_State* L)
 {
-	return LuaPoco::loadConstructor(L, LuaPoco::NamedEventUserdata::NamedEvent);
+    return LuaPoco::loadConstructor(L, LuaPoco::NamedEventUserdata::NamedEvent);
 }
 
 namespace LuaPoco
 {
 
 NamedEventUserdata::NamedEventUserdata(const std::string& name) :
-	mNamedEvent(name)
+    mNamedEvent(name)
 {
 }
 
@@ -27,31 +27,31 @@ NamedEventUserdata::~NamedEventUserdata()
 
 UserdataType NamedEventUserdata::getType()
 {
-	return Userdata_NamedEvent;
+    return Userdata_NamedEvent;
 }
 
 // register metatable for this class
 bool NamedEventUserdata::registerNamedEvent(lua_State* L)
 {
-	luaL_newmetatable(L, "Poco.NamedEvent.metatable");
-	lua_pushvalue(L, -1);
-	lua_setfield(L, -2, "__index");
-	lua_pushcfunction(L, metamethod__gc);
-	lua_setfield(L, -2, "__gc");
-	lua_pushcfunction(L, metamethod__tostring);
-	lua_setfield(L, -2, "__tostring");
-	
-	lua_pushstring(L, "Poco.NamedEvent.metatable");
-	lua_setfield(L, -2, "poco.userdata");
-	
-	// methods
-	lua_pushcfunction(L, set);
-	lua_setfield(L, -2, "set");
-	lua_pushcfunction(L, wait);
-	lua_setfield(L, -2, "wait");
-	lua_pop(L, 1);
-	
-	return true;
+    luaL_newmetatable(L, "Poco.NamedEvent.metatable");
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    lua_pushcfunction(L, metamethod__gc);
+    lua_setfield(L, -2, "__gc");
+    lua_pushcfunction(L, metamethod__tostring);
+    lua_setfield(L, -2, "__tostring");
+    
+    lua_pushstring(L, "Poco.NamedEvent.metatable");
+    lua_setfield(L, -2, "poco.userdata");
+    
+    // methods
+    lua_pushcfunction(L, set);
+    lua_setfield(L, -2, "set");
+    lua_pushcfunction(L, wait);
+    lua_setfield(L, -2, "wait");
+    lua_pop(L, 1);
+    
+    return true;
 }
 
 /// constructs a new namedevent userdata.
@@ -61,14 +61,14 @@ bool NamedEventUserdata::registerNamedEvent(lua_State* L)
 
 int NamedEventUserdata::NamedEvent(lua_State* L)
 {
-	const char* name = luaL_checkstring(L, 1);
-	
-	void* ud = lua_newuserdata(L, sizeof(NamedEventUserdata));
-	luaL_getmetatable(L, "Poco.NamedEvent.metatable");
-	lua_setmetatable(L, -2);
-	
-	NamedEventUserdata* neud = new(ud) NamedEventUserdata(name);
-	return 1;
+    const char* name = luaL_checkstring(L, 1);
+    
+    void* ud = lua_newuserdata(L, sizeof(NamedEventUserdata));
+    luaL_getmetatable(L, "Poco.NamedEvent.metatable");
+    lua_setmetatable(L, -2);
+    
+    NamedEventUserdata* neud = new(ud) NamedEventUserdata(name);
+    return 1;
 }
 
 ///
@@ -77,20 +77,20 @@ int NamedEventUserdata::NamedEvent(lua_State* L)
 // metamethod infrastructure
 int NamedEventUserdata::metamethod__gc(lua_State* L)
 {
-	NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
-	neud->~NamedEventUserdata();
-	
-	return 0;
+    NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
+    neud->~NamedEventUserdata();
+    
+    return 0;
 }
 
 int NamedEventUserdata::metamethod__tostring(lua_State* L)
 {
-	NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
-	
-	lua_pushfstring(L, "Poco.NamedEvent (%p)", reinterpret_cast<void*>(neud));
-	return 1;
+    NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
+    
+    lua_pushfstring(L, "Poco.NamedEvent (%p)", reinterpret_cast<void*>(neud));
+    return 1;
 }
 
 // userdata methods
@@ -100,12 +100,12 @@ int NamedEventUserdata::metamethod__tostring(lua_State* L)
 // @function set
 int NamedEventUserdata::set(lua_State* L)
 {
-	NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
-	
-	neud->mNamedEvent.set();
-	
-	return 0;
+    NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
+    
+    neud->mNamedEvent.set();
+    
+    return 0;
 }
 
 /// Waits for the event to become signaled.
@@ -113,12 +113,12 @@ int NamedEventUserdata::set(lua_State* L)
 // @function wait
 int NamedEventUserdata::wait(lua_State* L)
 {
-	NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
-		luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
-	
-	neud->mNamedEvent.wait();
-	
-	return 0;
+    NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
+        luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
+    
+    neud->mNamedEvent.wait();
+    
+    return 0;
 }
 
 } // LuaPoco

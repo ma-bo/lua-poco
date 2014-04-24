@@ -25,59 +25,59 @@ namespace LuaPoco
 // and load class constructors into the poco table.
 bool loadMetatables(lua_State* L)
 {
-	bool rv = false;
-	lua_getfield(L, LUA_REGISTRYINDEX, "poco.metatables.registered");
-	if (lua_isnil(L, -1))
-	{
-		if (
-			FileUserdata::registerFile(L) &&
-			RegularExpressionUserdata::registerRegularExpression(L) &&
-			DynamicAnyUserdata::registerDynamicAny(L) &&
-			TimestampUserdata::registerTimestamp(L) &&
-			ChecksumUserdata::registerChecksum(L) &&
-			PipeUserdata::registerPipe(L) &&
-			NamedEventUserdata::registerNamedEvent(L) && 
-			NamedMutexUserdata::registerNamedMutex(L) &&
-			ProcessHandleUserdata::registerProcessHandle(L) &&
-			SemaphoreUserdata::registerSemaphore(L) &&
-			FastMutexUserdata::registerFastMutex(L) &&
-			MutexUserdata::registerMutex(L) &&
-			ThreadUserdata::registerThread(L) &&
-			EventUserdata::registerEvent(L) &&
-			IStream::registerIStream(L) &&
-			OStream::registerOStream(L)
-		)
-		{
-			rv = true;
-		}
-	}
-	else
-		rv = true;
-	
-	lua_pop(L, 1);
-	
-	return rv;
+    bool rv = false;
+    lua_getfield(L, LUA_REGISTRYINDEX, "poco.metatables.registered");
+    if (lua_isnil(L, -1))
+    {
+        if (
+            FileUserdata::registerFile(L) &&
+            RegularExpressionUserdata::registerRegularExpression(L) &&
+            DynamicAnyUserdata::registerDynamicAny(L) &&
+            TimestampUserdata::registerTimestamp(L) &&
+            ChecksumUserdata::registerChecksum(L) &&
+            PipeUserdata::registerPipe(L) &&
+            NamedEventUserdata::registerNamedEvent(L) && 
+            NamedMutexUserdata::registerNamedMutex(L) &&
+            ProcessHandleUserdata::registerProcessHandle(L) &&
+            SemaphoreUserdata::registerSemaphore(L) &&
+            FastMutexUserdata::registerFastMutex(L) &&
+            MutexUserdata::registerMutex(L) &&
+            ThreadUserdata::registerThread(L) &&
+            EventUserdata::registerEvent(L) &&
+            IStream::registerIStream(L) &&
+            OStream::registerOStream(L)
+        )
+        {
+            rv = true;
+        }
+    }
+    else
+        rv = true;
+    
+    lua_pop(L, 1);
+    
+    return rv;
 }
 
 int loadConstructor(lua_State*L, lua_CFunction cons)
 {
-	int rv = 0;
-	
-	if (LuaPoco::loadMetatables(L))
-	{
-		lua_createtable(L, 0, 1);
-		lua_pushcfunction(L, cons);
-		lua_setfield(L, -2, "new");
-		rv = 1;
-	}
-	else
-	{
-		lua_pushnil(L);
-		lua_pushstring(L, "failed to create required poco metatables");
-		rv = 2;
-	}
-	
-	return rv;
+    int rv = 0;
+    
+    if (LuaPoco::loadMetatables(L))
+    {
+        lua_createtable(L, 0, 1);
+        lua_pushcfunction(L, cons);
+        lua_setfield(L, -2, "new");
+        rv = 1;
+    }
+    else
+    {
+        lua_pushnil(L);
+        lua_pushstring(L, "failed to create required poco metatables");
+        rv = 2;
+    }
+    
+    return rv;
 }
 
 } // LuaPoco

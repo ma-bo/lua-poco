@@ -9,19 +9,19 @@
 
 int luaopen_poco_pipe(lua_State* L)
 {
-	return LuaPoco::loadConstructor(L, LuaPoco::PipeUserdata::Pipe);
+    return LuaPoco::loadConstructor(L, LuaPoco::PipeUserdata::Pipe);
 }
 
 namespace LuaPoco
 {
 
 PipeUserdata::PipeUserdata() :
-	mPipe()
+    mPipe()
 {
 }
 
 PipeUserdata::PipeUserdata(const Poco::Pipe& p) :
-	mPipe(p)
+    mPipe(p)
 {
 }
 
@@ -31,48 +31,48 @@ PipeUserdata::~PipeUserdata()
 
 UserdataType PipeUserdata::getType()
 {
-	return Userdata_Pipe;
+    return Userdata_Pipe;
 }
 
 bool PipeUserdata::isCopyable()
 {
-	return true;
+    return true;
 }
 
 bool PipeUserdata::copyToState(lua_State *L)
 {
-	void* ud = lua_newuserdata(L, sizeof(PipeUserdata));
-	luaL_getmetatable(L, "Poco.Pipe.metatable");
-	lua_setmetatable(L, -2);
-	
-	PipeUserdata* pud = new(ud) PipeUserdata();
-	return true;
+    void* ud = lua_newuserdata(L, sizeof(PipeUserdata));
+    luaL_getmetatable(L, "Poco.Pipe.metatable");
+    lua_setmetatable(L, -2);
+    
+    PipeUserdata* pud = new(ud) PipeUserdata();
+    return true;
 }
 
 // register metatable for this class
 bool PipeUserdata::registerPipe(lua_State* L)
 {
-	luaL_newmetatable(L, "Poco.Pipe.metatable");
-	lua_pushvalue(L, -1);
-	lua_setfield(L, -2, "__index");
-	lua_pushcfunction(L, metamethod__gc);
-	lua_setfield(L, -2, "__gc");
-	lua_pushcfunction(L, metamethod__tostring);
-	lua_setfield(L, -2, "__tostring");
-	
-	lua_pushstring(L, "Poco.Pipe.metatable");
-	lua_setfield(L, -2, "poco.userdata");
-	
-	// methods
-	lua_pushcfunction(L, readBytes);
-	lua_setfield(L, -2, "readBytes");
-	lua_pushcfunction(L, writeBytes);
-	lua_setfield(L, -2, "writeBytes");
-	lua_pushcfunction(L, close);
-	lua_setfield(L, -2, "close");
-	lua_pop(L, 1);
-	
-	return true;
+    luaL_newmetatable(L, "Poco.Pipe.metatable");
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    lua_pushcfunction(L, metamethod__gc);
+    lua_setfield(L, -2, "__gc");
+    lua_pushcfunction(L, metamethod__tostring);
+    lua_setfield(L, -2, "__tostring");
+    
+    lua_pushstring(L, "Poco.Pipe.metatable");
+    lua_setfield(L, -2, "poco.userdata");
+    
+    // methods
+    lua_pushcfunction(L, readBytes);
+    lua_setfield(L, -2, "readBytes");
+    lua_pushcfunction(L, writeBytes);
+    lua_setfield(L, -2, "writeBytes");
+    lua_pushcfunction(L, close);
+    lua_setfield(L, -2, "close");
+    lua_pop(L, 1);
+    
+    return true;
 }
 
 /// Constructs a new pipe userdata
@@ -81,31 +81,31 @@ bool PipeUserdata::registerPipe(lua_State* L)
 // @function new
 int PipeUserdata::Pipe(lua_State* L)
 {
-	void* ud = lua_newuserdata(L, sizeof(PipeUserdata));
-	luaL_getmetatable(L, "Poco.Pipe.metatable");
-	lua_setmetatable(L, -2);
-	
-	PipeUserdata* pud = new(ud) PipeUserdata();
-	return 1;
+    void* ud = lua_newuserdata(L, sizeof(PipeUserdata));
+    luaL_getmetatable(L, "Poco.Pipe.metatable");
+    lua_setmetatable(L, -2);
+    
+    PipeUserdata* pud = new(ud) PipeUserdata();
+    return 1;
 }
 
 // metamethod infrastructure
 int PipeUserdata::metamethod__gc(lua_State* L)
 {
-	PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
-	pud->~PipeUserdata();
-	
-	return 0;
+    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    pud->~PipeUserdata();
+    
+    return 0;
 }
 
 int PipeUserdata::metamethod__tostring(lua_State* L)
 {
-	PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
-	
-	lua_pushfstring(L, "Poco.Pipe (%p)", reinterpret_cast<void*>(pud));
-	return 1;
+    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    
+    lua_pushfstring(L, "Poco.Pipe (%p)", reinterpret_cast<void*>(pud));
+    return 1;
 }
 
 // userdata methods
@@ -117,38 +117,38 @@ int PipeUserdata::metamethod__tostring(lua_State* L)
 // @function readBytes
 int PipeUserdata::readBytes(lua_State* L)
 {
-	int rv = 0;
-	PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
-	
-	char readBuffer[1024];
-	size_t bytesToRead = sizeof readBuffer;
-	size_t bytesRead = 0;
-	
-	if (lua_gettop(L) > 1 && lua_isnumber(L, 2))
-	{
-		size_t requestedAmount = lua_tonumber(L, 2);
-		bytesToRead = requestedAmount <= bytesToRead ? requestedAmount : bytesToRead;
-	}
-	
-	try
-	{
-		bytesRead = pud->mPipe.readBytes(readBuffer, bytesToRead);
-		luaL_Buffer lb;
-		luaL_buffinit(L, &lb);
-		luaL_addlstring(&lb, readBuffer, bytesRead);
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    
+    char readBuffer[1024];
+    size_t bytesToRead = sizeof readBuffer;
+    size_t bytesRead = 0;
+    
+    if (lua_gettop(L) > 1 && lua_isnumber(L, 2))
+    {
+        size_t requestedAmount = lua_tonumber(L, 2);
+        bytesToRead = requestedAmount <= bytesToRead ? requestedAmount : bytesToRead;
+    }
+    
+    try
+    {
+        bytesRead = pud->mPipe.readBytes(readBuffer, bytesToRead);
+        luaL_Buffer lb;
+        luaL_buffinit(L, &lb);
+        luaL_addlstring(&lb, readBuffer, bytesRead);
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// Writes string of bytes to pipe.
@@ -158,33 +158,33 @@ int PipeUserdata::readBytes(lua_State* L)
 // @function writeBytes
 int PipeUserdata::writeBytes(lua_State* L)
 {
-	int rv = 0;
-	PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
-	
-	size_t writeIndex = 0;
-	size_t strSize = 0;
-	const char* str = luaL_checklstring(L, 2, &strSize);
-	
-	try
-	{
-		while (writeIndex != strSize)
-		{
-			writeIndex += pud->mPipe.writeBytes(&str[writeIndex], strSize - writeIndex);
-		}
-		lua_pushboolean(L, 1);
-		rv = 1;
-	}
-	catch (const Poco::Exception& e)
-	{
-		rv = pushPocoException(L, e);
-	}
-	catch (...)
-	{
-		rv = pushUnknownException(L);
-	}
-	
-	return rv;
+    int rv = 0;
+    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    
+    size_t writeIndex = 0;
+    size_t strSize = 0;
+    const char* str = luaL_checklstring(L, 2, &strSize);
+    
+    try
+    {
+        while (writeIndex != strSize)
+        {
+            writeIndex += pud->mPipe.writeBytes(&str[writeIndex], strSize - writeIndex);
+        }
+        lua_pushboolean(L, 1);
+        rv = 1;
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
 }
 
 /// Closes pipe.
@@ -192,23 +192,23 @@ int PipeUserdata::writeBytes(lua_State* L)
 // @function close
 int PipeUserdata::close(lua_State* L)
 {
-	int rv = 0;
-	PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-		luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
-	
-	const char* closeEnd = "both";
-	int top = lua_gettop(L);
-	if (top > 1)
-		closeEnd = luaL_checkstring(L, 2);
-	
-	if (std::strcmp(closeEnd, "read") == 0)
-		pud->mPipe.close(Poco::Pipe::CLOSE_READ);
-	else if (std::strcmp(closeEnd, "write") == 0)
-		pud->mPipe.close(Poco::Pipe::CLOSE_WRITE);
-	else
-		pud->mPipe.close(Poco::Pipe::CLOSE_BOTH);
-	
-	return rv;
+    int rv = 0;
+    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
+        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    
+    const char* closeEnd = "both";
+    int top = lua_gettop(L);
+    if (top > 1)
+        closeEnd = luaL_checkstring(L, 2);
+    
+    if (std::strcmp(closeEnd, "read") == 0)
+        pud->mPipe.close(Poco::Pipe::CLOSE_READ);
+    else if (std::strcmp(closeEnd, "write") == 0)
+        pud->mPipe.close(Poco::Pipe::CLOSE_WRITE);
+    else
+        pud->mPipe.close(Poco::Pipe::CLOSE_BOTH);
+    
+    return rv;
 }
 
 } // LuaPoco

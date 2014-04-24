@@ -17,28 +17,28 @@ namespace LuaPoco
 class ChecksumUserdata : public Userdata
 {
 public:
-	ChecksumUserdata(Poco::Checksum::Type t);
-	virtual ~ChecksumUserdata();
-	virtual UserdataType getType();
-	virtual bool isCopyable();
-	virtual bool copyToState(lua_State *L);
-	// register metatable for this class
-	static bool registerChecksum(lua_State* L);
-	// constructor function 
-	static int Checksum(lua_State* L);
+    ChecksumUserdata(Poco::Checksum::Type t);
+    virtual ~ChecksumUserdata();
+    virtual UserdataType getType();
+    virtual bool isCopyable();
+    virtual bool copyToState(lua_State *L);
+    // register metatable for this class
+    static bool registerChecksum(lua_State* L);
+    // constructor function 
+    static int Checksum(lua_State* L);
 private:
-	ChecksumUserdata();
-	
-	// metamethod infrastructure
-	static int metamethod__gc(lua_State* L);
-	static int metamethod__tostring(lua_State* L);
-	
-	// userdata methods
-	static int update(lua_State* L);
-	static int checksum(lua_State* L);
-	static int type(lua_State* L);
-	
-	Poco::Checksum mChecksum;
+    ChecksumUserdata();
+    
+    // metamethod infrastructure
+    static int metamethod__gc(lua_State* L);
+    static int metamethod__tostring(lua_State* L);
+    
+    // userdata methods
+    static int update(lua_State* L);
+    static int checksum(lua_State* L);
+    static int type(lua_State* L);
+    
+    Poco::Checksum mChecksum;
 };
 
 } // LuaPoco
