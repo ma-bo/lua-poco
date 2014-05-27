@@ -172,6 +172,7 @@ int RegularExpressionUserdata::metamethod__gc(lua_State* L)
     RegularExpressionUserdata* reud = reinterpret_cast<RegularExpressionUserdata*>(
         luaL_checkudata(L, 1, "Poco.RegularExpression.metatable"));
     reud->~RegularExpressionUserdata();
+    return 0;
 }
 
 int RegularExpressionUserdata::metamethod__tostring(lua_State* L)
