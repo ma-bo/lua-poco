@@ -27,7 +27,7 @@ message(STATUS "LUA-POCO using Lua library: ${LUA_LIB}")
 
 # include POCO library
 find_path(POCO_INCLUDE_DIR Poco/File.h)
-include_directories(${POCO_INCLUDE_DIR}/Poco)
+include_directories(${POCO_INCLUDE_DIR})
 
 find_library(LIBPocoFoundation PocoFoundation)
 find_library(LIBPocoCrypto PocoCrypto)
