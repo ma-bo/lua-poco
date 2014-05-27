@@ -45,6 +45,7 @@ int functionWriter(lua_State* L, const void* p, size_t sz, void* ud)
     }
     catch (const std::exception& e)
     {
+        (void) e;
         // only likely scenario is a std::bad_alloc
         rv = -1;
     }
@@ -86,6 +87,7 @@ bool transferFunction(lua_State* toL, lua_State* fromL)
         }
         catch (const std::exception& e)
         {
+            (void) e;
             // catch a std::bad_alloc
             result = false;
         }
