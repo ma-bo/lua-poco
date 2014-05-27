@@ -9,7 +9,7 @@
 
 extern "C"
 {
-int luaopen_poco_regex(lua_State* L);
+LUAPOCO_API int luaopen_poco_regex(lua_State* L);
 }
 
 namespace LuaPoco

@@ -1,6 +1,12 @@
 #ifndef LUAPOCO_H
 #define LUAPOCO_H
 
+#ifdef _WIN32
+#define LUAPOCO_API __declspec(dllexport)
+#else
+#define LUAPOCO_API
+#endif
+
 #ifdef USE_LUA_AS_CPP
 // define variable via CMAKE configure time to 
 // link against a C++ compilation of Lua

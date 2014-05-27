@@ -8,7 +8,7 @@
 
 extern "C"
 {
-int luaopen_poco_timestamp(lua_State* L);
+LUAPOCO_API int luaopen_poco_timestamp(lua_State* L);
 }
 
 namespace LuaPoco
