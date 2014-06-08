@@ -137,6 +137,7 @@ int PipeUserdata::readBytes(lua_State* L)
         luaL_Buffer lb;
         luaL_buffinit(L, &lb);
         luaL_addlstring(&lb, readBuffer, bytesRead);
+        luaL_pushresult(&lb);
         rv = 1;
     }
     catch (const Poco::Exception& e)
