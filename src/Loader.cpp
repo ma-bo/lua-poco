@@ -44,8 +44,8 @@ bool loadMetatables(lua_State* L)
             MutexUserdata::registerMutex(L) &&
             ThreadUserdata::registerThread(L) &&
             EventUserdata::registerEvent(L) &&
-            IStream::registerIStream(L) &&
-            OStream::registerOStream(L)
+            IStreamUserdata::registerIStream(L) &&
+            OStreamUserdata::registerOStream(L)
         )
         {
             rv = true;

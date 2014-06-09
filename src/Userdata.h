@@ -29,6 +29,8 @@ enum UserdataType
 enum BaseType
 {
     BaseType_None = 0,
+    BaseType_OStream,
+    BaseType_IStream
 };
 
 // generic functions to reduce the amount of copy and paste code.
