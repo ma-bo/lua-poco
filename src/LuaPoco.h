@@ -2,9 +2,13 @@
 #define LUAPOCO_H
 
 #ifdef _WIN32
-#define LUAPOCO_API __declspec(dllexport)
+    #ifdef poco_EXPORTS
+        #define LUAPOCO_API __declspec(dllexport)
+    #else
+        #define LUAPOCO_API __declspec(dllimport)
+    #endif
 #else
-#define LUAPOCO_API
+    #define LUAPOCO_API
 #endif
 
 #ifdef USE_LUA_AS_CPP
