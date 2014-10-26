@@ -9,13 +9,10 @@
 namespace LuaPoco
 {
 
-class IStreamUserdata : public Userdata
+class IStream
 {
 public:
-    virtual std::istream& getHandle() = 0;
-    // register metatable
-    static bool registerIStream(lua_State* L);
-    virtual BaseType getBaseType();
+    virtual std::istream& istream() = 0;
 private:
     // userdata methods
     static int read(lua_State* L);

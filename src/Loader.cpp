@@ -17,6 +17,7 @@
 #include "foundation/Event.h"
 #include "foundation/IStream.h"
 #include "foundation/OStream.h"
+#include "foundation/PipeOStream.h"
 
 namespace LuaPoco
 {
@@ -44,8 +45,7 @@ bool loadMetatables(lua_State* L)
             MutexUserdata::registerMutex(L) &&
             ThreadUserdata::registerThread(L) &&
             EventUserdata::registerEvent(L) &&
-            IStreamUserdata::registerIStream(L) &&
-            OStreamUserdata::registerOStream(L)
+            PipeOStreamUserdata::registerPipeOStream(L)
         )
         {
             rv = true;
