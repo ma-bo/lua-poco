@@ -21,8 +21,6 @@ public:
     TimestampUserdata(Poco::Timestamp::TimeVal tv);
     TimestampUserdata(const Poco::Timestamp& ts);
     virtual ~TimestampUserdata();
-    virtual UserdataType getType();
-    virtual bool isCopyable();
     virtual bool copyToState(lua_State* L);
     Poco::Timestamp mTimestamp;
     

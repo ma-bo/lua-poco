@@ -20,7 +20,6 @@ class NamedEventUserdata : public Userdata
 public:
     NamedEventUserdata(const std::string& name);
     virtual ~NamedEventUserdata();
-    virtual UserdataType getType();
     // register metatable for this class
     static bool registerNamedEvent(lua_State* L);
     // constructor function 

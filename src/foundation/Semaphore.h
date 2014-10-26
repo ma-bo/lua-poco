@@ -22,8 +22,6 @@ public:
     SemaphoreUserdata(int n, int max);
     SemaphoreUserdata(const Poco::SharedPtr<Poco::Semaphore>& sem);
     virtual ~SemaphoreUserdata();
-    virtual UserdataType getType();
-    virtual bool isCopyable();
     virtual bool copyToState(lua_State *L);
     // register metatable for this class
     static bool registerSemaphore(lua_State* L);

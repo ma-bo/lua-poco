@@ -29,16 +29,6 @@ FastMutexUserdata::~FastMutexUserdata()
 {
 }
 
-UserdataType FastMutexUserdata::getType()
-{
-    return Userdata_FastMutex;
-}
-
-bool FastMutexUserdata::isCopyable()
-{
-    return true;
-}
-
 bool FastMutexUserdata::copyToState(lua_State *L)
 {
     void* ud = lua_newuserdata(L, sizeof(FastMutexUserdata));

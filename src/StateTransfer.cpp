@@ -218,7 +218,7 @@ bool transferValue(lua_State* toL, lua_State* fromL)
             if (lua_isstring(fromL, -1))
             {
                 Userdata* ud = reinterpret_cast<Userdata*>(lua_touserdata(fromL, -3));
-                if (ud->isCopyable() && ud->copyToState(toL))
+                if (ud->copyToState(toL))
                     result = true;
             }
             lua_pop(fromL, 1);

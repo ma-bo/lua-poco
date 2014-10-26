@@ -20,7 +20,6 @@ class ThreadUserdata : public Userdata, public Poco::Runnable
 public:
     ThreadUserdata();
     virtual ~ThreadUserdata();
-    virtual UserdataType getType();
     // register metatable for this class
     static bool registerThread(lua_State* L);
     void run();

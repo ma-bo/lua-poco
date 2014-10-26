@@ -19,8 +19,6 @@ class ChecksumUserdata : public Userdata
 public:
     ChecksumUserdata(Poco::Checksum::Type t);
     virtual ~ChecksumUserdata();
-    virtual UserdataType getType();
-    virtual bool isCopyable();
     virtual bool copyToState(lua_State *L);
     // register metatable for this class
     static bool registerChecksum(lua_State* L);

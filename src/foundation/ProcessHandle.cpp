@@ -17,11 +17,6 @@ ProcessHandleUserdata::~ProcessHandleUserdata()
 {
 }
 
-UserdataType ProcessHandleUserdata::getType()
-{
-    return Userdata_ProcessHandle;
-}
-
 // register metatable for this class
 bool ProcessHandleUserdata::registerProcessHandle(lua_State* L)
 {

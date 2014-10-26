@@ -29,16 +29,6 @@ PipeUserdata::~PipeUserdata()
 {
 }
 
-UserdataType PipeUserdata::getType()
-{
-    return Userdata_Pipe;
-}
-
-bool PipeUserdata::isCopyable()
-{
-    return true;
-}
-
 bool PipeUserdata::copyToState(lua_State *L)
 {
     void* ud = lua_newuserdata(L, sizeof(PipeUserdata));

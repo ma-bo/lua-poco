@@ -35,16 +35,6 @@ SemaphoreUserdata::~SemaphoreUserdata()
 {
 }
 
-UserdataType SemaphoreUserdata::getType()
-{
-    return Userdata_Semaphore;
-}
-
-bool SemaphoreUserdata::isCopyable()
-{
-    return true;
-}
-
 bool SemaphoreUserdata::copyToState(lua_State *L)
 {
     void* ud = lua_newuserdata(L, sizeof(SemaphoreUserdata));

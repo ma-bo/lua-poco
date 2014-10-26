@@ -22,11 +22,6 @@ NamedMutexUserdata::~NamedMutexUserdata()
 {
 }
 
-UserdataType NamedMutexUserdata::getType()
-{
-    return Userdata_NamedMutex;
-}
-
 // register metatable for this class
 bool NamedMutexUserdata::registerNamedMutex(lua_State* L)
 {

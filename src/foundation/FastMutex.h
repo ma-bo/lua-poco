@@ -21,8 +21,6 @@ public:
     FastMutexUserdata();
     FastMutexUserdata(const Poco::SharedPtr<Poco::FastMutex>& mtx);
     virtual ~FastMutexUserdata();
-    virtual UserdataType getType();
-    virtual bool isCopyable();
     virtual bool copyToState(lua_State *L);
     // register metatable for this class
     static bool registerFastMutex(lua_State* L);

@@ -13,7 +13,6 @@ class ProcessHandleUserdata : public Userdata
 public:
     ProcessHandleUserdata(const Poco::ProcessHandle& ph);
     virtual ~ProcessHandleUserdata();
-    virtual UserdataType getType();
     // register metatable for this class
     static bool registerProcessHandle(lua_State* L);
 private:

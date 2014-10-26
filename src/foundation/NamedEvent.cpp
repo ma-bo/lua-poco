@@ -25,11 +25,6 @@ NamedEventUserdata::~NamedEventUserdata()
 {
 }
 
-UserdataType NamedEventUserdata::getType()
-{
-    return Userdata_NamedEvent;
-}
-
 // register metatable for this class
 bool NamedEventUserdata::registerNamedEvent(lua_State* L)
 {

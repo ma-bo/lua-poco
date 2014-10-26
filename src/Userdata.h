@@ -7,32 +7,6 @@
 namespace LuaPoco
 {
 
-enum UserdataType
-{
-    Userdata_None = 0,
-    Userdata_File,
-    Userdata_Timestamp,
-    Userdata_DynamicAny,
-    Userdata_RegularExpression,
-    Userdata_Checksum,
-    Userdata_Pipe,
-    Userdata_NamedEvent,
-    Userdata_NamedMutex,
-    Userdata_ProcessHandle,
-    Userdata_Semaphore,
-    Userdata_FastMutex,
-    Userdata_Mutex,
-    Userdata_Thread,
-    Userdata_Event
-};
-
-enum BaseType
-{
-    BaseType_None = 0,
-    BaseType_OStream,
-    BaseType_IStream
-};
-
 // generic functions to reduce the amount of copy and paste code.
 int pushPocoException(lua_State* L, const Poco::Exception& e);
 int pushUnknownException(lua_State* L);
@@ -46,11 +20,7 @@ class Userdata
 public:
     Userdata();
     virtual ~Userdata();
-    
-    virtual bool isCopyable();
     virtual bool copyToState(lua_State *L);
-    virtual UserdataType getType() = 0;
-    virtual BaseType getBaseType();
 
 private:
     Userdata(const Userdata& disabledCopy);

@@ -32,11 +32,6 @@ FileUserdata::~FileUserdata()
     mFile = NULL;
 }
 
-UserdataType FileUserdata::getType()
-{
-    return Userdata_File;
-}
-
 bool FileUserdata::copyToState(lua_State* L)
 {
     void* ud = lua_newuserdata(L, sizeof *this);

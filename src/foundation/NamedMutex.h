@@ -20,7 +20,6 @@ class NamedMutexUserdata : public Userdata
 public:
     NamedMutexUserdata(const std::string& name);
     virtual ~NamedMutexUserdata();
-    virtual UserdataType getType();
     // register metatable for this class
     static bool registerNamedMutex(lua_State* L);
     // constructor function 

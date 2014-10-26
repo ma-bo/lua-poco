@@ -27,16 +27,6 @@ DynamicAnyUserdata::~DynamicAnyUserdata()
 {
 }
 
-UserdataType DynamicAnyUserdata::getType()
-{
-    return Userdata_DynamicAny;
-}
-
-bool DynamicAnyUserdata::isCopyable()
-{
-    return true;
-}
-
 bool DynamicAnyUserdata::copyToState(lua_State* L)
 {
     void* ud = lua_newuserdata(L, sizeof *this);

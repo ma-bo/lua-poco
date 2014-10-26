@@ -21,8 +21,6 @@ public:
     PipeUserdata();
     PipeUserdata(const Poco::Pipe& p);
     virtual ~PipeUserdata();
-    virtual UserdataType getType();
-    virtual bool isCopyable();
     virtual bool copyToState(lua_State *L);
     // register metatable for this class
     static bool registerPipe(lua_State* L);

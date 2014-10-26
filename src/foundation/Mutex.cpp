@@ -29,16 +29,6 @@ MutexUserdata::~MutexUserdata()
 {
 }
 
-UserdataType MutexUserdata::getType()
-{
-    return Userdata_Mutex;
-}
-
-bool MutexUserdata::isCopyable()
-{
-    return true;
-}
-
 bool MutexUserdata::copyToState(lua_State *L)
 {
     void* ud = lua_newuserdata(L, sizeof(MutexUserdata));

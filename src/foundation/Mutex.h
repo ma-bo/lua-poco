@@ -21,8 +21,6 @@ public:
     MutexUserdata();
     MutexUserdata(const Poco::SharedPtr<Poco::Mutex>& mtx);
     virtual ~MutexUserdata();
-    virtual UserdataType getType();
-    virtual bool isCopyable();
     virtual bool copyToState(lua_State *L);
     // register metatable for this class
     static bool registerMutex(lua_State* L);

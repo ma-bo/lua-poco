@@ -55,16 +55,6 @@ TimestampUserdata::~TimestampUserdata()
 {
 }
 
-UserdataType TimestampUserdata::getType()
-{
-    return Userdata_Timestamp;
-}
-
-bool TimestampUserdata::isCopyable()
-{
-    return true;
-}
-
 bool TimestampUserdata::copyToState(lua_State* L)
 {
     void* ud = lua_newuserdata(L, sizeof *this);

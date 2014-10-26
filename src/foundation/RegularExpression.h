@@ -20,7 +20,6 @@ class RegularExpressionUserdata : public Userdata
 public:
     RegularExpressionUserdata(const std::string& pattern, int options, bool study);
     virtual ~RegularExpressionUserdata();
-    virtual UserdataType getType();
     
     // register metatable for this class
     static bool registerRegularExpression(lua_State* L);

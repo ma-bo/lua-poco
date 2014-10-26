@@ -26,16 +26,6 @@ ChecksumUserdata::~ChecksumUserdata()
 {
 }
 
-UserdataType ChecksumUserdata::getType()
-{
-    return Userdata_Checksum;
-}
-
-bool ChecksumUserdata::isCopyable()
-{
-    return true;
-}
-
 bool ChecksumUserdata::copyToState(lua_State *L)
 {
     void* ud = lua_newuserdata(L, sizeof(ChecksumUserdata));

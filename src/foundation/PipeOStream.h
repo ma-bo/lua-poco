@@ -20,9 +20,6 @@ class PipeOStreamUserdata : public Userdata, public OStream
 public:
     PipeOStreamUserdata(const Poco::Pipe& p);
     virtual ~PipeOStreamUserdata();
-    virtual UserdataType getType();
-    virtual BaseType getBaseType();
-    virtual bool isCopyable();
     virtual std::ostream& ostream();
     // register metatable for this class
     static bool registerPipeOStream(lua_State* L);

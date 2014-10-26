@@ -25,21 +25,6 @@ PipeOStreamUserdata::~PipeOStreamUserdata()
 {
 }
 
-UserdataType PipeOStreamUserdata::getType()
-{
-    return Userdata_Pipe;
-}
-
-BaseType PipeOStreamUserdata::getBaseType()
-{
-    return BaseType_OStream;
-}
-
-bool PipeOStreamUserdata::isCopyable()
-{
-    return false;
-}
-
 std::ostream& PipeOStreamUserdata::ostream()
 {
     std::cerr << "return mPipeOutputStream" << std::endl;

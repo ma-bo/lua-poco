@@ -36,11 +36,6 @@ ThreadUserdata::~ThreadUserdata()
         lua_close(mThreadState);
 }
 
-UserdataType ThreadUserdata::getType()
-{
-    return Userdata_Thread;
-}
-
 // register metatable for this class
 bool ThreadUserdata::registerThread(lua_State* L)
 {

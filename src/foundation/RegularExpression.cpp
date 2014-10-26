@@ -80,11 +80,6 @@ RegularExpressionUserdata::~RegularExpressionUserdata()
 {
 }
 
-UserdataType RegularExpressionUserdata::getType()
-{
-    return Userdata_RegularExpression;
-}
-
 // register metatable for this class
 bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 {

@@ -28,16 +28,6 @@ EventUserdata::~EventUserdata()
 {
 }
 
-UserdataType EventUserdata::getType()
-{
-    return Userdata_Event;
-}
-
-bool EventUserdata::isCopyable()
-{
-    return true;
-}
-
 bool EventUserdata::copyToState(lua_State *L)
 {
     void* ud = lua_newuserdata(L, sizeof(EventUserdata));
