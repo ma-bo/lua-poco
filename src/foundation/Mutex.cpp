@@ -36,6 +36,7 @@ bool MutexUserdata::copyToState(lua_State *L)
     lua_setmetatable(L, -2);
     
     MutexUserdata* mud = new(ud) MutexUserdata(mMutex);
+    setPrivateUserdata(L, -1, mud);
     return true;
 }
 
@@ -79,6 +80,7 @@ int MutexUserdata::Mutex(lua_State* L)
     {
         rv = 1;
         MutexUserdata* mud = new(ud) MutexUserdata();
+        setPrivateUserdata(L, -1, mud);
     }
     catch (const Poco::Exception& e)
     {
@@ -95,19 +97,9 @@ int MutexUserdata::Mutex(lua_State* L)
 // @type mutex
 
 // metamethod infrastructure
-int MutexUserdata::metamethod__gc(lua_State* L)
-{
-    MutexUserdata* mud = reinterpret_cast<MutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Mutex.metatable"));
-    mud->~MutexUserdata();
-    
-    return 0;
-}
-
 int MutexUserdata::metamethod__tostring(lua_State* L)
 {
-    MutexUserdata* mud = reinterpret_cast<MutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Mutex.metatable"));
+    MutexUserdata* mud = checkPrivateUserdata<MutexUserdata>(L, 1);
     
     lua_pushfstring(L, "Poco.Mutex (%p)", reinterpret_cast<void*>(mud));
     return 1;
@@ -120,8 +112,8 @@ int MutexUserdata::metamethod__tostring(lua_State* L)
 int MutexUserdata::lock(lua_State* L)
 {
     int rv = 0;
-    MutexUserdata* mud = reinterpret_cast<MutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Mutex.metatable"));
+    MutexUserdata* mud = checkPrivateUserdata<MutexUserdata>(L, 1);
+    
     try
     {
         mud->mMutex->lock();
@@ -147,8 +139,8 @@ int MutexUserdata::lock(lua_State* L)
 int MutexUserdata::tryLock(lua_State* L)
 {
     int rv = 0;
-    MutexUserdata* mud = reinterpret_cast<MutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Mutex.metatable"));
+    MutexUserdata* mud = checkPrivateUserdata<MutexUserdata>(L, 1);
+        
     int top = lua_gettop(L);
     
     long ms;
@@ -183,8 +175,7 @@ int MutexUserdata::tryLock(lua_State* L)
 int MutexUserdata::unlock(lua_State* L)
 {
     int rv = 0;
-    MutexUserdata* mud = reinterpret_cast<MutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Mutex.metatable"));
+    MutexUserdata* mud = checkPrivateUserdata<MutexUserdata>(L, 1);
     
     try
     {
