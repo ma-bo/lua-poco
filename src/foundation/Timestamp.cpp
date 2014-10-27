@@ -149,7 +149,6 @@ int TimestampUserdata::TimestampFromEpoch(lua_State* L)
 int TimestampUserdata::TimestampFromUtc(lua_State* L)
 {
     int rv = 0;
-    
     Poco::Int64 val = 0;
     DynamicAnyUserdata* daud = checkPrivateUserdata<DynamicAnyUserdata>(L, 1);
     
