@@ -48,6 +48,7 @@ bool loadMetatables(lua_State* L)
             PipeOStreamUserdata::registerPipeOStream(L)
         )
         {
+            setupDerivedToUserdata(L);
             rv = true;
         }
     }
