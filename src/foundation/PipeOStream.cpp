@@ -79,6 +79,16 @@ int PipeOStreamUserdata::PipeOStream(lua_State* L)
     return 1;
 }
 
+int PipeOStreamUserdata::metamethod__gc(lua_State* L)
+{
+    PipeOStreamUserdata* pud = checkPrivateUserdata<PipeOStreamUserdata>(L, 1);
+
+    luaL_unref(L, LUA_REGISTRYINDEX, pud->mPipeReference);
+    pud->~PipeOStreamUserdata();
+
+    return 0;
+}
+
 // metamethod infrastructure
 int PipeOStreamUserdata::metamethod__tostring(lua_State* L)
 {
