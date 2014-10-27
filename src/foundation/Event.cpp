@@ -34,7 +34,8 @@ bool EventUserdata::copyToState(lua_State *L)
     luaL_getmetatable(L, "Poco.Event.metatable");
     lua_setmetatable(L, -2);
     
-    EventUserdata* mud = new(ud) EventUserdata(mEvent);
+    EventUserdata* eud = new(ud) EventUserdata(mEvent);
+    setPrivateUserdata(L, -1, eud);
     return true;
 }
 
@@ -89,7 +90,8 @@ int EventUserdata::Event(lua_State* L)
     try
     {
         rv = 1;
-        EventUserdata* mud = new(ud) EventUserdata();
+        EventUserdata* eud = new(ud) EventUserdata();
+        setPrivateUserdata(L, -1, eud);
     }
     catch (const Poco::Exception& e)
     {
@@ -106,21 +108,12 @@ int EventUserdata::Event(lua_State* L)
 // @type event
 
 // metamethod infrastructure
-int EventUserdata::metamethod__gc(lua_State* L)
-{
-    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Event.metatable"));
-    mud->~EventUserdata();
-    
-    return 0;
-}
-
 int EventUserdata::metamethod__tostring(lua_State* L)
 {
-    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
         luaL_checkudata(L, 1, "Poco.Event.metatable"));
     
-    lua_pushfstring(L, "Poco.Event (%p)", reinterpret_cast<void*>(mud));
+    lua_pushfstring(L, "Poco.Event (%p)", reinterpret_cast<void*>(eud));
     return 1;
 }
 
@@ -132,11 +125,11 @@ int EventUserdata::metamethod__tostring(lua_State* L)
 int EventUserdata::set(lua_State* L)
 {
     int rv = 0;
-    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
         luaL_checkudata(L, 1, "Poco.Event.metatable"));
     try
     {
-        mud->mEvent->set();
+        eud->mEvent->set();
     }
     catch (const Poco::Exception& e)
     {
@@ -159,14 +152,14 @@ int EventUserdata::set(lua_State* L)
 int EventUserdata::tryWait(lua_State* L)
 {
     int rv = 0;
-    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
         luaL_checkudata(L, 1, "Poco.Event.metatable"));
     long ms = luaL_checkinteger(L, 2);
     
     try
     {
         bool result = false;
-        result = mud->mEvent->tryWait(ms);
+        result = eud->mEvent->tryWait(ms);
         
         lua_pushboolean(L, result);
         rv = 1;
@@ -190,12 +183,12 @@ int EventUserdata::tryWait(lua_State* L)
 int EventUserdata::wait(lua_State* L)
 {
     int rv = 0;
-    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
         luaL_checkudata(L, 1, "Poco.Event.metatable"));
     
     try
     {
-        mud->mEvent->wait();
+        eud->mEvent->wait();
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -218,11 +211,11 @@ int EventUserdata::wait(lua_State* L)
 int EventUserdata::reset(lua_State* L)
 {
     int rv = 0;
-    EventUserdata* mud = reinterpret_cast<EventUserdata*>(
+    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
         luaL_checkudata(L, 1, "Poco.Event.metatable"));
     try
     {
-        mud->mEvent->reset();
+        eud->mEvent->reset();
     }
     catch (const Poco::Exception& e)
     {
