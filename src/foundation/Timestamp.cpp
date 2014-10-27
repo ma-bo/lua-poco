@@ -61,6 +61,7 @@ bool TimestampUserdata::copyToState(lua_State* L)
     luaL_getmetatable(L, "Poco.Timestamp.metatable");
     lua_setmetatable(L, -2);
     TimestampUserdata* tsud = new(ud) TimestampUserdata(mTimestamp);
+    setDerivedtoUserdata(L, -1, tsud);
     
     return true;
 }
@@ -125,6 +126,7 @@ int TimestampUserdata::TimestampFromEpoch(lua_State* L)
         luaL_getmetatable(L, "Poco.Timestamp.metatable");
         lua_setmetatable(L, -2);
         TimestampUserdata* tsud = new (ud) TimestampUserdata(Poco::Timestamp::fromEpochTime(val));
+        setDerivedtoUserdata(L, -1, tsud);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -149,8 +151,8 @@ int TimestampUserdata::TimestampFromUtc(lua_State* L)
     int rv = 0;
     
     Poco::Int64 val = 0;
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
+    
     try
     {
         daud->mDynamicAny.convert(val);
@@ -158,6 +160,7 @@ int TimestampUserdata::TimestampFromUtc(lua_State* L)
         luaL_getmetatable(L, "Poco.Timestamp.metatable");
         lua_setmetatable(L, -2);
         TimestampUserdata* tsud = new (ud) TimestampUserdata(val);
+        setDerivedtoUserdata(L, -1, tsud);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -189,6 +192,7 @@ int TimestampUserdata::Timestamp(lua_State* L)
         luaL_getmetatable(L, "Poco.Timestamp.metatable");
         lua_setmetatable(L, -2);
         TimestampUserdata* tsud = new (ud) TimestampUserdata();
+        setDerivedtoUserdata(L, -1, tsud);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -206,20 +210,9 @@ int TimestampUserdata::Timestamp(lua_State* L)
 ///
 // @type timestamp
 
-// metamethod infrastructure
-int TimestampUserdata::metamethod__gc(lua_State* L)
-{
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
-    tsud->~TimestampUserdata();
-    return 0;
-}
-
 int TimestampUserdata::metamethod__tostring(lua_State* L)
 {
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
-    
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
     lua_pushfstring(L, "Poco.Timestamp (%p)", reinterpret_cast<void*>(tsud));
     return 1;
 }
@@ -246,9 +239,8 @@ int TimestampUserdata::metamethod__add(lua_State* L)
     }
     lua_pop(L, 2);
     
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, tsIndex, "Poco.Timestamp.metatable"));
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, otherIndex));
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, tsIndex);
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, otherIndex);
     
     try
     {
@@ -262,6 +254,7 @@ int TimestampUserdata::metamethod__add(lua_State* L)
         luaL_getmetatable(L, "Poco.Timestamp.metatable");
         lua_setmetatable(L, -2);
         TimestampUserdata* tsudNew = new (ud) TimestampUserdata(newTs);
+        setDerivedtoUserdata(L, -1, tsudNew);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -298,9 +291,8 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
     }
     lua_pop(L, 2);
     
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, tsIndex, "Poco.Timestamp.metatable"));
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, otherIndex));
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, tsIndex);
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, otherIndex);
     
     try
     {
@@ -317,6 +309,7 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
         luaL_getmetatable(L, "Poco.Timestamp.metatable");
         lua_setmetatable(L, -2);
         TimestampUserdata* tsudNew = new (ud) TimestampUserdata(newTs);
+        setDerivedtoUserdata(L, -1, tsudNew);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -333,10 +326,8 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
 
 int TimestampUserdata::metamethod__lt(lua_State* L)
 {
-    TimestampUserdata* tsudLhs = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
-    TimestampUserdata* tsudRhs = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 2, "Poco.Timestamp.metatable"));
+    TimestampUserdata* tsudLhs = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
+    TimestampUserdata* tsudRhs = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
     
     bool result = tsudLhs->mTimestamp < tsudRhs->mTimestamp;
     lua_pushboolean(L, result);
@@ -346,10 +337,8 @@ int TimestampUserdata::metamethod__lt(lua_State* L)
 
 int TimestampUserdata::metamethod__eq(lua_State* L)
 {
-    TimestampUserdata* tsudLhs = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
-    TimestampUserdata* tsudRhs = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 2, "Poco.Timestamp.metatable"));
+    TimestampUserdata* tsudRhs = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
+    TimestampUserdata* tsudLhs = checkDerivedFromUserdata<TimestampUserdata>(L, 2);
     
     bool result = tsudLhs->mTimestamp == tsudRhs->mTimestamp;
     lua_pushboolean(L, result);
@@ -359,10 +348,8 @@ int TimestampUserdata::metamethod__eq(lua_State* L)
 
 int TimestampUserdata::metamethod__le(lua_State* L)
 {
-    TimestampUserdata* tsudLhs = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
-    TimestampUserdata* tsudRhs = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 2, "Poco.Timestamp.metatable"));
+    TimestampUserdata* tsudRhs = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
+    TimestampUserdata* tsudLhs = checkDerivedFromUserdata<TimestampUserdata>(L, 2);
     
     bool result = tsudLhs->mTimestamp <= tsudRhs->mTimestamp;
     lua_pushboolean(L, result);
@@ -382,8 +369,7 @@ int TimestampUserdata::metamethod__le(lua_State* L)
 int TimestampUserdata::elapsed(lua_State* L)
 {
     int rv = 0;
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
     
     Poco::Int64 elapsed = tsud->mTimestamp.elapsed();
     void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
@@ -393,6 +379,7 @@ int TimestampUserdata::elapsed(lua_State* L)
     try
     {
         DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(elapsed);
+        setDerivedtoUserdata(L, -1, daud);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -416,9 +403,7 @@ int TimestampUserdata::elapsed(lua_State* L)
 int TimestampUserdata::epochMicroseconds(lua_State* L)
 {
     int rv = 0;
-    
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
     
     Poco::Int64 epochMs = tsud->mTimestamp.epochMicroseconds();
     
@@ -429,6 +414,7 @@ int TimestampUserdata::epochMicroseconds(lua_State* L)
     try
     {
         DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(epochMs);
+        setDerivedtoUserdata(L, -1, daud);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -451,8 +437,7 @@ int TimestampUserdata::epochMicroseconds(lua_State* L)
 // @function epochTime
 int TimestampUserdata::epochTime(lua_State* L)
 {
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
     // Lua 5.1 and 5.2 represent os.time() values as lua_Numbers.
     lua_Number epoch = static_cast<lua_Number>(tsud->mTimestamp.epochTime());
     lua_pushnumber(L, epoch);
@@ -467,8 +452,7 @@ int TimestampUserdata::epochTime(lua_State* L)
 // @function isElapsed
 int TimestampUserdata::isElapsed(lua_State* L)
 {
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
     
     Poco::Int64 interval = 0;
     
@@ -476,8 +460,7 @@ int TimestampUserdata::isElapsed(lua_State* L)
         interval = luaL_checkinteger(L, 2);
     else
     {
-        DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-            luaL_checkudata(L, 2, "Poco.DynamicAny.metatable"));
+        DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 2);
         try
         {
             daud->mDynamicAny.convert(interval);
@@ -505,8 +488,7 @@ int TimestampUserdata::isElapsed(lua_State* L)
 // @function resolution
 int TimestampUserdata::resolution(lua_State* L)
 {
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
     
     lua_Number res = tsud->mTimestamp.resolution();
     lua_pushnumber(L, res);
@@ -516,9 +498,7 @@ int TimestampUserdata::resolution(lua_State* L)
 
 int TimestampUserdata::update(lua_State* L)
 {
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
-    
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
     tsud->mTimestamp.update();
     
     return 0;
@@ -533,8 +513,7 @@ int TimestampUserdata::update(lua_State* L)
 int TimestampUserdata::utcTime(lua_State* L)
 {
     int rv = 0;
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Timestamp.metatable"));
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
     
     Poco::DynamicAny val = tsud->mTimestamp.utcTime();
     
@@ -545,6 +524,7 @@ int TimestampUserdata::utcTime(lua_State* L)
     try
     {
         DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
+        setDerivedtoUserdata(L, -1, daud);
         rv = 1;
     }
     catch (const Poco::Exception& e)

@@ -34,9 +34,6 @@ public:
 private:
     
     // metamethod infrastructure
-    static int metamethod__gc(lua_State* L);
-    //static int metamethod__index(lua_State* L);
-    //static int metamethod__newindex(lua_State* L);
     static int metamethod__tostring(lua_State* L);
     static int metamethod__add(lua_State* L);
     static int metamethod__sub(lua_State* L);
