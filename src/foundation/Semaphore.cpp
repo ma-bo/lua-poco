@@ -42,6 +42,7 @@ bool SemaphoreUserdata::copyToState(lua_State *L)
     lua_setmetatable(L, -2);
     
     SemaphoreUserdata* sud = new(ud) SemaphoreUserdata(mSemaphore);
+    setPrivateUserdata(L, -1, sud);
     return true;
 }
 
@@ -93,10 +94,13 @@ int SemaphoreUserdata::Semaphore(lua_State* L)
     {
         rv = 1;
         
+        SemaphoreUserdata* sud = NULL;
         if (top > 1)
-            SemaphoreUserdata* sud = new(ud) SemaphoreUserdata(n, max);
+            sud = new(ud) SemaphoreUserdata(n, max);
         else
-            SemaphoreUserdata* sud = new(ud) SemaphoreUserdata(n);
+            sud = new(ud) SemaphoreUserdata(n);
+        
+        setPrivateUserdata(L, -1, sud);
     }
     catch (const Poco::Exception& e)
     {
@@ -111,17 +115,6 @@ int SemaphoreUserdata::Semaphore(lua_State* L)
 
 ///
 // @type semaphore
-
-// metamethod infrastructure
-int SemaphoreUserdata::metamethod__gc(lua_State* L)
-{
-    SemaphoreUserdata* sud = reinterpret_cast<SemaphoreUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Semaphore.metatable"));
-    sud->~SemaphoreUserdata();
-    
-    return 0;
-}
-
 int SemaphoreUserdata::metamethod__tostring(lua_State* L)
 {
     SemaphoreUserdata* sud = reinterpret_cast<SemaphoreUserdata*>(
