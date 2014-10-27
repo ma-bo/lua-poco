@@ -33,9 +33,6 @@ bool NamedMutexUserdata::registerNamedMutex(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.NamedMutex.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, lock);
     lua_setfield(L, -2, "lock");
@@ -61,6 +58,7 @@ int NamedMutexUserdata::NamedMutex(lua_State* L)
     lua_setmetatable(L, -2);
     
     NamedMutexUserdata* nmud = new(ud) NamedMutexUserdata(name);
+    setPrivateUserdata(L, -1, nmud);
     return 1;
 }
 
@@ -68,19 +66,9 @@ int NamedMutexUserdata::NamedMutex(lua_State* L)
 // @type namedmutex
 
 // metamethod infrastructure
-int NamedMutexUserdata::metamethod__gc(lua_State* L)
-{
-    NamedMutexUserdata* nmud = reinterpret_cast<NamedMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.NamedMutex.metatable"));
-    nmud->~NamedMutexUserdata();
-    
-    return 0;
-}
-
 int NamedMutexUserdata::metamethod__tostring(lua_State* L)
 {
-    NamedMutexUserdata* nmud = reinterpret_cast<NamedMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.NamedMutex.metatable"));
+    NamedMutexUserdata* nmud = checkPrivateUserdata<NamedMutexUserdata>(L, 1);
     
     lua_pushfstring(L, "Poco.NamedMutex (%p)", reinterpret_cast<void*>(nmud));
     return 1;
@@ -93,8 +81,7 @@ int NamedMutexUserdata::metamethod__tostring(lua_State* L)
 // @function lock
 int NamedMutexUserdata::lock(lua_State* L)
 {
-    NamedMutexUserdata* nmud = reinterpret_cast<NamedMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.NamedMutex.metatable"));
+    NamedMutexUserdata* nmud = checkPrivateUserdata<NamedMutexUserdata>(L, 1);
     
     nmud->mNamedMutex.lock();
     
@@ -107,8 +94,7 @@ int NamedMutexUserdata::lock(lua_State* L)
 // @function tryLock
 int NamedMutexUserdata::tryLock(lua_State* L)
 {
-    NamedMutexUserdata* nmud = reinterpret_cast<NamedMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.NamedMutex.metatable"));
+    NamedMutexUserdata* nmud = checkPrivateUserdata<NamedMutexUserdata>(L, 1);
     
     bool locked = nmud->mNamedMutex.tryLock();
     lua_pushboolean(L, locked);
@@ -120,9 +106,8 @@ int NamedMutexUserdata::tryLock(lua_State* L)
 // @function unlock
 int NamedMutexUserdata::unlock(lua_State* L)
 {
-    NamedMutexUserdata* nmud = reinterpret_cast<NamedMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.NamedMutex.metatable"));
-    
+    NamedMutexUserdata* nmud = checkPrivateUserdata<NamedMutexUserdata>(L, 1);
+
     nmud->mNamedMutex.unlock();
     
     return 0;

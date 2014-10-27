@@ -27,7 +27,6 @@ public:
     
 private:
     // metamethod infrastructure
-    static int metamethod__gc(lua_State* L);
     static int metamethod__tostring(lua_State* L);
     
     // userdata methods
