@@ -66,43 +66,28 @@ bool PipeOStreamUserdata::registerPipeOStream(lua_State* L)
 // @see pipe
 int PipeOStreamUserdata::PipeOStream(lua_State* L)
 {
-    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, 1);
     
     void* ud = lua_newuserdata(L, sizeof(PipeOStreamUserdata));
     luaL_getmetatable(L, "Poco.PipeOStream.metatable");
     lua_setmetatable(L, -2);
-        
+    
     PipeOStreamUserdata* posud = new(ud) PipeOStreamUserdata(pud->mPipe);
+    setPrivateUserdata(L, -1, posud);
     // store a reference to the PipeUserdata to prevent it from being
     // garbage collected while the PipeOutputStream is using it.
     lua_pushvalue(L, 1);
     posud->mPipeReference = luaL_ref(L, LUA_REGISTRYINDEX);
     
-    Userdata* userdata = posud;
-    OStream* ostream = posud;
-    
     return 1;
 }
 
 // metamethod infrastructure
-int PipeOStreamUserdata::metamethod__gc(lua_State* L)
-{
-    PipeOStreamUserdata* pud = reinterpret_cast<PipeOStreamUserdata*>(
-        luaL_checkudata(L, 1, "Poco.PipeOStream.metatable"));
-        
-    luaL_unref(L, LUA_REGISTRYINDEX, pud->mPipeReference);
-    pud->~PipeOStreamUserdata();
-    
-    return 0;
-}
-
 int PipeOStreamUserdata::metamethod__tostring(lua_State* L)
 {
-    PipeOStreamUserdata* pud = reinterpret_cast<PipeOStreamUserdata*>(
-        luaL_checkudata(L, 1, "Poco.PipeOStream.metatable"));
+    PipeOStreamUserdata* pud = checkPrivateUserdata<PipeOStreamUserdata>(L, 1);
+    lua_pushfstring(L, "Poco.PipeOStream (%p)", static_cast<void*>(pud));
     
-    lua_pushfstring(L, "Poco.PipeOStream (%p)", reinterpret_cast<void*>(pud));
     return 1;
 }
 
