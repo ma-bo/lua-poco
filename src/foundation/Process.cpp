@@ -167,38 +167,15 @@ const char* getWorkingDir(lua_State* L)
 void getPipes(lua_State* L, PipeUserdata*& inPipe, PipeUserdata*& outPipe, PipeUserdata*& errPipe)
 {
     lua_getfield(L, -1, "inPipe");
-    if (lua_isuserdata(L, -1))
-    {
-        lua_getmetatable(L, -1);
-        luaL_getmetatable(L, "Poco.Pipe.metatable");
-        if (lua_rawequal(L, -1, -2))
-            inPipe = reinterpret_cast<PipeUserdata*>(lua_touserdata(L, -3));
-        lua_pop(L, 2);
-    }
+    if (lua_isuserdata(L, -1)) inPipe = dynamic_cast<PipeUserdata*>(getPrivateUserdata(L, -1));
     lua_pop(L, 1);
     
     lua_getfield(L, -1, "outPipe");
-    if (lua_isuserdata(L, -1))
-    {
-        lua_getmetatable(L, -1);
-        luaL_getmetatable(L, "Poco.Pipe.metatable");
-        if (lua_rawequal(L, -1, -2))
-            outPipe = reinterpret_cast<PipeUserdata*>(lua_touserdata(L, -3));
-        else
-            
-        lua_pop(L, 2);
-    }
+    if (lua_isuserdata(L, -1)) outPipe = dynamic_cast<PipeUserdata*>(getPrivateUserdata(L, -1));
     lua_pop(L, 1);
     
     lua_getfield(L, -1, "errPipe");
-    if (lua_isuserdata(L, -1))
-    {
-        lua_getmetatable(L, -1);
-        luaL_getmetatable(L, "Poco.Pipe.metatable");
-        if (lua_rawequal(L, -1, -2))
-            errPipe = reinterpret_cast<PipeUserdata*>(lua_touserdata(L, -3));
-        lua_pop(L, 2);
-    }
+    if (lua_isuserdata(L, -1)) errPipe = dynamic_cast<PipeUserdata*>(getPrivateUserdata(L, -1));
     lua_pop(L, 1);
 }
 
@@ -318,6 +295,7 @@ int Process::launch(lua_State* L)
                 workingDir ? workingDir : Poco::Path::current(),
                 inPipe, outPipe, errPipe, env);
             ProcessHandleUserdata* phud = new (ud) ProcessHandleUserdata(ph);
+            setPrivateUserdata(L, -1, phud);
             rv = 1;
         }
         else
@@ -326,6 +304,7 @@ int Process::launch(lua_State* L)
                 workingDir ? workingDir : Poco::Path::current(),
                 inPipe, outPipe, errPipe);
             ProcessHandleUserdata* phud = new (ud) ProcessHandleUserdata(ph);
+            setPrivateUserdata(L, -1, phud);
             rv = 1;
         }
     }
