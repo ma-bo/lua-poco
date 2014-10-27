@@ -36,6 +36,7 @@ bool FastMutexUserdata::copyToState(lua_State *L)
     lua_setmetatable(L, -2);
     
     FastMutexUserdata* fmud = new(ud) FastMutexUserdata(mFastMutex);
+    setPrivateUserdata(L, -1, fmud);
     return true;
 }
 
@@ -79,6 +80,7 @@ int FastMutexUserdata::FastMutex(lua_State* L)
     {
         rv = 1;
         FastMutexUserdata* fmud = new(ud) FastMutexUserdata();
+        setPrivateUserdata(L, -1, fmud);
     }
     catch (const Poco::Exception& e)
     {
@@ -95,20 +97,9 @@ int FastMutexUserdata::FastMutex(lua_State* L)
 // @type fastmutex
 
 // metamethod infrastructure
-int FastMutexUserdata::metamethod__gc(lua_State* L)
-{
-    FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
-    fmud->~FastMutexUserdata();
-    
-    return 0;
-}
-
 int FastMutexUserdata::metamethod__tostring(lua_State* L)
 {
-    FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
-    
+    FastMutexUserdata* fmud = checkPrivateUserdata<FastMutexUserdata>(L, 1);
     lua_pushfstring(L, "Poco.FastMutex (%p)", reinterpret_cast<void*>(fmud));
     return 1;
 }
@@ -120,8 +111,7 @@ int FastMutexUserdata::metamethod__tostring(lua_State* L)
 int FastMutexUserdata::lock(lua_State* L)
 {
     int rv = 0;
-    FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
+    FastMutexUserdata* fmud = checkPrivateUserdata<FastMutexUserdata>(L, 1);
     
     try
     {
@@ -148,8 +138,7 @@ int FastMutexUserdata::lock(lua_State* L)
 int FastMutexUserdata::tryLock(lua_State* L)
 {
     int rv = 0;
-    FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
+    FastMutexUserdata* fmud = checkPrivateUserdata<FastMutexUserdata>(L, 1);
     int top = lua_gettop(L);
     
     long ms;
@@ -184,8 +173,7 @@ int FastMutexUserdata::tryLock(lua_State* L)
 int FastMutexUserdata::unlock(lua_State* L)
 {
     int rv = 0;
-    FastMutexUserdata* fmud = reinterpret_cast<FastMutexUserdata*>(
-        luaL_checkudata(L, 1, "Poco.FastMutex.metatable"));
+    FastMutexUserdata* fmud = checkPrivateUserdata<FastMutexUserdata>(L, 1);
     
     try
     {
