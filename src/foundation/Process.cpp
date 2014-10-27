@@ -1,6 +1,7 @@
 /// Functions for working with processes.
 // @module process
 
+#include "Loader.h"
 #include "Process.h"
 #include "ProcessHandle.h"
 #include "Pipe.h"
@@ -9,17 +10,20 @@
 
 int luaopen_poco_process(lua_State* L)
 {
-    lua_createtable(L, 0, 5);
-    lua_pushcfunction(L, LuaPoco::Process::kill);
-    lua_setfield(L, -2, "kill");
-    lua_pushcfunction(L, LuaPoco::Process::id);
-    lua_setfield(L, -2, "id");
-    lua_pushcfunction(L, LuaPoco::Process::requestTermination);
-    lua_setfield(L, -2, "requestTermination");
-    lua_pushcfunction(L, LuaPoco::Process::times);
-    lua_setfield(L, -2, "times");
-    lua_pushcfunction(L, LuaPoco::Process::launch);
-    lua_setfield(L, -2, "launch");
+    if (LuaPoco::loadMetatables(L))
+    {
+        lua_createtable(L, 0, 5);
+        lua_pushcfunction(L, LuaPoco::Process::kill);
+        lua_setfield(L, -2, "kill");
+        lua_pushcfunction(L, LuaPoco::Process::id);
+        lua_setfield(L, -2, "id");
+        lua_pushcfunction(L, LuaPoco::Process::requestTermination);
+        lua_setfield(L, -2, "requestTermination");
+        lua_pushcfunction(L, LuaPoco::Process::times);
+        lua_setfield(L, -2, "times");
+        lua_pushcfunction(L, LuaPoco::Process::launch);
+        lua_setfield(L, -2, "launch");
+    }
     
     return 1;
 }
