@@ -50,9 +50,6 @@ bool EventUserdata::registerEvent(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.Event.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, set);
     lua_setfield(L, -2, "set");
@@ -110,10 +107,9 @@ int EventUserdata::Event(lua_State* L)
 // metamethod infrastructure
 int EventUserdata::metamethod__tostring(lua_State* L)
 {
-    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1);
     
-    lua_pushfstring(L, "Poco.Event (%p)", reinterpret_cast<void*>(eud));
+    lua_pushfstring(L, "Poco.Event (%p)", static_cast<void*>(eud));
     return 1;
 }
 
@@ -125,8 +121,8 @@ int EventUserdata::metamethod__tostring(lua_State* L)
 int EventUserdata::set(lua_State* L)
 {
     int rv = 0;
-    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1);
+    
     try
     {
         eud->mEvent->set();
@@ -152,8 +148,8 @@ int EventUserdata::set(lua_State* L)
 int EventUserdata::tryWait(lua_State* L)
 {
     int rv = 0;
-    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1);
+    
     long ms = luaL_checkinteger(L, 2);
     
     try
@@ -183,8 +179,7 @@ int EventUserdata::tryWait(lua_State* L)
 int EventUserdata::wait(lua_State* L)
 {
     int rv = 0;
-    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1);
     
     try
     {
@@ -211,8 +206,8 @@ int EventUserdata::wait(lua_State* L)
 int EventUserdata::reset(lua_State* L)
 {
     int rv = 0;
-    EventUserdata* eud = reinterpret_cast<EventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Event.metatable"));
+    EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1);
+    
     try
     {
         eud->mEvent->reset();
