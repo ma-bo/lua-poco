@@ -103,10 +103,48 @@ int OStream::seek(lua_State* L)
     int rv = 0;
     OStream* osud = checkPrivateUserdata<OStream>(L, 1);
     std::ostream& os = osud->ostream();
+
+    std::ios_base::seekdir whence = std::ios_base::beg;
+    const char *mode = "set";
+    size_t offset = 0;
+    
+    if (lua_gettop(L) == 2)
+    {
+        if (lua_isstring(L, 2)) mode = lua_tostring(L, 2);
+        else if (lua_isnumber(L, 2)) offset = static_cast<size_t>(lua_tonumber(L, 2));
+        else luaL_error(L, "invalid type for parameter 2, %s", lua_typename(L, lua_type(L, 2)));
+    }
+    else if (lua_gettop(L) == 3)
+    {
+        mode = luaL_checkstring(L, 2);
+        offset = static_cast<size_t>(luaL_checknumber(L, 3));
+    }
+    
+    if (std::strcmp(mode, "cur") == 0)
+        whence = std::ios_base::cur;
+    else if (std::strcmp(mode, "end") == 0)
+        whence = std::ios_base::end;
     
     try
     {
-        rv = 1;
+        os.seekp(offset, whence);
+        if (os.good())
+        {
+            lua_pushnumber(L, static_cast<lua_Number>(os.tellp()));
+            rv = 1;
+        }
+        else if (os.eof())
+        {
+            lua_pushnil(L);
+            lua_pushstring(L, "eof");
+            rv = 2;
+        }
+        else
+        {
+            lua_pushnil(L);
+            lua_pushstring(L, "error");
+            rv = 2;
+        }
     }
     catch (const Poco::Exception& e)
     {
@@ -118,6 +156,66 @@ int OStream::seek(lua_State* L)
     }
     
     return rv;
+}
+
+
+OStreamUserdata::OStreamUserdata(std::ostream& ostream, int udReference)
+    : mOStream(ostream)
+    , mOStreamReference(udReference)
+{
+}
+
+OStreamUserdata::~OStreamUserdata()
+{
+}
+
+std::ostream& OStreamUserdata::ostream()
+{
+    return mOStream;
+}
+
+// register metatable for this class
+bool OStreamUserdata::registerOStream(lua_State* L)
+{
+    luaL_newmetatable(L, "Poco.OStream.metatable");
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    lua_pushcfunction(L, metamethod__gc);
+    lua_setfield(L, -2, "__gc");
+    lua_pushcfunction(L, metamethod__tostring);
+    lua_setfield(L, -2, "__tostring");
+    
+    // ostream methods
+    lua_pushcfunction(L, write);
+    lua_setfield(L, -2, "write");
+    lua_pushcfunction(L, seek);
+    lua_setfield(L, -2, "seek");
+    lua_pushcfunction(L, flush);
+    lua_setfield(L, -2, "flush");
+    
+    lua_pop(L, 1);
+    return true;
+}
+
+// metamethod infrastructure
+int OStreamUserdata::metamethod__gc(lua_State* L)
+{
+    OStreamUserdata* oud = checkPrivateUserdata<OStreamUserdata>(L, 1);
+    
+    if (oud->mOStreamReference != LUA_NOREF)
+        luaL_unref(L, LUA_REGISTRYINDEX, oud->mOStreamReference);
+    
+    oud->~OStreamUserdata();
+
+    return 0;
+}
+
+int OStreamUserdata::metamethod__tostring(lua_State* L)
+{
+    OStreamUserdata* oud = checkPrivateUserdata<OStreamUserdata>(L, 1);
+    
+    lua_pushfstring(L, "Poco.OStream (%p)", static_cast<void*>(oud));
+    return 1;
 }
 
 } // LuaPoco
