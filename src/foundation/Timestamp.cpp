@@ -327,7 +327,7 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
 int TimestampUserdata::metamethod__lt(lua_State* L)
 {
     TimestampUserdata* tsudLhs = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
-    TimestampUserdata* tsudRhs = checkDerivedFromUserdata<TimestampUserdata>(L, 1);
+    TimestampUserdata* tsudRhs = checkDerivedFromUserdata<TimestampUserdata>(L, 2);
     
     bool result = tsudLhs->mTimestamp < tsudRhs->mTimestamp;
     lua_pushboolean(L, result);
