@@ -36,9 +36,6 @@ bool NamedEventUserdata::registerNamedEvent(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.NamedEvent.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, set);
     lua_setfield(L, -2, "set");
@@ -63,6 +60,7 @@ int NamedEventUserdata::NamedEvent(lua_State* L)
     lua_setmetatable(L, -2);
     
     NamedEventUserdata* neud = new(ud) NamedEventUserdata(name);
+    setPrivateUserdata(L, -1, neud);
     return 1;
 }
 
@@ -70,19 +68,9 @@ int NamedEventUserdata::NamedEvent(lua_State* L)
 // @type namedevent
 
 // metamethod infrastructure
-int NamedEventUserdata::metamethod__gc(lua_State* L)
-{
-    NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
-    neud->~NamedEventUserdata();
-    
-    return 0;
-}
-
 int NamedEventUserdata::metamethod__tostring(lua_State* L)
 {
-    NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
+    NamedEventUserdata* neud = checkPrivateUserdata<NamedEventUserdata>(L, 1);
     
     lua_pushfstring(L, "Poco.NamedEvent (%p)", reinterpret_cast<void*>(neud));
     return 1;
@@ -95,8 +83,7 @@ int NamedEventUserdata::metamethod__tostring(lua_State* L)
 // @function set
 int NamedEventUserdata::set(lua_State* L)
 {
-    NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
+    NamedEventUserdata* neud = checkPrivateUserdata<NamedEventUserdata>(L, 1);
     
     neud->mNamedEvent.set();
     
@@ -108,8 +95,7 @@ int NamedEventUserdata::set(lua_State* L)
 // @function wait
 int NamedEventUserdata::wait(lua_State* L)
 {
-    NamedEventUserdata* neud = reinterpret_cast<NamedEventUserdata*>(
-        luaL_checkudata(L, 1, "Poco.NamedEvent.metatable"));
+    NamedEventUserdata* neud = checkPrivateUserdata<NamedEventUserdata>(L, 1);
     
     neud->mNamedEvent.wait();
     
