@@ -36,6 +36,7 @@ bool PipeUserdata::copyToState(lua_State *L)
     lua_setmetatable(L, -2);
     
     PipeUserdata* pud = new(ud) PipeUserdata();
+    setPrivateUserdata(L, -1, pud);
     return true;
 }
 
@@ -76,25 +77,16 @@ int PipeUserdata::Pipe(lua_State* L)
     lua_setmetatable(L, -2);
     
     PipeUserdata* pud = new(ud) PipeUserdata();
+    setPrivateUserdata(L, -1, pud);
     return 1;
 }
 
 // metamethod infrastructure
-int PipeUserdata::metamethod__gc(lua_State* L)
-{
-    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
-    pud->~PipeUserdata();
-    
-    return 0;
-}
-
 int PipeUserdata::metamethod__tostring(lua_State* L)
 {
-    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, 1);
     
-    lua_pushfstring(L, "Poco.Pipe (%p)", reinterpret_cast<void*>(pud));
+    lua_pushfstring(L, "Poco.Pipe (%p)", static_cast<void*>(pud));
     return 1;
 }
 
@@ -108,8 +100,7 @@ int PipeUserdata::metamethod__tostring(lua_State* L)
 int PipeUserdata::readBytes(lua_State* L)
 {
     int rv = 0;
-    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, 1);
     
     char readBuffer[1024];
     size_t bytesToRead = sizeof readBuffer;
@@ -150,8 +141,7 @@ int PipeUserdata::readBytes(lua_State* L)
 int PipeUserdata::writeBytes(lua_State* L)
 {
     int rv = 0;
-    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, 1);
     
     size_t writeIndex = 0;
     size_t strSize = 0;
@@ -184,8 +174,7 @@ int PipeUserdata::writeBytes(lua_State* L)
 int PipeUserdata::close(lua_State* L)
 {
     int rv = 0;
-    PipeUserdata* pud = reinterpret_cast<PipeUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Pipe.metatable"));
+    PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, 1);
     
     const char* closeEnd = "both";
     int top = lua_gettop(L);
