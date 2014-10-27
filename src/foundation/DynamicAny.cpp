@@ -34,6 +34,7 @@ bool DynamicAnyUserdata::copyToState(lua_State* L)
     lua_setmetatable(L, -2);
     
     DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(mDynamicAny);
+    setDerivedtoUserdata(L, -1, daud);
     
     return true;
 }
@@ -108,6 +109,7 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
             lua_setmetatable(L, -2);
             lua_Number val = lua_tonumber(L, 1);
             DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
+            setDerivedtoUserdata(L, -1, daud);
             rv = 1;
         }
         else if (type == LUA_TSTRING)
@@ -117,6 +119,7 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
             lua_setmetatable(L, -2);
             const char* val = lua_tostring(L, 1);
             DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
+            setDerivedtoUserdata(L, -1, daud);
             rv = 1;
         }
         else if (type == LUA_TBOOLEAN)
@@ -126,16 +129,18 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
             lua_setmetatable(L, -2);
             bool val = lua_toboolean(L, 1);
             DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
+            setDerivedtoUserdata(L, -1, daud);
             rv = 1;
         }
         else if (type == LUA_TUSERDATA)
         {
-            void *udFrom = luaL_checkudata(L, 1, "Poco.DynamicAny.metatable");
+            DynamicAnyUserdata* daudFrom = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
             void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
             luaL_getmetatable(L, "Poco.DynamicAny.metatable");
             lua_setmetatable(L, -2);
-            DynamicAnyUserdata* daudFrom = reinterpret_cast<DynamicAnyUserdata*>(udFrom);
-            DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(*daudFrom);
+            
+            DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(daudFrom->mDynamicAny);
+            setDerivedtoUserdata(L, -1, daud);
             rv = 1;
         }
         else
@@ -161,21 +166,10 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
 // @type dynamicany
 
 // metamethod infrastructure
-int DynamicAnyUserdata::metamethod__gc(lua_State* L)
-{
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
-    daud->~DynamicAnyUserdata();
-    
-    return 0;
-}
-
 int DynamicAnyUserdata::metamethod__tostring(lua_State* L)
 {
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
-    
-    lua_pushfstring(L, "Poco.DynamicAny (%p)", reinterpret_cast<void*>(daud));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
+    lua_pushfstring(L, "Poco.DynamicAny (%p)", static_cast<void*>(daud));
     return 1;
 }
 
@@ -189,8 +183,7 @@ int DynamicAnyUserdata::metamethod__tostring(lua_State* L)
 int DynamicAnyUserdata::convert(lua_State* L)
 {
     int rv = 0;
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
     const char* toTypeStr = luaL_checkstring(L, 2);
     std::string toType(toTypeStr);
     
@@ -233,6 +226,7 @@ int DynamicAnyUserdata::convert(lua_State* L)
         luaL_getmetatable(L, "Poco.DynamicAny.metatable");
         lua_setmetatable(L, -2);
         DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(newValue);
+        setDerivedtoUserdata(L, -1, daud);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -252,8 +246,7 @@ int DynamicAnyUserdata::convert(lua_State* L)
 // @function isNumeric
 int DynamicAnyUserdata::isNumeric(lua_State* L)
 {
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
     
     int isnumeric = daud->mDynamicAny.isNumeric();
     lua_pushboolean(L, isnumeric);
@@ -266,8 +259,7 @@ int DynamicAnyUserdata::isNumeric(lua_State* L)
 // @function isInteger
 int DynamicAnyUserdata::isInteger(lua_State* L)
 {
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
     
     int isinteger = daud->mDynamicAny.isInteger();
     lua_pushboolean(L, isinteger);
@@ -280,8 +272,7 @@ int DynamicAnyUserdata::isInteger(lua_State* L)
 // @function isSigned
 int DynamicAnyUserdata::isSigned(lua_State* L)
 {
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
     
     int issigned = daud->mDynamicAny.isSigned();
     lua_pushboolean(L, issigned);
@@ -291,8 +282,7 @@ int DynamicAnyUserdata::isSigned(lua_State* L)
 
 int DynamicAnyUserdata::isString(lua_State* L)
 {
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
     
     int isstring = daud->mDynamicAny.isString();
     lua_pushboolean(L, isstring);
@@ -307,8 +297,8 @@ int DynamicAnyUserdata::isString(lua_State* L)
 int DynamicAnyUserdata::toNumber(lua_State* L)
 {
     int rv = 0;
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
+    
     try
     {
         lua_Number result;
@@ -335,8 +325,7 @@ int DynamicAnyUserdata::toNumber(lua_State* L)
 int DynamicAnyUserdata::toString(lua_State* L)
 {
     int rv = 0;
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
     
     try
     {
@@ -364,8 +353,7 @@ int DynamicAnyUserdata::toString(lua_State* L)
 int DynamicAnyUserdata::toBoolean(lua_State* L)
 {
     int rv = 0;
-    DynamicAnyUserdata* daud = reinterpret_cast<DynamicAnyUserdata*>(
-        luaL_checkudata(L, 1, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, 1);
     
     try
     {
@@ -393,15 +381,13 @@ int DynamicAnyUserdata::metamethod__add(lua_State* L)
     int udIndex = 1;
     int valIndex = 2;
     
-    DynamicAnyUserdata* daud;
-    
     if (!lua_isuserdata(L, 1))
     {
         udIndex = 2;
         valIndex = 1;
     }
     
-    daud = reinterpret_cast<DynamicAnyUserdata*>(luaL_checkudata(L, udIndex, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, udIndex);
     
     try
     {
@@ -409,6 +395,7 @@ int DynamicAnyUserdata::metamethod__add(lua_State* L)
         luaL_getmetatable(L, "Poco.DynamicAny.metatable");
         lua_setmetatable(L, -2);
         DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(Poco::DynamicAny());
+        setDerivedtoUserdata(L, -1, daud);
         
         if (lua_isuserdata(L, valIndex))
         {
@@ -419,7 +406,7 @@ int DynamicAnyUserdata::metamethod__add(lua_State* L)
             
             if (equal)
             {
-                DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
+                DynamicAnyUserdata* daudOther = checkDerivedFromUserdata<DynamicAnyUserdata>(L, valIndex);
                 newValueUd->mDynamicAny = daud->mDynamicAny + daudOther->mDynamicAny;
                 rv = 1;
             }
@@ -459,15 +446,13 @@ int DynamicAnyUserdata::metamethod__sub(lua_State* L)
     int udIndex = 1;
     int valIndex = 2;
     
-    DynamicAnyUserdata* daud;
-    
     if (!lua_isuserdata(L, 1))
     {
         udIndex = 2;
         valIndex = 1;
     }
     
-    daud = reinterpret_cast<DynamicAnyUserdata*>(luaL_checkudata(L, udIndex, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, udIndex);
     
     try
     {
@@ -475,6 +460,7 @@ int DynamicAnyUserdata::metamethod__sub(lua_State* L)
         luaL_getmetatable(L, "Poco.DynamicAny.metatable");
         lua_setmetatable(L, -2);
         DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(Poco::DynamicAny());
+        setDerivedtoUserdata(L, -1, daud);
         
         if (lua_isuserdata(L, valIndex))
         {
@@ -485,7 +471,7 @@ int DynamicAnyUserdata::metamethod__sub(lua_State* L)
             
             if (equal)
             {
-                DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
+                DynamicAnyUserdata* daudOther = checkDerivedFromUserdata<DynamicAnyUserdata>(L, valIndex);
                 if (udIndex == 1)
                     newValueUd->mDynamicAny = daud->mDynamicAny - daudOther->mDynamicAny;
                 else
@@ -527,15 +513,13 @@ int DynamicAnyUserdata::metamethod__mul(lua_State* L)
     int udIndex = 1;
     int valIndex = 2;
     
-    DynamicAnyUserdata* daud;
-    
     if (!lua_isuserdata(L, 1))
     {
         udIndex = 2;
         valIndex = 1;
     }
     
-    daud = reinterpret_cast<DynamicAnyUserdata*>(luaL_checkudata(L, udIndex, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, udIndex);
     
     try
     {
@@ -543,6 +527,7 @@ int DynamicAnyUserdata::metamethod__mul(lua_State* L)
         luaL_getmetatable(L, "Poco.DynamicAny.metatable");
         lua_setmetatable(L, -2);
         DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(Poco::DynamicAny());
+        setDerivedtoUserdata(L, -1, daud);
         
         if (lua_isuserdata(L, valIndex))
         {
@@ -553,7 +538,7 @@ int DynamicAnyUserdata::metamethod__mul(lua_State* L)
             
             if (equal)
             {
-                DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
+                DynamicAnyUserdata* daudOther = checkDerivedFromUserdata<DynamicAnyUserdata>(L, valIndex);
                 newValueUd->mDynamicAny = daud->mDynamicAny * daudOther->mDynamicAny;
                 rv = 1;
             }
@@ -587,15 +572,13 @@ int DynamicAnyUserdata::metamethod__div(lua_State* L)
     int udIndex = 1;
     int valIndex = 2;
     
-    DynamicAnyUserdata* daud;
-    
     if (!lua_isuserdata(L, 1))
     {
         udIndex = 2;
         valIndex = 1;
     }
     
-    daud = reinterpret_cast<DynamicAnyUserdata*>(luaL_checkudata(L, udIndex, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, udIndex);
     
     try
     {
@@ -603,6 +586,7 @@ int DynamicAnyUserdata::metamethod__div(lua_State* L)
         luaL_getmetatable(L, "Poco.DynamicAny.metatable");
         lua_setmetatable(L, -2);
         DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(Poco::DynamicAny());
+        setDerivedtoUserdata(L, -1, daud);
         
         if (lua_isuserdata(L, valIndex))
         {
@@ -613,7 +597,7 @@ int DynamicAnyUserdata::metamethod__div(lua_State* L)
             
             if (equal)
             {
-                DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
+                DynamicAnyUserdata* daudOther = checkDerivedFromUserdata<DynamicAnyUserdata>(L, valIndex);
                 
                 if (udIndex == 1)
                     newValueUd->mDynamicAny = daud->mDynamicAny / daudOther->mDynamicAny;
@@ -655,15 +639,13 @@ int DynamicAnyUserdata::metamethod__eq(lua_State* L)
     int udIndex = 1;
     int valIndex = 2;
     
-    DynamicAnyUserdata* daud;
-    
     if (!lua_isuserdata(L, 1))
     {
         udIndex = 2;
         valIndex = 1;
     }
     
-    daud = reinterpret_cast<DynamicAnyUserdata*>(luaL_checkudata(L, udIndex, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, udIndex);
     
     try
     {
@@ -676,7 +658,7 @@ int DynamicAnyUserdata::metamethod__eq(lua_State* L)
             
             if (equal)
             {
-                DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
+                DynamicAnyUserdata* daudOther = checkDerivedFromUserdata<DynamicAnyUserdata>(L, valIndex);
                 bool result = daud->mDynamicAny == daudOther->mDynamicAny;
                 lua_pushboolean(L, result);
                 rv = 1;
@@ -705,15 +687,13 @@ int DynamicAnyUserdata::metamethod__lt(lua_State* L)
     int udIndex = 1;
     int valIndex = 2;
     
-    DynamicAnyUserdata* daud;
-    
     if (!lua_isuserdata(L, 1))
     {
         udIndex = 2;
         valIndex = 1;
     }
     
-    daud = reinterpret_cast<DynamicAnyUserdata*>(luaL_checkudata(L, udIndex, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, udIndex);
     
     try
     {
@@ -726,7 +706,7 @@ int DynamicAnyUserdata::metamethod__lt(lua_State* L)
             
             if (equal)
             {
-                DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
+                DynamicAnyUserdata* daudOther = checkDerivedFromUserdata<DynamicAnyUserdata>(L, valIndex);
                 bool result;
                 
                 if (udIndex == 1)
@@ -761,15 +741,13 @@ int DynamicAnyUserdata::metamethod__le(lua_State* L)
     int udIndex = 1;
     int valIndex = 2;
     
-    DynamicAnyUserdata* daud;
-    
     if (!lua_isuserdata(L, 1))
     {
         udIndex = 2;
         valIndex = 1;
     }
     
-    daud = reinterpret_cast<DynamicAnyUserdata*>(luaL_checkudata(L, udIndex, "Poco.DynamicAny.metatable"));
+    DynamicAnyUserdata* daud = checkDerivedFromUserdata<DynamicAnyUserdata>(L, udIndex);
     
     try
     {
@@ -782,7 +760,7 @@ int DynamicAnyUserdata::metamethod__le(lua_State* L)
             
             if (equal)
             {
-                DynamicAnyUserdata* daudOther = reinterpret_cast<DynamicAnyUserdata*>(lua_touserdata(L, valIndex));
+                DynamicAnyUserdata* daudOther = checkDerivedFromUserdata<DynamicAnyUserdata>(L, valIndex);
                 bool result;
                 
                 if (udIndex == 1)

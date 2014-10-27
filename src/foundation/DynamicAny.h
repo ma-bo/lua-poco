@@ -14,7 +14,7 @@ LUAPOCO_API int luaopen_poco_dynamicany(lua_State* L);
 namespace LuaPoco
 {
 
-class DynamicAnyUserdata
+class DynamicAnyUserdata : public Userdata
 {
 public:
     template <class T>
@@ -30,9 +30,10 @@ public:
     Poco::DynamicAny mDynamicAny;
 private:
     DynamicAnyUserdata();
+    DynamicAnyUserdata(const DynamicAnyUserdata& disabledCopy);
+    DynamicAnyUserdata& operator=(const DynamicAnyUserdata& disabledAssignment);
     
     // metamethod infrastructure
-    static int metamethod__gc(lua_State* L);
     static int metamethod__tostring(lua_State* L);
     
     // methods
