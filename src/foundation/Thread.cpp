@@ -98,6 +98,7 @@ int ThreadUserdata::Thread(lua_State* L)
         luaL_getmetatable(L, "Poco.Thread.metatable");
         lua_setmetatable(L, -2);
         ThreadUserdata* thud = new(ud) ThreadUserdata();
+        setPrivateUserdata(L, -1, thud);
         rv = 1;
         
         Poco::Thread::Priority p = Poco::Thread::PRIO_NORMAL;
@@ -141,23 +142,10 @@ int ThreadUserdata::Thread(lua_State* L)
 
 ///
 // @type thread
-
-// metamethod infrastructure
-int ThreadUserdata::metamethod__gc(lua_State* L)
-{
-    ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Thread.metatable"));
-    thud->~ThreadUserdata();
-    
-    return 0;
-}
-
 int ThreadUserdata::metamethod__tostring(lua_State* L)
 {
-    ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Thread.metatable"));
-    
-    lua_pushfstring(L, "Poco.Thread (%p)", reinterpret_cast<void*>(thud));
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
+    lua_pushfstring(L, "Poco.Thread (%p)", static_cast<void*>(thud));
     return 1;
 }
 
@@ -171,8 +159,7 @@ int ThreadUserdata::metamethod__tostring(lua_State* L)
 int ThreadUserdata::name(lua_State* L)
 {
     int rv = 0;
-    ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Thread.metatable"));
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
     
     const char* name = NULL;
     int top = lua_gettop(L);
@@ -217,8 +204,7 @@ int ThreadUserdata::name(lua_State* L)
 int ThreadUserdata::priority(lua_State* L)
 {
     int rv = 0;
-    ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Thread.metatable"));
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
     
     const char* priority = NULL;
     int top = lua_gettop(L);
@@ -294,8 +280,7 @@ int ThreadUserdata::priority(lua_State* L)
 int ThreadUserdata::id(lua_State* L)
 {
     int rv = 0;
-    ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Thread.metatable"));
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
     
     try
     {
@@ -320,8 +305,7 @@ int ThreadUserdata::id(lua_State* L)
 int ThreadUserdata::isRunning(lua_State* L)
 {
     int rv = 0;
-    ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Thread.metatable"));
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
     
     try
     {
@@ -348,8 +332,7 @@ int ThreadUserdata::isRunning(lua_State* L)
 int ThreadUserdata::join(lua_State* L)
 {
     int rv = 0;
-    ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Thread.metatable"));
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
     
     try
     {
@@ -399,8 +382,7 @@ int ThreadUserdata::join(lua_State* L)
 int ThreadUserdata::stackSize(lua_State* L)
 {
     int rv = 0;
-    ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Thread.metatable"));
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
     
     int top = lua_gettop(L);
     lua_Integer stackSize = 0;
@@ -445,8 +427,7 @@ int ThreadUserdata::start(lua_State* L)
 {
     int rv = 0;
     int top = lua_gettop(L);
-    ThreadUserdata* thud = reinterpret_cast<ThreadUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Thread.metatable"));
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
         
     luaL_checktype(L, 2, LUA_TFUNCTION);
     
