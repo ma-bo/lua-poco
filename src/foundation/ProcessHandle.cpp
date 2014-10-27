@@ -47,20 +47,11 @@ bool ProcessHandleUserdata::registerProcessHandle(lua_State* L)
 // @type processhandle
 
 // metamethod infrastructure
-int ProcessHandleUserdata::metamethod__gc(lua_State* L)
-{
-    ProcessHandleUserdata* phud = reinterpret_cast<ProcessHandleUserdata*>(
-        luaL_checkudata(L, 1, "Poco.ProcessHandle.metatable"));
-    phud->~ProcessHandleUserdata();
-    
-    return 0;
-}
-
 int ProcessHandleUserdata::metamethod__tostring(lua_State* L)
 {
     int rv = 0;
-    ProcessHandleUserdata* phud = reinterpret_cast<ProcessHandleUserdata*>(
-        luaL_checkudata(L, 1, "Poco.ProcessHandle.metatable"));
+    ProcessHandleUserdata* phud = checkPrivateUserdata<ProcessHandleUserdata>(L, 1);
+    
     try
     {
         lua_pushfstring(L, "Poco.ProcessHandle (%p)", reinterpret_cast<void*>(phud));
@@ -86,8 +77,8 @@ int ProcessHandleUserdata::metamethod__tostring(lua_State* L)
 int ProcessHandleUserdata::id(lua_State* L)
 {
     int rv = 0;
-    ProcessHandleUserdata* phud = reinterpret_cast<ProcessHandleUserdata*>(
-        luaL_checkudata(L, 1, "Poco.ProcessHandle.metatable"));
+    ProcessHandleUserdata* phud = checkPrivateUserdata<ProcessHandleUserdata>(L, 1);
+    
     try
     {
         lua_pushnumber(L, phud->mProcessHandle.id());
@@ -110,8 +101,7 @@ int ProcessHandleUserdata::id(lua_State* L)
 // @function wait
 int ProcessHandleUserdata::wait(lua_State* L)
 {
-    ProcessHandleUserdata* phud = reinterpret_cast<ProcessHandleUserdata*>(
-        luaL_checkudata(L, 1, "Poco.ProcessHandle.metatable"));
+    ProcessHandleUserdata* phud = checkPrivateUserdata<ProcessHandleUserdata>(L, 1);
     
     lua_pushinteger(L, phud->mProcessHandle.wait());
     
@@ -123,8 +113,7 @@ int ProcessHandleUserdata::wait(lua_State* L)
 // @function kill
 int ProcessHandleUserdata::kill(lua_State* L)
 {
-    ProcessHandleUserdata* phud = reinterpret_cast<ProcessHandleUserdata*>(
-        luaL_checkudata(L, 1, "Poco.ProcessHandle.metatable"));
+    ProcessHandleUserdata* phud = checkPrivateUserdata<ProcessHandleUserdata>(L, 1);
     
     Poco::Process::kill(phud->mProcessHandle);
     
