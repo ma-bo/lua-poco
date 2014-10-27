@@ -10,9 +10,6 @@ namespace LuaPoco
 {
 
 // base class for all userdata
-// the idea is that it will be possible to pass a userdata to another 
-// userdata's method, and these types this will enable base class 
-// compatability testing.
 class Userdata
 {
 public:
@@ -31,15 +28,16 @@ private:
 int pushPocoException(lua_State* L, const Poco::Exception& e);
 int pushUnknownException(lua_State* L);
 
-// setup private table for Derived pointer to Userdata pointer mapping.
+// constructs the private table for mapping a specific Userdata pointer to the base Userdata pointer.
 void setupPrivateUserdata(lua_State* L);
-// stores Userdata pointer in a private table with the derived userdata as a weak key.
+
+// sets the association between a specific Userdata pointer and the base Userdata pointer.
 void setPrivateUserdata(lua_State* L, int userdataIdx, Userdata* ud);
-// retrieves the associated Userdata pointer for the derived pointer.
-// (provides mechanism for type safe dynamic_cast from Userdata pointer back to the Derived pointer.)
+
+// gets the base Userdata pointer associated with a specific Userdata pointer.
 Userdata* getPrivateUserdata(lua_State* L, int userdataIdx);
 
-// function to validate that a Userdata* can be dynamic_cast to Derived* and lua_error() if not.
+// generic to validate that a Userdata* can be dynamic_cast to a specific Userdata pointer, lua_error() if not.
 template <typename T>
 T* checkPrivateUserdata(lua_State* L, int userdataIdx)
 {
