@@ -41,6 +41,20 @@ Userdata* getDerivedToUserdata(lua_State* L, int userdataIdx);
 // clears the association of the derived pointer with the base userdata pointer from the private table.
 void setDerivedtoUserdata(lua_State* L, int userdataIdx);
 
+// function to validate that a Userdata* can be dynamic_cast to Derived* and lua_error() if not.
+template <typename T>
+T* checkDerivedFromUserdata(lua_State* L, int userdataIdx)
+{
+    T* derived = NULL;
+    userdataIdx = userdataIdx < 0 ? lua_gettop(L) + 1 + userdataIdx : userdataIdx;
+    
+    luaL_checktype(L, userdataIdx, LUA_TUSERDATA);
+    derived = dynamic_cast<T*>(getDerivedToUserdata(L, userdataIdx));
+    if (derived == NULL) luaL_error(L, "invalid userdata, expected: %s", typeid(T).name());
+    
+    return derived;
+}
+
 } // LuaPoco
 
 #endif
