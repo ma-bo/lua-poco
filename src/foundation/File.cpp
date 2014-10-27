@@ -5,7 +5,6 @@
 #include "File.h"
 #include "Timestamp.h"
 #include <Poco/Exception.h>
-#include <iostream>
 #include <string>
 
 int luaopen_poco_file(lua_State* L)

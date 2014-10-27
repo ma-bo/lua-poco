@@ -5,7 +5,6 @@
 #include "Pipe.h"
 #include "Poco/Exception.h"
 #include <cstring>
-#include <iostream>
 
 int luaopen_poco_pipeostream(lua_State* L)
 {

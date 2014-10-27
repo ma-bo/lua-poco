@@ -4,7 +4,6 @@
 
 #include "RegularExpression.h"
 #include "Poco/Exception.h"
-#include <iostream>
 
 int luaopen_poco_regex(lua_State* L)
 {
