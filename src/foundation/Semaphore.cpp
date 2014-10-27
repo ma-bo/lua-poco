@@ -57,9 +57,6 @@ bool SemaphoreUserdata::registerSemaphore(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.Semaphore.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, set);
     lua_setfield(L, -2, "set");
@@ -117,10 +114,9 @@ int SemaphoreUserdata::Semaphore(lua_State* L)
 // @type semaphore
 int SemaphoreUserdata::metamethod__tostring(lua_State* L)
 {
-    SemaphoreUserdata* sud = reinterpret_cast<SemaphoreUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Semaphore.metatable"));
+    SemaphoreUserdata* sud = checkPrivateUserdata<SemaphoreUserdata>(L, 1);
     
-    lua_pushfstring(L, "Poco.Semaphore (%p)", reinterpret_cast<void*>(sud));
+    lua_pushfstring(L, "Poco.Semaphore (%p)", static_cast<void*>(sud));
     return 1;
 }
 
@@ -132,8 +128,8 @@ int SemaphoreUserdata::metamethod__tostring(lua_State* L)
 int SemaphoreUserdata::set(lua_State* L)
 {
     int rv = 0;
-    SemaphoreUserdata* sud = reinterpret_cast<SemaphoreUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Semaphore.metatable"));
+    SemaphoreUserdata* sud = checkPrivateUserdata<SemaphoreUserdata>(L, 1);
+    
     try
     {
         sud->mSemaphore->set();
@@ -160,8 +156,8 @@ int SemaphoreUserdata::set(lua_State* L)
 int SemaphoreUserdata::tryWait(lua_State* L)
 {
     int rv = 0;
-    SemaphoreUserdata* sud = reinterpret_cast<SemaphoreUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Semaphore.metatable"));
+    SemaphoreUserdata* sud = checkPrivateUserdata<SemaphoreUserdata>(L, 1);
+    
     long ms = luaL_checkinteger(L, 2);
     
     try
@@ -189,8 +185,7 @@ int SemaphoreUserdata::tryWait(lua_State* L)
 int SemaphoreUserdata::wait(lua_State* L)
 {
     int rv = 0;
-    SemaphoreUserdata* sud = reinterpret_cast<SemaphoreUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Semaphore.metatable"));
+    SemaphoreUserdata* sud = checkPrivateUserdata<SemaphoreUserdata>(L, 1);
     
     try
     {
