@@ -26,7 +26,6 @@ PipeOStreamUserdata::~PipeOStreamUserdata()
 
 std::ostream& PipeOStreamUserdata::ostream()
 {
-    std::cerr << "return mPipeOutputStream" << std::endl;
     return mPipeOutputStream;
 }
 
@@ -80,11 +79,8 @@ int PipeOStreamUserdata::PipeOStream(lua_State* L)
     lua_pushvalue(L, 1);
     posud->mPipeReference = luaL_ref(L, LUA_REGISTRYINDEX);
     
-    std::cerr << "posud: " << (void*) posud << std::endl;
     Userdata* userdata = posud;
     OStream* ostream = posud;
-    std::cerr << "Userdata* " << (void*) userdata << std::endl;
-    std::cerr << "OStream* " << (void*) ostream << std::endl;
     
     return 1;
 }
