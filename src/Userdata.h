@@ -32,24 +32,22 @@ int pushPocoException(lua_State* L, const Poco::Exception& e);
 int pushUnknownException(lua_State* L);
 
 // setup private table for Derived pointer to Userdata pointer mapping.
-void setupDerivedToUserdata(lua_State* L);
+void setupPrivateUserdata(lua_State* L);
 // stores Userdata pointer in a private table with the derived userdata as a weak key.
-void setDerivedtoUserdata(lua_State* L, int userdataIdx, Userdata* ud);
+void setPrivateUserdata(lua_State* L, int userdataIdx, Userdata* ud);
 // retrieves the associated Userdata pointer for the derived pointer.
 // (provides mechanism for type safe dynamic_cast from Userdata pointer back to the Derived pointer.)
-Userdata* getDerivedToUserdata(lua_State* L, int userdataIdx);
-// clears the association of the derived pointer with the base userdata pointer from the private table.
-void setDerivedtoUserdata(lua_State* L, int userdataIdx);
+Userdata* getPrivateUserdata(lua_State* L, int userdataIdx);
 
 // function to validate that a Userdata* can be dynamic_cast to Derived* and lua_error() if not.
 template <typename T>
-T* checkDerivedFromUserdata(lua_State* L, int userdataIdx)
+T* checkPrivateUserdata(lua_State* L, int userdataIdx)
 {
     T* derived = NULL;
     userdataIdx = userdataIdx < 0 ? lua_gettop(L) + 1 + userdataIdx : userdataIdx;
     
     luaL_checktype(L, userdataIdx, LUA_TUSERDATA);
-    derived = dynamic_cast<T*>(getDerivedToUserdata(L, userdataIdx));
+    derived = dynamic_cast<T*>(getPrivateUserdata(L, userdataIdx));
     if (derived == NULL) luaL_error(L, "invalid userdata, expected: %s", typeid(T).name());
     
     return derived;

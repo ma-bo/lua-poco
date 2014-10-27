@@ -33,12 +33,12 @@ bool Userdata::copyToState(lua_State *L)
 // @type checksum
 int Userdata::metamethod__gc(lua_State* L)
 {
-    Userdata* ud = getDerivedToUserdata(L, 1);
+    Userdata* ud = getPrivateUserdata(L, 1);
     ud->~Userdata();
     return 0;
 }
 
-void setupDerivedToUserdata(lua_State* L)
+void setupPrivateUserdata(lua_State* L)
 {
     // start private table with 20 slots hash table slots for userdata.
     lua_createtable(L, 0, 20);
@@ -53,7 +53,7 @@ void setupDerivedToUserdata(lua_State* L)
 }
 
 // stores Userdata pointer in a private table with the derived userdata as a weak key.
-void setDerivedtoUserdata(lua_State* L, int userdataIdx, Userdata* ud)
+void setPrivateUserdata(lua_State* L, int userdataIdx, Userdata* ud)
 {
     // convert negative relative index to positive.
     userdataIdx = userdataIdx < 0 ? lua_gettop(L) + 1 + userdataIdx : userdataIdx;
@@ -68,7 +68,7 @@ void setDerivedtoUserdata(lua_State* L, int userdataIdx, Userdata* ud)
 }
 // retrieves the associated Userdata pointer for the derived pointer.
 // (provides mechanism for type safe dynamic_cast from Userdata pointer back to the Derived pointer.)
-Userdata* getDerivedToUserdata(lua_State* L, int userdataIdx)
+Userdata* getPrivateUserdata(lua_State* L, int userdataIdx)
 {
     Userdata* ud = NULL;
     userdataIdx = userdataIdx < 0 ? lua_gettop(L) + 1 + userdataIdx : userdataIdx;
