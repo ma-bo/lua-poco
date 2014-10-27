@@ -7,33 +7,11 @@
 namespace LuaPoco
 {
 
-static OStream* checkOStream(lua_State* L)
-{
-    OStream* osud = NULL;
-    luaL_checktype(L, 1, LUA_TUSERDATA);
-    // check for metatable attached to userdata
-    if (lua_getmetatable(L, 1))
-    {
-        // check if it is 
-        lua_getfield(L, -1, "poco.userdata");
-        if (lua_isnil(L, -1))
-            luaL_error(L, "userdata is not a poco userdata.");
-        lua_pop(L, 2);
-        //broken due to casting from a void* (derived class) to a base class.
-        //Userdata* ud = reinterpret_cast<Userdata*>(lua_touserdata(L, 1));
-        //if (ud->getBaseType() != BaseType_OStream)
-            //luaL_error(L, "userdata is not an ostream userdata.");
-        //osud = dynamic_cast<OStream*>(ud);
-    }
-    
-    return osud;
-}
-
 // userdata methods
 int OStream::write(lua_State* L)
 {
     int rv = 0;
-    OStream* osud = checkOStream(L);
+    OStream* osud = checkPrivateUserdata<OStream>(L, 1);
     std::ostream& os = osud->ostream();
     luaL_checkany(L, 2);
     
@@ -82,7 +60,7 @@ int OStream::write(lua_State* L)
 int OStream::flush(lua_State* L)
 {
     int rv = 0;
-    OStream* osud = checkOStream(L);
+    OStream* osud = checkPrivateUserdata<OStream>(L, 1);
     std::ostream& os = osud->ostream();
     
     try
@@ -123,7 +101,7 @@ int OStream::flush(lua_State* L)
 int OStream::seek(lua_State* L)
 {
     int rv = 0;
-    OStream* osud = checkOStream(L);
+    OStream* osud = checkPrivateUserdata<OStream>(L, 1);
     std::ostream& os = osud->ostream();
     
     try
