@@ -211,9 +211,7 @@ int FileUserdata::copyTo(lua_State* L)
     }
     catch (...)
     {
-    {
         rv = pushUnknownException(L);
-    }
     }
     
     return rv;
@@ -253,10 +251,9 @@ int FileUserdata::createDirectories(lua_State* L)
 // @function createDirectory
 int FileUserdata::createDirectory(lua_State* L)
 {
-    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
-    
     int rv = 0;
     int created = 0;
+    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
     try
     {
@@ -283,9 +280,8 @@ int FileUserdata::createDirectory(lua_State* L)
 int FileUserdata::createFile(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
-    
     int created = 0;
+    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
     try
     {
@@ -503,9 +499,9 @@ int FileUserdata::renameTo(lua_State* L)
 int FileUserdata::canExecute(lua_State* L)
 {
     int rv = 0;
+    int executable = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int executable = 0;
     try
     {
         executable = fud->mFile->canExecute();
@@ -532,9 +528,9 @@ int FileUserdata::canExecute(lua_State* L)
 int FileUserdata::canRead(lua_State* L)
 {
     int rv = 0;
+    int readable = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int readable = 0;
     try
     {
         readable = fud->mFile->canRead();
@@ -561,9 +557,9 @@ int FileUserdata::canRead(lua_State* L)
 int FileUserdata::canWrite(lua_State* L)
 {
     int rv = 0;
+    int writable = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int writable = 0;
     try
     {
         writable = fud->mFile->canWrite();
@@ -622,8 +618,9 @@ int FileUserdata::created(lua_State* L)
 int FileUserdata::exists(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     int exists = 0;
+    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
+
     
     try
     {
@@ -683,9 +680,8 @@ int FileUserdata::getLastModified(lua_State* L)
 int FileUserdata::getSize(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
-    
     lua_Number num;
+    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
     try
     {
@@ -713,9 +709,9 @@ int FileUserdata::getSize(lua_State* L)
 int FileUserdata::isDevice(lua_State* L)
 {
     int rv = 0;
+    int device = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int device = 0;
     try
     {
         device = fud->mFile->isDevice();
@@ -742,9 +738,9 @@ int FileUserdata::isDevice(lua_State* L)
 int FileUserdata::isDirectory(lua_State* L)
 {
     int rv = 0;
+    int directory = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int directory = 0;
     try
     {
         directory = fud->mFile->isDirectory();
@@ -771,9 +767,9 @@ int FileUserdata::isDirectory(lua_State* L)
 int FileUserdata::isFile(lua_State* L)
 {
     int rv = 0;
+    int file = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int file = 0;
     try
     {
         file = fud->mFile->isFile();
@@ -802,9 +798,9 @@ int FileUserdata::isFile(lua_State* L)
 int FileUserdata::isHidden(lua_State* L)
 {
     int rv = 0;
+    int hidden = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int hidden = 0;
     try
     {
         hidden = fud->mFile->isHidden();
@@ -831,9 +827,9 @@ int FileUserdata::isHidden(lua_State* L)
 int FileUserdata::isLink(lua_State* L)
 {
     int rv = 0;
+    int link = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int link = 0;
     try
     {
         link = fud->mFile->isLink();
@@ -876,9 +872,9 @@ int FileUserdata::path(lua_State* L)
 int FileUserdata::setExecutable(lua_State* L)
 {
     int rv = 0;
+    int executable = 1;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int executable = 1;
     if (lua_gettop(L) > 1)
         executable = lua_toboolean(L, 2);
     try
@@ -937,9 +933,9 @@ int FileUserdata::setLastModified(lua_State* L)
 int FileUserdata::setReadOnly(lua_State* L)
 {
     int rv = 0;
+    int readOnly = 1;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    int readOnly = 1;
     if (lua_gettop(L) > 1)
         readOnly = lua_toboolean(L, 2);
     
@@ -970,7 +966,6 @@ int FileUserdata::setSize(lua_State* L)
 {
     int rv = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
-        
     lua_Number size = luaL_checknumber(L, 2);
     
     try
@@ -999,9 +994,9 @@ int FileUserdata::setSize(lua_State* L)
 int FileUserdata::setWritable(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
-        
     int writable = 1;
+    FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
+    
     if (lua_gettop(L) > 1)
         writable = lua_toboolean(L, 2);
     
