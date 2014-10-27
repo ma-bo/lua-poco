@@ -30,7 +30,9 @@ bool Userdata::copyToState(lua_State *L)
 {
     return false;
 }
-// @type checksum
+
+// generic garbage collector destructor function which can be used by all classes
+// that inherit from Userdata, provided they don't need to take special steps on GC.
 int Userdata::metamethod__gc(lua_State* L)
 {
     Userdata* ud = getPrivateUserdata(L, 1);
