@@ -33,7 +33,9 @@ bool ChecksumUserdata::copyToState(lua_State *L)
     lua_setmetatable(L, -2);
     
     ChecksumUserdata* csud = new(ud) ChecksumUserdata(csud->mChecksum.type());
+    setPrivateUserdata(L, -1, csud);
     csud->mChecksum = mChecksum;
+    
     return true;
 }
 
@@ -47,9 +49,6 @@ bool ChecksumUserdata::registerChecksum(lua_State* L)
     lua_setfield(L, -2, "__gc");
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
-    
-    lua_pushstring(L, "Poco.Checksum.metatable");
-    lua_setfield(L, -2, "poco.userdata");
     
     // methods
     lua_pushcfunction(L, update);
@@ -83,6 +82,8 @@ int ChecksumUserdata::Checksum(lua_State* L)
     lua_setmetatable(L, -2);
     
     ChecksumUserdata* csud = new(ud) ChecksumUserdata(type);
+    setPrivateUserdata(L, -1, csud);
+    
     return 1;
 }
 
@@ -90,21 +91,11 @@ int ChecksumUserdata::Checksum(lua_State* L)
 
 ///
 // @type checksum
-int ChecksumUserdata::metamethod__gc(lua_State* L)
-{
-    ChecksumUserdata* csud = reinterpret_cast<ChecksumUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Checksum.metatable"));
-    csud->~ChecksumUserdata();
-    
-    return 0;
-}
-
 int ChecksumUserdata::metamethod__tostring(lua_State* L)
 {
-    ChecksumUserdata* csud = reinterpret_cast<ChecksumUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Checksum.metatable"));
+    ChecksumUserdata* csud = checkPrivateUserdata<ChecksumUserdata>(L, 1);
     
-    lua_pushfstring(L, "Poco.Checksum (%p)", reinterpret_cast<void*>(csud));
+    lua_pushfstring(L, "Poco.Checksum (%p)", static_cast<void*>(csud));
     return 1;
 }
 
@@ -115,8 +106,7 @@ int ChecksumUserdata::metamethod__tostring(lua_State* L)
 // @function update
 int ChecksumUserdata::update(lua_State* L)
 {
-    ChecksumUserdata* csud = reinterpret_cast<ChecksumUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Checksum.metatable"));
+    ChecksumUserdata* csud = checkPrivateUserdata<ChecksumUserdata>(L, 1);
     
     luaL_checkany(L, 2);
     if (lua_isnumber(L, 2))
@@ -141,8 +131,7 @@ int ChecksumUserdata::update(lua_State* L)
 // @function checksum
 int ChecksumUserdata::checksum(lua_State* L)
 {
-    ChecksumUserdata* csud = reinterpret_cast<ChecksumUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Checksum.metatable"));
+    ChecksumUserdata* csud = checkPrivateUserdata<ChecksumUserdata>(L, 1);
     
     lua_pushinteger(L, csud->mChecksum.checksum());
     return 1;
@@ -153,8 +142,7 @@ int ChecksumUserdata::checksum(lua_State* L)
 // @function type
 int ChecksumUserdata::type(lua_State* L)
 {
-    ChecksumUserdata* csud = reinterpret_cast<ChecksumUserdata*>(
-        luaL_checkudata(L, 1, "Poco.Checksum.metatable"));
+    ChecksumUserdata* csud = checkPrivateUserdata<ChecksumUserdata>(L, 1);
     
     const char* checksumType = "ADLER32";
     if (csud->mChecksum.type() == Poco::Checksum::TYPE_CRC32)
