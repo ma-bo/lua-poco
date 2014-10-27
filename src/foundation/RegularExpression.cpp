@@ -141,6 +141,7 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
     try
     {
         RegularExpressionUserdata *reud = new (ud) RegularExpressionUserdata(pattern, options, study);
+        setPrivateUserdata(L, -1, reud);
         luaL_getmetatable(L, "Poco.RegularExpression.metatable");
         lua_setmetatable(L, -2);
         rv = 1;
@@ -161,19 +162,9 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
 // @type regex
 
 // metamethod infrastructure
-int RegularExpressionUserdata::metamethod__gc(lua_State* L)
-{
-    RegularExpressionUserdata* reud = reinterpret_cast<RegularExpressionUserdata*>(
-        luaL_checkudata(L, 1, "Poco.RegularExpression.metatable"));
-    reud->~RegularExpressionUserdata();
-    return 0;
-}
-
 int RegularExpressionUserdata::metamethod__tostring(lua_State* L)
 {
-    RegularExpressionUserdata* reud = reinterpret_cast<RegularExpressionUserdata*>(
-        luaL_checkudata(L, 1, "Poco.RegularExpression.metatable"));
-    
+    RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
     lua_pushfstring(L, "Poco.RegularExpression (%p)", reinterpret_cast<void*>(reud));
     return 1;
 }
@@ -191,8 +182,7 @@ int RegularExpressionUserdata::metamethod__tostring(lua_State* L)
 int RegularExpressionUserdata::extract(lua_State* L)
 {
     int rv = 0;
-    RegularExpressionUserdata* reud = reinterpret_cast<RegularExpressionUserdata*>(
-        luaL_checkudata(L, 1, "Poco.RegularExpression.metatable"));
+    RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
     
     const char* subject = luaL_checkstring(L, 2);
     int options = 0;
@@ -241,8 +231,7 @@ int RegularExpressionUserdata::extract(lua_State* L)
 int RegularExpressionUserdata::match(lua_State* L)
 {
     int rv = 0;
-    RegularExpressionUserdata* reud = reinterpret_cast<RegularExpressionUserdata*>(
-        luaL_checkudata(L, 1, "Poco.RegularExpression.metatable"));
+    RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
     
     const char* subject = luaL_checkstring(L, 2);
     int options = 0;
@@ -302,8 +291,7 @@ int RegularExpressionUserdata::match(lua_State* L)
 int RegularExpressionUserdata::substitute(lua_State* L)
 {
     int rv = 0;
-    RegularExpressionUserdata* reud = reinterpret_cast<RegularExpressionUserdata*>(
-        luaL_checkudata(L, 1, "Poco.RegularExpression.metatable"));
+    RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
     
     size_t subjectSize = 0;
     const char* subject = luaL_checklstring(L, 2, &subjectSize);
@@ -360,8 +348,7 @@ int RegularExpressionUserdata::substitute(lua_State* L)
 int RegularExpressionUserdata::extractCaptures(lua_State* L)
 {
     int rv = 0;
-    RegularExpressionUserdata* reud = reinterpret_cast<RegularExpressionUserdata*>(
-        luaL_checkudata(L, 1, "Poco.RegularExpression.metatable"));
+    RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
     
     size_t subjectSize = 0;
     const char* subject = luaL_checklstring(L, 2, &subjectSize);
@@ -424,8 +411,7 @@ int RegularExpressionUserdata::extractCaptures(lua_State* L)
 int RegularExpressionUserdata::extractPositions(lua_State* L)
 {
     int rv = 0;
-    RegularExpressionUserdata* reud = reinterpret_cast<RegularExpressionUserdata*>(
-        luaL_checkudata(L, 1, "Poco.RegularExpression.metatable"));
+    RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
     
     size_t subjectSize = 0;
     const char* subject = luaL_checklstring(L, 2, &subjectSize);
