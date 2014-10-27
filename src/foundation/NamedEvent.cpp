@@ -72,7 +72,7 @@ int NamedEventUserdata::metamethod__tostring(lua_State* L)
 {
     NamedEventUserdata* neud = checkPrivateUserdata<NamedEventUserdata>(L, 1);
     
-    lua_pushfstring(L, "Poco.NamedEvent (%p)", reinterpret_cast<void*>(neud));
+    lua_pushfstring(L, "Poco.NamedEvent (%p)", static_cast<void*>(neud));
     return 1;
 }
 

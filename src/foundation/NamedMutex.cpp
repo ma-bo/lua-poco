@@ -70,7 +70,7 @@ int NamedMutexUserdata::metamethod__tostring(lua_State* L)
 {
     NamedMutexUserdata* nmud = checkPrivateUserdata<NamedMutexUserdata>(L, 1);
     
-    lua_pushfstring(L, "Poco.NamedMutex (%p)", reinterpret_cast<void*>(nmud));
+    lua_pushfstring(L, "Poco.NamedMutex (%p)", static_cast<void*>(nmud));
     return 1;
 }
 

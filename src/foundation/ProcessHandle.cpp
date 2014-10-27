@@ -28,9 +28,6 @@ bool ProcessHandleUserdata::registerProcessHandle(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.ProcessHandle.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, id);
     lua_setfield(L, -2, "id");
@@ -54,7 +51,7 @@ int ProcessHandleUserdata::metamethod__tostring(lua_State* L)
     
     try
     {
-        lua_pushfstring(L, "Poco.ProcessHandle (%p)", reinterpret_cast<void*>(phud));
+        lua_pushfstring(L, "Poco.ProcessHandle (%p)", static_cast<void*>(phud));
         rv = 1;
     }
     catch (const Poco::Exception& e)

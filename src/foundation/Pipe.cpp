@@ -51,9 +51,6 @@ bool PipeUserdata::registerPipe(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.Pipe.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, readBytes);
     lua_setfield(L, -2, "readBytes");

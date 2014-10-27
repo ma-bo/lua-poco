@@ -51,9 +51,6 @@ bool FastMutexUserdata::registerFastMutex(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.FastMutex.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, lock);
     lua_setfield(L, -2, "lock");
@@ -100,7 +97,7 @@ int FastMutexUserdata::FastMutex(lua_State* L)
 int FastMutexUserdata::metamethod__tostring(lua_State* L)
 {
     FastMutexUserdata* fmud = checkPrivateUserdata<FastMutexUserdata>(L, 1);
-    lua_pushfstring(L, "Poco.FastMutex (%p)", reinterpret_cast<void*>(fmud));
+    lua_pushfstring(L, "Poco.FastMutex (%p)", static_cast<void*>(fmud));
     return 1;
 }
 

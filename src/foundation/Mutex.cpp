@@ -51,9 +51,6 @@ bool MutexUserdata::registerMutex(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.Mutex.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, lock);
     lua_setfield(L, -2, "lock");
@@ -101,7 +98,7 @@ int MutexUserdata::metamethod__tostring(lua_State* L)
 {
     MutexUserdata* mud = checkPrivateUserdata<MutexUserdata>(L, 1);
     
-    lua_pushfstring(L, "Poco.Mutex (%p)", reinterpret_cast<void*>(mud));
+    lua_pushfstring(L, "Poco.Mutex (%p)", static_cast<void*>(mud));
     return 1;
 }
 

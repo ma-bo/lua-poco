@@ -91,9 +91,6 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.RegularExpression.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, extract);
     lua_setfield(L, -2, "extract");
@@ -165,7 +162,7 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
 int RegularExpressionUserdata::metamethod__tostring(lua_State* L)
 {
     RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
-    lua_pushfstring(L, "Poco.RegularExpression (%p)", reinterpret_cast<void*>(reud));
+    lua_pushfstring(L, "Poco.RegularExpression (%p)", static_cast<void*>(reud));
     return 1;
 }
 

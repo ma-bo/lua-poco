@@ -78,9 +78,6 @@ bool TimestampUserdata::registerTimestamp(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.Timestamp.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // Timestamp methods
     lua_pushcfunction(L, elapsed);
     lua_setfield(L, -2, "elapsed");
@@ -212,7 +209,7 @@ int TimestampUserdata::Timestamp(lua_State* L)
 int TimestampUserdata::metamethod__tostring(lua_State* L)
 {
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, 1);
-    lua_pushfstring(L, "Poco.Timestamp (%p)", reinterpret_cast<void*>(tsud));
+    lua_pushfstring(L, "Poco.Timestamp (%p)", static_cast<void*>(tsud));
     return 1;
 }
 

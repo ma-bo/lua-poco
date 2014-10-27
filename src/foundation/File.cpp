@@ -55,9 +55,6 @@ bool FileUserdata::registerFile(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.File.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // methods
     lua_pushcfunction(L, copyTo);
     lua_setfield(L, -2, "copyTo");
@@ -172,7 +169,7 @@ int FileUserdata::File(lua_State* L)
 int FileUserdata::metamethod__tostring(lua_State* L)
 {
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
-    lua_pushfstring(L, "Poco.File (%p)", reinterpret_cast<void*>(fud));
+    lua_pushfstring(L, "Poco.File (%p)", static_cast<void*>(fud));
     return 1;
 }
 

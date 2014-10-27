@@ -40,9 +40,6 @@ bool PipeOStreamUserdata::registerPipeOStream(lua_State* L)
     lua_pushcfunction(L, metamethod__tostring);
     lua_setfield(L, -2, "__tostring");
     
-    lua_pushstring(L, "Poco.PipeOStream.metatable");
-    lua_setfield(L, -2, "poco.userdata");
-    
     // ostream methods
     lua_pushcfunction(L, write);
     lua_setfield(L, -2, "write");

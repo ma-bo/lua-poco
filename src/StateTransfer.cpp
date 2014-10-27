@@ -211,20 +211,12 @@ bool transferValue(lua_State* toL, lua_State* fromL)
         result = transferFunction(toL, fromL);
         break;
     case LUA_TUSERDATA:
-        lua_getmetatable(fromL, -1);
-        if (lua_istable(fromL, -1))
-        {
-            lua_getfield(fromL, -1, "poco.userdata");
-            if (lua_isstring(fromL, -1))
-            {
-                Userdata* ud = reinterpret_cast<Userdata*>(lua_touserdata(fromL, -3));
-                if (ud->copyToState(toL))
-                    result = true;
-            }
-            lua_pop(fromL, 1);
-        }
-        lua_pop(fromL, 1);
+    {
+        Userdata* ud = getPrivateUserdata(fromL, -1);
+        if (ud && ud->copyToState(toL))
+            result = true;
         break;
+    }
     case LUA_TTHREAD:
         // copying coroutines is not supported.
         break;
