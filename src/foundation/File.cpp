@@ -38,6 +38,7 @@ bool FileUserdata::copyToState(lua_State* L)
     lua_setmetatable(L, -2);
     
     FileUserdata* fud = new(ud) FileUserdata(*mFile);
+    setDerivedtoUserdata(L, -1, fud);
     
     return true;
 }
@@ -147,6 +148,7 @@ int FileUserdata::File(lua_State* L)
         fud = new (ud) FileUserdata(path);
         luaL_getmetatable(L, "Poco.File.metatable");
         lua_setmetatable(L, -2);
+        setDerivedtoUserdata(L, -1, fud);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -167,20 +169,9 @@ int FileUserdata::File(lua_State* L)
 // @type file
 
 // metamethods
-int FileUserdata::metamethod__gc(lua_State* L)
-{
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
-    fud->~FileUserdata();
-    
-    return 0;
-}
-
 int FileUserdata::metamethod__tostring(lua_State* L)
 {
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
-    
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     lua_pushfstring(L, "Poco.File (%p)", reinterpret_cast<void*>(fud));
     return 1;
 }
@@ -196,8 +187,7 @@ int FileUserdata::metamethod__tostring(lua_State* L)
 int FileUserdata::copyTo(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
         
     size_t pathLen = 0;
     const char* path = luaL_checklstring(L, 2, &pathLen);
@@ -236,8 +226,7 @@ int FileUserdata::copyTo(lua_State* L)
 int FileUserdata::createDirectories(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
         
     try
     {
@@ -264,8 +253,7 @@ int FileUserdata::createDirectories(lua_State* L)
 // @function createDirectory
 int FileUserdata::createDirectory(lua_State* L)
 {
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int rv = 0;
     int created = 0;
@@ -295,8 +283,7 @@ int FileUserdata::createDirectory(lua_State* L)
 int FileUserdata::createFile(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int created = 0;
     
@@ -325,8 +312,7 @@ int FileUserdata::createFile(lua_State* L)
 int FileUserdata::listNames(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     try
     {
@@ -364,8 +350,7 @@ int FileUserdata::listNames(lua_State* L)
 int FileUserdata::listFiles(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     try
     {
@@ -381,6 +366,7 @@ int FileUserdata::listFiles(lua_State* L)
             luaL_getmetatable(L, "Poco.File.metatable");
             lua_setmetatable(L, -2);
             FileUserdata* fud = new(ud) FileUserdata(*i);
+            setDerivedtoUserdata(L, -1, fud);
             lua_rawseti(L, -2, tableIndex);
             ++i;
             ++tableIndex;
@@ -409,9 +395,8 @@ int FileUserdata::listFiles(lua_State* L)
 int FileUserdata::moveTo(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
-        
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
+    
     size_t pathLen = 0;
     const char* path = luaL_checklstring(L, 2, &pathLen);
     
@@ -448,8 +433,7 @@ int FileUserdata::moveTo(lua_State* L)
 int FileUserdata::remove(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     // default false as per defaul parameter to Poco::File::remove().
     int recursive = 0;
@@ -482,8 +466,7 @@ int FileUserdata::remove(lua_State* L)
 int FileUserdata::renameTo(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
         
     size_t pathLen = 0;
     const char* path = luaL_checklstring(L, 2, &pathLen);
@@ -520,8 +503,7 @@ int FileUserdata::renameTo(lua_State* L)
 int FileUserdata::canExecute(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int executable = 0;
     try
@@ -550,8 +532,7 @@ int FileUserdata::canExecute(lua_State* L)
 int FileUserdata::canRead(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int readable = 0;
     try
@@ -580,8 +561,7 @@ int FileUserdata::canRead(lua_State* L)
 int FileUserdata::canWrite(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int writable = 0;
     try
@@ -612,8 +592,7 @@ int FileUserdata::canWrite(lua_State* L)
 int FileUserdata::created(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     try
     {
@@ -622,6 +601,7 @@ int FileUserdata::created(lua_State* L)
         luaL_getmetatable(L, "Poco.Timestamp.metatable");
         lua_setmetatable(L, -2);
         TimestampUserdata* tsud = new(ud) TimestampUserdata(ts);
+        setDerivedtoUserdata(L, -1, tsud);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -642,9 +622,9 @@ int FileUserdata::created(lua_State* L)
 int FileUserdata::exists(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     int exists = 0;
+    
     try
     {
         exists = fud->mFile->exists();
@@ -673,8 +653,7 @@ int FileUserdata::exists(lua_State* L)
 int FileUserdata::getLastModified(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     try
     {
@@ -683,6 +662,7 @@ int FileUserdata::getLastModified(lua_State* L)
         luaL_getmetatable(L, "Poco.Timestamp.metatable");
         lua_setmetatable(L, -2);
         TimestampUserdata* tsud = new(ud) TimestampUserdata(ts);
+        setDerivedtoUserdata(L, -1, tsud);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -703,8 +683,7 @@ int FileUserdata::getLastModified(lua_State* L)
 int FileUserdata::getSize(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     lua_Number num;
     
@@ -734,8 +713,7 @@ int FileUserdata::getSize(lua_State* L)
 int FileUserdata::isDevice(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int device = 0;
     try
@@ -764,8 +742,7 @@ int FileUserdata::isDevice(lua_State* L)
 int FileUserdata::isDirectory(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int directory = 0;
     try
@@ -794,8 +771,7 @@ int FileUserdata::isDirectory(lua_State* L)
 int FileUserdata::isFile(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int file = 0;
     try
@@ -826,8 +802,7 @@ int FileUserdata::isFile(lua_State* L)
 int FileUserdata::isHidden(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int hidden = 0;
     try
@@ -856,8 +831,7 @@ int FileUserdata::isHidden(lua_State* L)
 int FileUserdata::isLink(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int link = 0;
     try
@@ -885,8 +859,7 @@ int FileUserdata::isLink(lua_State* L)
 // @function path
 int FileUserdata::path(lua_State* L)
 {
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     std::string path = fud->mFile->path();
     lua_pushlstring(L, path.c_str(), path.size());
@@ -903,8 +876,7 @@ int FileUserdata::path(lua_State* L)
 int FileUserdata::setExecutable(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int executable = 1;
     if (lua_gettop(L) > 1)
@@ -936,10 +908,8 @@ int FileUserdata::setExecutable(lua_State* L)
 int FileUserdata::setLastModified(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
-    TimestampUserdata* tsud = reinterpret_cast<TimestampUserdata*>(
-        luaL_checkudata(L, 2, "Poco.Timestamp.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
+    TimestampUserdata* tsud = checkDerivedFromUserdata<TimestampUserdata>(L, 2);
     
     try
     {
@@ -967,9 +937,7 @@ int FileUserdata::setLastModified(lua_State* L)
 int FileUserdata::setReadOnly(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
-    
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
     
     int readOnly = 1;
     if (lua_gettop(L) > 1)
@@ -1001,8 +969,7 @@ int FileUserdata::setReadOnly(lua_State* L)
 int FileUserdata::setSize(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
         
     lua_Number size = luaL_checknumber(L, 2);
     
@@ -1032,8 +999,7 @@ int FileUserdata::setSize(lua_State* L)
 int FileUserdata::setWritable(lua_State* L)
 {
     int rv = 0;
-    FileUserdata* fud = reinterpret_cast<FileUserdata*>(
-        luaL_checkudata(L, 1, "Poco.File.metatable"));
+    FileUserdata* fud = checkDerivedFromUserdata<FileUserdata>(L, 1);
         
     int writable = 1;
     if (lua_gettop(L) > 1)
