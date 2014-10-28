@@ -15,6 +15,7 @@ class OStream
 {
 public:
     virtual std::ostream& ostream() = 0;
+protected:
     // userdata methods
     static int write(lua_State* L);
     static int flush(lua_State* L);
