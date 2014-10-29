@@ -3,6 +3,7 @@
 
 #include "IStream.h"
 #include "Poco/Exception.h"
+#include <cstring>
 
 namespace LuaPoco
 {

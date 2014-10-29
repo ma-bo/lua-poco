@@ -3,6 +3,7 @@
 
 #include "LuaPoco.h"
 #include "Poco/Exception.h"
+#include <typeinfo>
 
 #define USERDATA_PRIVATE_TABLE "poco_userdata_private"
 
