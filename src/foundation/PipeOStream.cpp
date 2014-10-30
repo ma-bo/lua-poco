@@ -63,7 +63,8 @@ bool PipeOStreamUserdata::registerPipeOStream(lua_State* L)
 // @see pipe
 int PipeOStreamUserdata::PipeOStream(lua_State* L)
 {
-    PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, 1);
+    int firstArg = lua_istable(L, 1) ? 2 : 1;
+    PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, firstArg);
     
     void* ud = lua_newuserdata(L, sizeof(PipeOStreamUserdata));
     luaL_getmetatable(L, "Poco.PipeOStream.metatable");

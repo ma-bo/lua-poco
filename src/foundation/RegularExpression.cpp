@@ -119,6 +119,7 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 int RegularExpressionUserdata::RegularExpression(lua_State* L)
 {
     int rv = 0;
+    int firstArg = lua_istable(L, 1) ? 2 : 1;
     int top = lua_gettop(L);
     
     const char* pattern = luaL_checkstring(L, 1);
@@ -126,13 +127,13 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
     int options = 0;
     bool study = true;
     
-    if (top > 1)
+    if (top > firstArg)
     {
-        optionsStr = luaL_checkstring(L, 2);
+        optionsStr = luaL_checkstring(L, firstArg + 1);
         options = parseRegexOptions(optionsStr);
     }
-    if (top > 2 && lua_isboolean(L, 3))
-        study = lua_toboolean(L, 3);
+    if (top > firstArg + 1 && lua_isboolean(L, firstArg + 2))
+        study = lua_toboolean(L, firstArg + 2);
     
     void* ud = lua_newuserdata(L, sizeof(RegularExpressionUserdata));
     try

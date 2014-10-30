@@ -66,9 +66,15 @@ int loadConstructor(lua_State*L, lua_CFunction cons)
     
     if (LuaPoco::loadMetatables(L))
     {
-        lua_createtable(L, 0, 1);
+        lua_createtable(L, 0, 3);
         lua_pushcfunction(L, cons);
-        lua_setfield(L, -2, "new");
+        lua_pushvalue(L, -1);
+        lua_setfield(L, -3, "new");
+        lua_setfield(L, -2, "__call");
+        lua_pushvalue(L, -1);
+        lua_setfield(L, -2, "__index");
+        lua_pushvalue(L, -1);
+        lua_setmetatable(L, -2);
         rv = 1;
     }
     else

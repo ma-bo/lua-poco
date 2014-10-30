@@ -14,8 +14,8 @@ LUA_API int luaopen_poco_event(lua_State* L)
 namespace LuaPoco
 {
 
-EventUserdata::EventUserdata() :
-    mEvent(new Poco::Event())
+EventUserdata::EventUserdata(bool autoReset) :
+    mEvent(new Poco::Event(autoReset))
 {
 }
 
@@ -73,21 +73,22 @@ bool EventUserdata::registerEvent(lua_State* L)
 int EventUserdata::Event(lua_State* L)
 {
     int rv = 0;
+    int firstArg = lua_istable(L, 1) ? 2 : 1;
+    bool autoReset = true;
+    if (lua_gettop(L) > 0)
+    {
+        luaL_checktype(L, firstArg, LUA_TBOOLEAN);
+        autoReset = lua_toboolean(L, firstArg);
+    }
+    
     void* ud = lua_newuserdata(L, sizeof(EventUserdata));
     luaL_getmetatable(L, "Poco.Event.metatable");
     lua_setmetatable(L, -2);
     
-    bool autoReset = true;
-    if (lua_gettop(L) > 1)
-    {
-        luaL_checktype(L, 2, LUA_TBOOLEAN);
-        autoReset = lua_toboolean(L, 2);
-    }
-    
     try
     {
         rv = 1;
-        EventUserdata* eud = new(ud) EventUserdata();
+        EventUserdata* eud = new(ud) EventUserdata(autoReset);
         setPrivateUserdata(L, -1, eud);
     }
     catch (const Poco::Exception& e)

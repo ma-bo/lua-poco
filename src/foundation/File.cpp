@@ -128,7 +128,8 @@ int FileUserdata::File(lua_State* L)
 {
     int rv = 0;
     size_t pathLen = 0;
-    const char* path = luaL_checklstring(L, 1, &pathLen);
+    int firstArg = lua_istable(L, 1) ? 2 : 1;
+    const char* path = luaL_checklstring(L, firstArg, &pathLen);
     
     if (pathLen == 0)
     {
@@ -154,9 +155,7 @@ int FileUserdata::File(lua_State* L)
     }
     catch (...)
     {
-    {
         rv = pushUnknownException(L);
-    }
     }
 
     return rv;

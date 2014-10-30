@@ -51,7 +51,8 @@ bool NamedMutexUserdata::registerNamedMutex(lua_State* L)
 // @function new
 int NamedMutexUserdata::NamedMutex(lua_State* L)
 {
-    const char* name = luaL_checkstring(L, 1);
+    int firstArg = lua_istable(L, 1) ? 2 : 1;
+    const char* name = luaL_checkstring(L, firstArg);
     
     void* ud = lua_newuserdata(L, sizeof(NamedMutexUserdata));
     luaL_getmetatable(L, "Poco.NamedMutex.metatable");

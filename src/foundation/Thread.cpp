@@ -77,17 +77,18 @@ int ThreadUserdata::Thread(lua_State* L)
 {
     int rv = 0;
     int top = lua_gettop(L);
+    int firstArg = lua_istable(L, 1) ? 2 : 1;
     
     const char* priority = NULL;
     const char* name = NULL;
     lua_Integer stackSize = 0;
     
-    if (top > 0)
-        priority = luaL_checkstring(L, 1);
-    if (top > 1)
-        name = luaL_checkstring(L, 2);
-    if (top > 2)
-        stackSize = luaL_checkinteger(L, 3);
+    if (top >= firstArg)
+        priority = luaL_checkstring(L, firstArg);
+    if (top > firstArg)
+        name = luaL_checkstring(L, firstArg + 1);
+    if (top > firstArg + 1)
+        stackSize = luaL_checkinteger(L, firstArg + 2);
 
     try
     {

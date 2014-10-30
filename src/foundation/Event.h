@@ -18,7 +18,7 @@ namespace LuaPoco
 class EventUserdata : public Userdata
 {
 public:
-    EventUserdata();
+    EventUserdata(bool autoReset = true);
     EventUserdata(const Poco::SharedPtr<Poco::Event>& event);
     virtual ~EventUserdata();
     virtual bool copyToState(lua_State *L);

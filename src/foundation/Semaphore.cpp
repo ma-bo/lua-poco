@@ -77,12 +77,13 @@ bool SemaphoreUserdata::registerSemaphore(lua_State* L)
 // @function new
 int SemaphoreUserdata::Semaphore(lua_State* L)
 {
+    int firstArg = lua_istable(L, 1) ? 2 : 1;
     int rv = 0;
     int top = lua_gettop(L);
     int max = 0;
-    int n = luaL_checkinteger(L, 1);
-    if (top > 1)
-        max = luaL_checkinteger(L, 2);
+    int n = luaL_checkinteger(L, firstArg);
+    if (top > firstArg)
+        max = luaL_checkinteger(L, firstArg + 1);
 
     void* ud = lua_newuserdata(L, sizeof(SemaphoreUserdata));
     luaL_getmetatable(L, "Poco.Semaphore.metatable");
@@ -92,7 +93,7 @@ int SemaphoreUserdata::Semaphore(lua_State* L)
         rv = 1;
         
         SemaphoreUserdata* sud = NULL;
-        if (top > 1)
+        if (top > firstArg)
             sud = new(ud) SemaphoreUserdata(n, max);
         else
             sud = new(ud) SemaphoreUserdata(n);

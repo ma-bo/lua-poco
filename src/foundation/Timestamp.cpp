@@ -180,7 +180,6 @@ int TimestampUserdata::TimestampFromUtc(lua_State* L)
 int TimestampUserdata::Timestamp(lua_State* L)
 {
     int rv = 0;
-    int top = lua_gettop(L);
     
     try
     {

@@ -94,9 +94,9 @@ bool DynamicAnyUserdata::registerDynamicAny(lua_State* L)
 int DynamicAnyUserdata::DynamicAny(lua_State* L)
 {
     int rv = 0;
-    
-    luaL_checkany(L, 1);
-    int type = lua_type(L, 1);
+    int firstArg = lua_istable(L, 1) ? 2 : 1;
+    luaL_checkany(L, firstArg);
+    int type = lua_type(L, firstArg);
     try
     {
         if (type == LUA_TNUMBER)
@@ -104,7 +104,7 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
             void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
             luaL_getmetatable(L, "Poco.DynamicAny.metatable");
             lua_setmetatable(L, -2);
-            lua_Number val = lua_tonumber(L, 1);
+            lua_Number val = lua_tonumber(L, firstArg);
             DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
             setPrivateUserdata(L, -1, daud);
             rv = 1;
@@ -114,7 +114,7 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
             void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
             luaL_getmetatable(L, "Poco.DynamicAny.metatable");
             lua_setmetatable(L, -2);
-            const char* val = lua_tostring(L, 1);
+            const char* val = lua_tostring(L, firstArg);
             DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
             setPrivateUserdata(L, -1, daud);
             rv = 1;
@@ -124,14 +124,14 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
             void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
             luaL_getmetatable(L, "Poco.DynamicAny.metatable");
             lua_setmetatable(L, -2);
-            bool val = lua_toboolean(L, 1);
+            bool val = lua_toboolean(L, firstArg);
             DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
             setPrivateUserdata(L, -1, daud);
             rv = 1;
         }
         else if (type == LUA_TUSERDATA)
         {
-            DynamicAnyUserdata* daudFrom = checkPrivateUserdata<DynamicAnyUserdata>(L, 1);
+            DynamicAnyUserdata* daudFrom = checkPrivateUserdata<DynamicAnyUserdata>(L, firstArg);
             void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
             luaL_getmetatable(L, "Poco.DynamicAny.metatable");
             lua_setmetatable(L, -2);

@@ -72,7 +72,8 @@ int ChecksumUserdata::Checksum(lua_State* L)
     const char* typeStr;
     if (top > 0)
     {
-        typeStr = luaL_checkstring(L, 1);
+        int firstArg = lua_istable(L, 1) ? 2 : 1;
+        typeStr = luaL_checkstring(L, firstArg);
         if (std::strcmp(typeStr, "CRC32") == 0)
             type = Poco::Checksum::TYPE_CRC32;
     }

@@ -53,7 +53,8 @@ bool NamedEventUserdata::registerNamedEvent(lua_State* L)
 
 int NamedEventUserdata::NamedEvent(lua_State* L)
 {
-    const char* name = luaL_checkstring(L, 1);
+    int firstArg = lua_istable(L, 1) ? 2 : 1;
+    const char* name = luaL_checkstring(L, firstArg);
     
     void* ud = lua_newuserdata(L, sizeof(NamedEventUserdata));
     luaL_getmetatable(L, "Poco.NamedEvent.metatable");
