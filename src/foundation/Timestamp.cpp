@@ -412,9 +412,8 @@ int TimestampUserdata::epochTime(lua_State* L)
     return 1;
 }
 
-/// Gets the timestamp expressed in time_t (a Lua number). time_t base time is midnight, January 1, 1970. Resolution is one second.
-// The value returned is stored within a dynamicany userdata as an Int64.
-// @see dynamicany
+/// Returns true if and only if the given interval (in microseconds) has passed since the time denoted by the timestamp.
+// @int interval time duration in microseconds to check.
 // @return boolean
 // @function isElapsed
 int TimestampUserdata::isElapsed(lua_State* L)
