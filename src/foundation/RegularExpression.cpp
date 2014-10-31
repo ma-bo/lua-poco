@@ -70,6 +70,8 @@ int parseRegexOptions(const std::string& options)
 namespace LuaPoco
 {
 
+const char* POCO_REGULAREXPRESSION_METATABLE_NAME = "Poco.RegularExpression.metatable";
+
 RegularExpressionUserdata::RegularExpressionUserdata(const std::string& pattern, int options, bool study)
     : mRegularExpression(pattern, options, study)
 {
@@ -82,28 +84,19 @@ RegularExpressionUserdata::~RegularExpressionUserdata()
 // register metatable for this class
 bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.RegularExpression.metatable");
-    // indexing and gc
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "extract", extract },
+        { "match", match },
+        { "extractPositions", extractPositions },
+        { "extractCaptures", extractCaptures },
+        { "substitute", substitute },
+        { NULL, NULL}
+    };
     
-    // methods
-    lua_pushcfunction(L, extract);
-    lua_setfield(L, -2, "extract");
-    lua_pushcfunction(L, match);
-    lua_setfield(L, -2, "match");
-    lua_pushcfunction(L, extractPositions);
-    lua_setfield(L, -2, "extractPositions");
-    lua_pushcfunction(L, extractCaptures);
-    lua_setfield(L, -2, "extractCaptures");
-    lua_pushcfunction(L, substitute);
-    lua_setfield(L, -2, "substitute");
-    lua_pop(L, 1);
-    
+    setupUserdataMetatable(L, POCO_REGULAREXPRESSION_METATABLE_NAME, methods);
     return true;
 }
 
@@ -135,13 +128,10 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
     if (top > firstArg + 1 && lua_isboolean(L, firstArg + 2))
         study = lua_toboolean(L, firstArg + 2);
     
-    void* ud = lua_newuserdata(L, sizeof(RegularExpressionUserdata));
     try
     {
-        RegularExpressionUserdata *reud = new (ud) RegularExpressionUserdata(pattern, options, study);
-        setPrivateUserdata(L, -1, reud);
-        luaL_getmetatable(L, "Poco.RegularExpression.metatable");
-        lua_setmetatable(L, -2);
+        RegularExpressionUserdata *reud = new(lua_newuserdata(L, sizeof *reud)) RegularExpressionUserdata(pattern, options, study);
+        setupPocoUserdata(L, reud, POCO_REGULAREXPRESSION_METATABLE_NAME);
         rv = 1;
     }
     catch (const Poco::Exception& e)

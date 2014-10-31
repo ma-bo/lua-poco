@@ -15,6 +15,8 @@ LUAPOCO_API int luaopen_poco_pipe(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_PIPE_METATABLE_NAME;
+
 class PipeUserdata : public Userdata
 {
 public:

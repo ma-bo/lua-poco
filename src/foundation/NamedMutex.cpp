@@ -13,6 +13,8 @@ int luaopen_poco_namedmutex(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_NAMEDMUTEX_METATABLE_NAME = "Poco.NamedMutex.metatable";
+
 NamedMutexUserdata::NamedMutexUserdata(const std::string& name) :
     mNamedMutex(name)
 {
@@ -25,23 +27,17 @@ NamedMutexUserdata::~NamedMutexUserdata()
 // register metatable for this class
 bool NamedMutexUserdata::registerNamedMutex(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.NamedMutex.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "lock", lock },
+        { "tryLock", tryLock },
+        { "unlock", unlock },
+        { NULL, NULL}
+    };
     
-    // methods
-    lua_pushcfunction(L, lock);
-    lua_setfield(L, -2, "lock");
-    lua_pushcfunction(L, tryLock);
-    lua_setfield(L, -2, "tryLock");
-    lua_pushcfunction(L, unlock);
-    lua_setfield(L, -2, "unlock");
-    lua_pop(L, 1);
-    
+    setupUserdataMetatable(L, POCO_NAMEDMUTEX_METATABLE_NAME, methods);    
     return true;
 }
 
@@ -53,13 +49,9 @@ int NamedMutexUserdata::NamedMutex(lua_State* L)
 {
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     const char* name = luaL_checkstring(L, firstArg);
+    NamedMutexUserdata* nmud = new(lua_newuserdata(L, sizeof *nmud)) NamedMutexUserdata(name);
+    setupPocoUserdata(L, nmud, POCO_NAMEDMUTEX_METATABLE_NAME);
     
-    void* ud = lua_newuserdata(L, sizeof(NamedMutexUserdata));
-    luaL_getmetatable(L, "Poco.NamedMutex.metatable");
-    lua_setmetatable(L, -2);
-    
-    NamedMutexUserdata* nmud = new(ud) NamedMutexUserdata(name);
-    setPrivateUserdata(L, -1, nmud);
     return 1;
 }
 

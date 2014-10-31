@@ -22,6 +22,8 @@ int luaopen_poco_thread(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_THREAD_METATABLE_NAME = "Poco.Thread.metatable";
+
 ThreadUserdata::ThreadUserdata() :
     mThread(), mJoined(false), mStarted(false), mThreadState(NULL), mParamCount(0),
     mThreadResult(0)
@@ -39,32 +41,21 @@ ThreadUserdata::~ThreadUserdata()
 // register metatable for this class
 bool ThreadUserdata::registerThread(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.Thread.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
-
-    // methods
-    lua_pushcfunction(L, name);
-    lua_setfield(L, -2, "name");
-    lua_pushcfunction(L, id);
-    lua_setfield(L, -2, "id");
-    lua_pushcfunction(L, isRunning);
-    lua_setfield(L, -2, "isRunning");
-    lua_pushcfunction(L, join);
-    lua_setfield(L, -2, "join");
-    lua_pushcfunction(L, stackSize);
-    lua_setfield(L, -2, "stackSize");
-    lua_pushcfunction(L, start);
-    lua_setfield(L, -2, "start");
-    lua_pushcfunction(L, priority);
-    lua_setfield(L, -2, "priority");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "name", name },
+        { "id", id },
+        { "isRunning", isRunning },
+        { "join", join },
+        { "stackSize", stackSize },
+        { "start", start },
+        { "priority", priority },
+        { NULL, NULL}
+    };
     
-    lua_pop(L, 1);
-    
+    setupUserdataMetatable(L, POCO_THREAD_METATABLE_NAME, methods);
     return true;
 }
 /// constructs a new thread userdata.
@@ -92,11 +83,8 @@ int ThreadUserdata::Thread(lua_State* L)
 
     try
     {
-        void* ud = lua_newuserdata(L, sizeof(ThreadUserdata));
-        luaL_getmetatable(L, "Poco.Thread.metatable");
-        lua_setmetatable(L, -2);
-        ThreadUserdata* thud = new(ud) ThreadUserdata();
-        setPrivateUserdata(L, -1, thud);
+        ThreadUserdata* thud = new(lua_newuserdata(L, sizeof *thud)) ThreadUserdata();
+        setupPocoUserdata(L, thud, POCO_THREAD_METATABLE_NAME);
         rv = 1;
         
         Poco::Thread::Priority p = Poco::Thread::PRIO_NORMAL;

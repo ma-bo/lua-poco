@@ -17,6 +17,8 @@ int luaopen_poco_checksum(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_CHECKSUM_METATABLE_NAME = "Poco.Checksum.metatable";
+
 ChecksumUserdata::ChecksumUserdata(Poco::Checksum::Type t) :
     mChecksum(t)
 {
@@ -28,12 +30,8 @@ ChecksumUserdata::~ChecksumUserdata()
 
 bool ChecksumUserdata::copyToState(lua_State *L)
 {
-    void* ud = lua_newuserdata(L, sizeof(ChecksumUserdata));
-    luaL_getmetatable(L, "Poco.Checksum.metatable");
-    lua_setmetatable(L, -2);
-    
-    ChecksumUserdata* csud = new(ud) ChecksumUserdata(csud->mChecksum.type());
-    setPrivateUserdata(L, -1, csud);
+    ChecksumUserdata* csud = new(lua_newuserdata(L, sizeof *csud)) ChecksumUserdata(csud->mChecksum.type());
+    setupPocoUserdata(L, csud, POCO_CHECKSUM_METATABLE_NAME);
     csud->mChecksum = mChecksum;
     
     return true;
@@ -42,22 +40,18 @@ bool ChecksumUserdata::copyToState(lua_State *L)
 // register metatable for this class
 bool ChecksumUserdata::registerChecksum(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.Checksum.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "update", update },
+        { "checksum", checksum },
+        { "type", type },
+        { NULL, NULL}
+    };
     
-    // methods
-    lua_pushcfunction(L, update);
-    lua_setfield(L, -2, "update");
-    lua_pushcfunction(L, checksum);
-    lua_setfield(L, -2, "checksum");
-    lua_pushcfunction(L, type);
-    lua_setfield(L, -2, "type");
-    lua_pop(L, 1);
+    setupUserdataMetatable(L, POCO_CHECKSUM_METATABLE_NAME, methods);
+    
     return true;
 }
 /// construct a new checksum userdata using CRC-32 or Adler-32 (default) algorithms.
@@ -78,12 +72,8 @@ int ChecksumUserdata::Checksum(lua_State* L)
             type = Poco::Checksum::TYPE_CRC32;
     }
     
-    void* ud = lua_newuserdata(L, sizeof(ChecksumUserdata));
-    luaL_getmetatable(L, "Poco.Checksum.metatable");
-    lua_setmetatable(L, -2);
-    
-    ChecksumUserdata* csud = new(ud) ChecksumUserdata(type);
-    setPrivateUserdata(L, -1, csud);
+    ChecksumUserdata* csud = new(lua_newuserdata(L, sizeof *csud)) ChecksumUserdata(type);
+    setupPocoUserdata(L, csud, POCO_CHECKSUM_METATABLE_NAME);
     
     return 1;
 }

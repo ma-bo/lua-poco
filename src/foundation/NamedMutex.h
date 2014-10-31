@@ -15,6 +15,8 @@ LUAPOCO_API int luaopen_poco_namedmutex(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_NAMEDMUTEX_METATABLE;
+
 class NamedMutexUserdata : public Userdata
 {
 public:

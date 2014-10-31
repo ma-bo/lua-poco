@@ -14,6 +14,8 @@ int luaopen_poco_pipeostream(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_PIPEOSTREAM_METATABLE_NAME = "Poco.PipeOStream.metatable";
+
 PipeOStreamUserdata::PipeOStreamUserdata(const Poco::Pipe& p) 
     : mPipeOutputStream(p)
     , mPipeReference(0)
@@ -32,23 +34,17 @@ std::ostream& PipeOStreamUserdata::ostream()
 // register metatable for this class
 bool PipeOStreamUserdata::registerPipeOStream(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.PipeOStream.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "write", write },
+        { "seek", seek },
+        { "flush", flush },
+        { NULL, NULL}
+    };
     
-    // ostream methods
-    lua_pushcfunction(L, write);
-    lua_setfield(L, -2, "write");
-    lua_pushcfunction(L, seek);
-    lua_setfield(L, -2, "seek");
-    lua_pushcfunction(L, flush);
-    lua_setfield(L, -2, "flush");
-    
-    lua_pop(L, 1);
+    setupUserdataMetatable(L, POCO_PIPEOSTREAM_METATABLE_NAME, methods);
     return true;
 }
 
@@ -66,12 +62,8 @@ int PipeOStreamUserdata::PipeOStream(lua_State* L)
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, firstArg);
     
-    void* ud = lua_newuserdata(L, sizeof(PipeOStreamUserdata));
-    luaL_getmetatable(L, "Poco.PipeOStream.metatable");
-    lua_setmetatable(L, -2);
-    
-    PipeOStreamUserdata* posud = new(ud) PipeOStreamUserdata(pud->mPipe);
-    setPrivateUserdata(L, -1, posud);
+    PipeOStreamUserdata* posud = new(lua_newuserdata(L, sizeof *posud)) PipeOStreamUserdata(pud->mPipe);
+    setupPocoUserdata(L, posud, POCO_PIPEOSTREAM_METATABLE_NAME);
     // store a reference to the PipeUserdata to prevent it from being
     // garbage collected while the PipeOutputStream is using it.
     lua_pushvalue(L, 1);

@@ -15,6 +15,8 @@ LUAPOCO_API int luaopen_poco_namedevent(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_NAMEDEVENT_METATABLE_NAME;
+
 class NamedEventUserdata : public Userdata
 {
 public:

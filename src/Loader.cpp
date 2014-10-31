@@ -72,8 +72,6 @@ int loadConstructor(lua_State*L, lua_CFunction cons)
         lua_setfield(L, -3, "new");
         lua_setfield(L, -2, "__call");
         lua_pushvalue(L, -1);
-        lua_setfield(L, -2, "__index");
-        lua_pushvalue(L, -1);
         lua_setmetatable(L, -2);
         rv = 1;
     }

@@ -8,6 +8,8 @@
 namespace LuaPoco
 {
 
+const char* POCO_PROCESSHANDLE_METATABLE_NAME = "Poco.ProcessHandle.metatable";
+
 ProcessHandleUserdata::ProcessHandleUserdata(const Poco::ProcessHandle& ph) :
     mProcessHandle(ph)
 {
@@ -20,23 +22,17 @@ ProcessHandleUserdata::~ProcessHandleUserdata()
 // register metatable for this class
 bool ProcessHandleUserdata::registerProcessHandle(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.ProcessHandle.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "id", id },
+        { "wait", wait },
+        { "kill", kill },
+        { NULL, NULL}
+    };
     
-    // methods
-    lua_pushcfunction(L, id);
-    lua_setfield(L, -2, "id");
-    lua_pushcfunction(L, wait);
-    lua_setfield(L, -2, "wait");
-    lua_pushcfunction(L, kill);
-    lua_setfield(L, -2, "kill");
-    lua_pop(L, 1);
-
+    setupUserdataMetatable(L, POCO_PROCESSHANDLE_METATABLE_NAME, methods);
     return true;
 }
 

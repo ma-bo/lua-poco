@@ -16,6 +16,8 @@ int luaopen_poco_namedevent(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_NAMEDEVENT_METATABLE_NAME = "Poco.NamedEvent.metatable";
+
 NamedEventUserdata::NamedEventUserdata(const std::string& name) :
     mNamedEvent(name)
 {
@@ -28,19 +30,16 @@ NamedEventUserdata::~NamedEventUserdata()
 // register metatable for this class
 bool NamedEventUserdata::registerNamedEvent(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.NamedEvent.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "set", set },
+        { "wait", wait },
+        { NULL, NULL}
+    };
     
-    // methods
-    lua_pushcfunction(L, set);
-    lua_setfield(L, -2, "set");
-    lua_pushcfunction(L, wait);
-    lua_setfield(L, -2, "wait");
+    setupUserdataMetatable(L, POCO_NAMEDEVENT_METATABLE_NAME, methods);
     lua_pop(L, 1);
     
     return true;
@@ -55,13 +54,8 @@ int NamedEventUserdata::NamedEvent(lua_State* L)
 {
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     const char* name = luaL_checkstring(L, firstArg);
-    
-    void* ud = lua_newuserdata(L, sizeof(NamedEventUserdata));
-    luaL_getmetatable(L, "Poco.NamedEvent.metatable");
-    lua_setmetatable(L, -2);
-    
-    NamedEventUserdata* neud = new(ud) NamedEventUserdata(name);
-    setPrivateUserdata(L, -1, neud);
+    NamedEventUserdata* neud = new(lua_newuserdata(L, sizeof *neud)) NamedEventUserdata(name);
+    setupPocoUserdata(L, neud, POCO_NAMEDEVENT_METATABLE_NAME);
     return 1;
 }
 

@@ -8,6 +8,8 @@
 namespace LuaPoco
 {
 
+const char* POCO_OSTREAM_METATABLE_NAME = "Poco.OStream.metatable";
+
 // userdata methods
 int OStream::write(lua_State* L)
 {
@@ -178,23 +180,17 @@ std::ostream& OStreamUserdata::ostream()
 // register metatable for this class
 bool OStreamUserdata::registerOStream(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.OStream.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "write", write },
+        { "seek", seek },
+        { "flush", flush },
+        { NULL, NULL}
+    };
     
-    // ostream methods
-    lua_pushcfunction(L, write);
-    lua_setfield(L, -2, "write");
-    lua_pushcfunction(L, seek);
-    lua_setfield(L, -2, "seek");
-    lua_pushcfunction(L, flush);
-    lua_setfield(L, -2, "flush");
-    
-    lua_pop(L, 1);
+    setupUserdataMetatable(L, POCO_OSTREAM_METATABLE_NAME, methods);
     return true;
 }
 

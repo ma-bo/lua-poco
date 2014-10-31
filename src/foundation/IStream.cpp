@@ -8,6 +8,8 @@
 namespace LuaPoco
 {
 
+const char* POCO_ISTREAM_METATABLE_NAME = "Poco.IStream.metatable";
+
 // userdata methods
 
 /// Reads from the istream.
@@ -263,23 +265,17 @@ std::istream& IStreamUserdata::istream()
 // register metatable for this class
 bool IStreamUserdata::registerIStream(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.IStream.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "read", read },
+        { "lines", lines },
+        { "seek", seek },
+        { NULL, NULL}
+    };
     
-    // istream methods
-    lua_pushcfunction(L, read);
-    lua_setfield(L, -2, "read");
-    lua_pushcfunction(L, lines);
-    lua_setfield(L, -2, "lines");
-    lua_pushcfunction(L, seek);
-    lua_setfield(L, -2, "seek");
-    
-    lua_pop(L, 1);
+    setupUserdataMetatable(L, POCO_ISTREAM_METATABLE_NAME, methods);
     return true;
 }
 

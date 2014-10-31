@@ -15,6 +15,8 @@ LUAPOCO_API int luaopen_poco_thread(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_THREAD_METATABLE_NAME;
+
 class ThreadUserdata : public Userdata, public Poco::Runnable
 {
 public:

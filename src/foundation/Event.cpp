@@ -14,6 +14,8 @@ LUA_API int luaopen_poco_event(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_EVENT_METATABLE_NAME = "Poco.Event.metatable";
+
 EventUserdata::EventUserdata(bool autoReset) :
     mEvent(new Poco::Event(autoReset))
 {
@@ -30,37 +32,26 @@ EventUserdata::~EventUserdata()
 
 bool EventUserdata::copyToState(lua_State *L)
 {
-    void* ud = lua_newuserdata(L, sizeof(EventUserdata));
-    luaL_getmetatable(L, "Poco.Event.metatable");
-    lua_setmetatable(L, -2);
-    
-    EventUserdata* eud = new(ud) EventUserdata(mEvent);
-    setPrivateUserdata(L, -1, eud);
+    EventUserdata* eud = new(lua_newuserdata(L, sizeof *eud)) EventUserdata(mEvent);
+    setupPocoUserdata(L, eud, POCO_EVENT_METATABLE_NAME);
     return true;
 }
 
 // register metatable for this class
 bool EventUserdata::registerEvent(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.Event.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "set", set },
+        { "tryWait", tryWait },
+        { "wait", wait },
+        { "reset", reset },
+        { NULL, NULL}
+    };
     
-    // methods
-    lua_pushcfunction(L, set);
-    lua_setfield(L, -2, "set");
-    lua_pushcfunction(L, tryWait);
-    lua_setfield(L, -2, "tryWait");
-    lua_pushcfunction(L, wait);
-    lua_setfield(L, -2, "wait");
-    lua_pushcfunction(L, reset);
-    lua_setfield(L, -2, "reset");
-    lua_pop(L, 1);
-    
+    setupUserdataMetatable(L, POCO_EVENT_METATABLE_NAME, methods);
     return true;
 }
 
@@ -81,15 +72,11 @@ int EventUserdata::Event(lua_State* L)
         autoReset = lua_toboolean(L, firstArg);
     }
     
-    void* ud = lua_newuserdata(L, sizeof(EventUserdata));
-    luaL_getmetatable(L, "Poco.Event.metatable");
-    lua_setmetatable(L, -2);
-    
     try
     {
+        EventUserdata* eud = new(lua_newuserdata(L, sizeof *eud)) EventUserdata(autoReset);
+        setupPocoUserdata(L, eud, POCO_EVENT_METATABLE_NAME);
         rv = 1;
-        EventUserdata* eud = new(ud) EventUserdata(autoReset);
-        setPrivateUserdata(L, -1, eud);
     }
     catch (const Poco::Exception& e)
     {

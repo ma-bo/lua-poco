@@ -15,6 +15,8 @@ LUAPOCO_API int luaopen_poco_pipeostream(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_PIPEOSTREAM_METATABLE_NAME;
+
 class PipeOStreamUserdata : public Userdata, public OStream
 {
 public:

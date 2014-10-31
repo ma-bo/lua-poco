@@ -15,6 +15,8 @@ LUAPOCO_API int luaopen_poco_fastmutex(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_FASTMUTEX_METATABLE_NAME;
+
 class FastMutexUserdata : public Userdata
 {
 public:

@@ -16,6 +16,8 @@ LUAPOCO_API int luaopen_poco_file(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_FILE_METATABLE_NAME;
+
 class FileUserdata : public Userdata
 {
 public:

@@ -9,6 +9,8 @@
 namespace LuaPoco
 {
 
+extern const char* POCO_OSTREAM_METATABLE_NAME;
+
 // for use by other OStream classes to provide their metamethods and access
 // to the underlying std::ostream handle.
 class OStream

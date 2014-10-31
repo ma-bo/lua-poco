@@ -14,6 +14,8 @@ LUAPOCO_API int luaopen_poco_checksum(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_CHECKSUM_METATABLE_NAME;
+
 class ChecksumUserdata : public Userdata
 {
 public:

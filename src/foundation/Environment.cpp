@@ -2,34 +2,30 @@
 // Functions to access environment variables and system information.
 // @module env
 
+#include "Userdata.h"
 #include "Environment.h"
 #include "Poco/Exception.h"
 
 int luaopen_poco_env(lua_State* L)
 {
+    struct LuaPoco::UserdataMethod methods[] = 
+    {
+        { "get", LuaPoco::Environment::get },
+        { "has", LuaPoco::Environment::has },
+        { "set", LuaPoco::Environment::set },
+        { "libraryVersion", LuaPoco::Environment::libraryVersion },
+        { "nodeId", LuaPoco::Environment::nodeId },
+        { "nodeName", LuaPoco::Environment::nodeName },
+        { "osArchitecture", LuaPoco::Environment::osArchitecture },
+        { "osDisplayName", LuaPoco::Environment::osDisplayName },
+        { "osName", LuaPoco::Environment::osName },
+        { "osVersion", LuaPoco::Environment::osVersion },
+        { "processorCount", LuaPoco::Environment::processorCount },
+        { NULL, NULL}
+    };
+    
     lua_createtable(L, 0, 11);
-    lua_pushcfunction(L, LuaPoco::Environment::get);
-    lua_setfield(L, -2, "get");
-    lua_pushcfunction(L, LuaPoco::Environment::has);
-    lua_setfield(L, -2, "has");
-    lua_pushcfunction(L, LuaPoco::Environment::set);
-    lua_setfield(L, -2, "set");
-    lua_pushcfunction(L, LuaPoco::Environment::libraryVersion);
-    lua_setfield(L, -2, "libraryVersion");
-    lua_pushcfunction(L, LuaPoco::Environment::nodeId);
-    lua_setfield(L, -2, "nodeId");
-    lua_pushcfunction(L, LuaPoco::Environment::nodeName);
-    lua_setfield(L, -2, "nodeName");
-    lua_pushcfunction(L, LuaPoco::Environment::osArchitecture);
-    lua_setfield(L, -2, "osArchitecture");
-    lua_pushcfunction(L, LuaPoco::Environment::osDisplayName);
-    lua_setfield(L, -2, "osDisplayName");
-    lua_pushcfunction(L, LuaPoco::Environment::osName);
-    lua_setfield(L, -2, "osName");
-    lua_pushcfunction(L, LuaPoco::Environment::osVersion);
-    lua_setfield(L, -2, "osVersion");
-    lua_pushcfunction(L, LuaPoco::Environment::processorCount);
-    lua_setfield(L, -2, "processorCount");
+    setMetatableFunctions(L, methods);
     
     return 1;
 }

@@ -14,6 +14,8 @@ LUAPOCO_API int luaopen_poco_timestamp(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_TIMESTAMP_METATABLE_NAME;
+
 class TimestampUserdata : public Userdata
 {
 public:

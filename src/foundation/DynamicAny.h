@@ -14,6 +14,8 @@ LUAPOCO_API int luaopen_poco_dynamicany(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_DYNAMICANY_METATABLE_NAME;
+
 class DynamicAnyUserdata : public Userdata
 {
 public:

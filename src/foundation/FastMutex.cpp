@@ -14,6 +14,8 @@ int luaopen_poco_fastmutex(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_FASTMUTEX_METATABLE_NAME = "Poco.FastMutex.metatable";
+
 FastMutexUserdata::FastMutexUserdata() :
     mFastMutex(new Poco::FastMutex())
 {
@@ -31,34 +33,25 @@ FastMutexUserdata::~FastMutexUserdata()
 
 bool FastMutexUserdata::copyToState(lua_State *L)
 {
-    void* ud = lua_newuserdata(L, sizeof(FastMutexUserdata));
-    luaL_getmetatable(L, "Poco.FastMutex.metatable");
-    lua_setmetatable(L, -2);
-    
-    FastMutexUserdata* fmud = new(ud) FastMutexUserdata(mFastMutex);
-    setPrivateUserdata(L, -1, fmud);
+    FastMutexUserdata* fmud = new(lua_newuserdata(L, sizeof *fmud)) FastMutexUserdata(mFastMutex);
+    setupPocoUserdata(L, fmud, POCO_FASTMUTEX_METATABLE_NAME);
     return true;
 }
 
 // register metatable for this class
 bool FastMutexUserdata::registerFastMutex(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.FastMutex.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
-    
-    // methods
-    lua_pushcfunction(L, lock);
-    lua_setfield(L, -2, "lock");
-    lua_pushcfunction(L, tryLock);
-    lua_setfield(L, -2, "tryLock");
-    lua_pushcfunction(L, unlock);
-    lua_setfield(L, -2, "unlock");
-    lua_pop(L, 1);
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "lock", lock },
+        { "tryLock", tryLock },
+        { "unlock", unlock },
+        { NULL, NULL}
+    };
+
+    setupUserdataMetatable(L, POCO_FASTMUTEX_METATABLE_NAME, methods);
     
     return true;
 }
@@ -70,14 +63,12 @@ bool FastMutexUserdata::registerFastMutex(lua_State* L)
 int FastMutexUserdata::FastMutex(lua_State* L)
 {
     int rv = 0;
-    void* ud = lua_newuserdata(L, sizeof(FastMutexUserdata));
-    luaL_getmetatable(L, "Poco.FastMutex.metatable");
-    lua_setmetatable(L, -2);
+
     try
     {
+        FastMutexUserdata* fmud = new(lua_newuserdata(L, sizeof *fmud)) FastMutexUserdata();
+        setupPocoUserdata(L, fmud, POCO_FASTMUTEX_METATABLE_NAME);
         rv = 1;
-        FastMutexUserdata* fmud = new(ud) FastMutexUserdata();
-        setPrivateUserdata(L, -1, fmud);
     }
     catch (const Poco::Exception& e)
     {

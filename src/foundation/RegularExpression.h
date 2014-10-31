@@ -15,6 +15,8 @@ LUAPOCO_API int luaopen_poco_regex(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_REGULAREXPRESSION_METATABLE_NAME;
+
 class RegularExpressionUserdata : public Userdata
 {
 public:

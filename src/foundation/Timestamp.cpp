@@ -14,13 +14,22 @@ int luaopen_poco_timestamp(lua_State* L)
     
     if (LuaPoco::loadMetatables(L))
     {
+        struct LuaPoco::UserdataMethod methods[] = 
+        {
+            { "new", LuaPoco::TimestampUserdata::Timestamp },
+            { "__call", LuaPoco::TimestampUserdata::Timestamp },
+            { "fromEpoch", LuaPoco::TimestampUserdata::TimestampFromEpoch },
+            { "fromUTC", LuaPoco::TimestampUserdata::TimestampFromUtc },
+            { NULL, NULL}
+        };
+        
         lua_createtable(L, 0, 1);
-        lua_pushcfunction(L, LuaPoco::TimestampUserdata::Timestamp);
-        lua_setfield(L, -2, "new");
-        lua_pushcfunction(L, LuaPoco::TimestampUserdata::TimestampFromEpoch);
-        lua_setfield(L, -2, "fromEpoch");
-        lua_pushcfunction(L, LuaPoco::TimestampUserdata::TimestampFromUtc);
-        lua_setfield(L, -2, "fromUTC");
+        setMetatableFunctions(L, methods);
+        // lua_pushvalue(L, -1);
+        // lua_setfield(L, -2, "__index");
+        lua_pushvalue(L, -1);
+        lua_setmetatable(L, -2);
+        
         rv = 1;
     }
     else
@@ -35,6 +44,8 @@ int luaopen_poco_timestamp(lua_State* L)
 
 namespace LuaPoco
 {
+
+const char* POCO_TIMESTAMP_METATABLE_NAME = "Poco.Timestamp.metatable";
 
 TimestampUserdata::TimestampUserdata() :
     mTimestamp()
@@ -57,52 +68,33 @@ TimestampUserdata::~TimestampUserdata()
 
 bool TimestampUserdata::copyToState(lua_State* L)
 {
-    void* ud = lua_newuserdata(L, sizeof *this);
-    luaL_getmetatable(L, "Poco.Timestamp.metatable");
-    lua_setmetatable(L, -2);
-    TimestampUserdata* tsud = new(ud) TimestampUserdata(mTimestamp);
-    setPrivateUserdata(L, -1, tsud);
-    
+    TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(mTimestamp);
+    setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
     return true;
 }
 
 // register metatable for this class
 bool TimestampUserdata::registerTimestamp(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.Timestamp.metatable");
-    // metamethods
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "__add", metamethod__add },
+        { "__sub", metamethod__sub },
+        { "__eq", metamethod__eq },
+        { "__lt", metamethod__lt },
+        { "__le", metamethod__le },
+        { "elapsed", elapsed },
+        { "epochMicroseconds", epochMicroseconds },
+        { "epochTime", epochTime },
+        { "isElapsed", isElapsed },
+        { "update", update },
+        { "utcTime", utcTime },
+        { NULL, NULL}
+    };
     
-    // Timestamp methods
-    lua_pushcfunction(L, elapsed);
-    lua_setfield(L, -2, "elapsed");
-    lua_pushcfunction(L, epochMicroseconds);
-    lua_setfield(L, -2, "epochMicroseconds");
-    lua_pushcfunction(L, epochTime);
-    lua_setfield(L, -2, "epochTime");
-    lua_pushcfunction(L, isElapsed);
-    lua_setfield(L, -2, "isElapsed");
-    lua_pushcfunction(L, update);
-    lua_setfield(L, -2, "update");
-    lua_pushcfunction(L, utcTime);
-    lua_setfield(L, -2, "utcTime");
-    lua_pushcfunction(L, metamethod__add);
-    lua_setfield(L, -2, "__add");
-    lua_pushcfunction(L, metamethod__sub);
-    lua_setfield(L, -2, "__sub");
-    lua_pushcfunction(L, metamethod__eq);
-    lua_setfield(L, -2, "__eq");
-    lua_pushcfunction(L, metamethod__lt);
-    lua_setfield(L, -2, "__lt");
-    lua_pushcfunction(L, metamethod__le);
-    lua_setfield(L, -2, "__le");
-    lua_pop(L, 1);
-    
+    setupUserdataMetatable(L, POCO_TIMESTAMP_METATABLE_NAME, methods);
     return true;
 }
 
@@ -119,11 +111,10 @@ int TimestampUserdata::TimestampFromEpoch(lua_State* L)
     std::time_t val = luaL_checkinteger(L, 1);
     try
     {
-        void *ud = lua_newuserdata(L, sizeof(TimestampUserdata));
-        luaL_getmetatable(L, "Poco.Timestamp.metatable");
-        lua_setmetatable(L, -2);
-        TimestampUserdata* tsud = new (ud) TimestampUserdata(Poco::Timestamp::fromEpochTime(val));
-        setPrivateUserdata(L, -1, tsud);
+        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) 
+            TimestampUserdata(Poco::Timestamp::fromEpochTime(val));
+        
+        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -152,11 +143,8 @@ int TimestampUserdata::TimestampFromUtc(lua_State* L)
     try
     {
         daud->mDynamicAny.convert(val);
-        void *ud = lua_newuserdata(L, sizeof(TimestampUserdata));
-        luaL_getmetatable(L, "Poco.Timestamp.metatable");
-        lua_setmetatable(L, -2);
-        TimestampUserdata* tsud = new (ud) TimestampUserdata(val);
-        setPrivateUserdata(L, -1, tsud);
+        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(val);
+        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -183,11 +171,8 @@ int TimestampUserdata::Timestamp(lua_State* L)
     
     try
     {
-        void *ud = lua_newuserdata(L, sizeof(TimestampUserdata));
-        luaL_getmetatable(L, "Poco.Timestamp.metatable");
-        lua_setmetatable(L, -2);
-        TimestampUserdata* tsud = new (ud) TimestampUserdata();
-        setPrivateUserdata(L, -1, tsud);
+        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata();
+        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -244,12 +229,9 @@ int TimestampUserdata::metamethod__add(lua_State* L)
         Poco::Timestamp newTs;
         
         newTs = tsud->mTimestamp + val;
+        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(newTs);
+        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         
-        void *ud = lua_newuserdata(L, sizeof(TimestampUserdata));
-        luaL_getmetatable(L, "Poco.Timestamp.metatable");
-        lua_setmetatable(L, -2);
-        TimestampUserdata* tsudNew = new (ud) TimestampUserdata(newTs);
-        setPrivateUserdata(L, -1, tsudNew);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -300,11 +282,8 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
         else
             newTs = val - tsud->mTimestamp;
         
-        void* ud = lua_newuserdata(L, sizeof(TimestampUserdata));
-        luaL_getmetatable(L, "Poco.Timestamp.metatable");
-        lua_setmetatable(L, -2);
-        TimestampUserdata* tsudNew = new (ud) TimestampUserdata(newTs);
-        setPrivateUserdata(L, -1, tsudNew);
+        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(newTs);
+        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -367,14 +346,11 @@ int TimestampUserdata::elapsed(lua_State* L)
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, 1);
     
     Poco::Int64 elapsed = tsud->mTimestamp.elapsed();
-    void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-    luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-    lua_setmetatable(L, -2);
     
     try
     {
-        DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(elapsed);
-        setPrivateUserdata(L, -1, daud);
+        DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(elapsed);
+        setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -402,14 +378,10 @@ int TimestampUserdata::epochMicroseconds(lua_State* L)
     
     Poco::Int64 epochMs = tsud->mTimestamp.epochMicroseconds();
     
-    void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-    luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-    lua_setmetatable(L, -2);
-    
     try
     {
-        DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(epochMs);
-        setPrivateUserdata(L, -1, daud);
+        DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(epochMs);
+        setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -512,14 +484,10 @@ int TimestampUserdata::utcTime(lua_State* L)
     
     Poco::DynamicAny val = tsud->mTimestamp.utcTime();
     
-    void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-    luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-    lua_setmetatable(L, -2);
-    
     try
     {
-        DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
-        setPrivateUserdata(L, -1, daud);
+        DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(val);
+        setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
         rv = 1;
     }
     catch (const Poco::Exception& e)

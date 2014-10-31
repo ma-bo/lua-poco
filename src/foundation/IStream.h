@@ -9,6 +9,8 @@
 namespace LuaPoco
 {
 
+extern const char* POCO_ISTREAM_METATABLE_NAME;
+
 class IStream
 {
 public:

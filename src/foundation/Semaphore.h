@@ -15,6 +15,8 @@ LUAPOCO_API int luaopen_poco_semaphore(lua_State* L);
 namespace LuaPoco
 {
 
+extern const char* POCO_SEMAPHORE_METATABLE_NAME;
+
 class SemaphoreUserdata : public Userdata
 {
 public:

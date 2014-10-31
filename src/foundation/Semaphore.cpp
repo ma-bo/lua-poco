@@ -1,7 +1,12 @@
 /// Synchronization mechanism used to control access to a shared resource.
-// A semaphore has a value that is constrained to be a non-negative integer and two atomic operations. The allowable operations are V (here called set()) and P (here called wait()). A V (set()) operation increases the value of the semaphore by one. A P (wait()) operation decreases the value of the semaphore by one, provided that can be done without violating the constraint that the value be non-negative. A P (wait()) operation that is initiated when the value of the semaphore is 0 suspends the calling thread. The calling thread may continue when the value becomes positive again. 
+// A semaphore has a value that is constrained to be a non-negative integer and two atomic operations.
+// The allowable operations are V (here called set()) and P (here called wait()).
+// A V (set()) operation increases the value of the semaphore by one.
+// A P (wait()) operation decreases the value of the semaphore by one, provided that can be done without violating the constraint that the value be non-negative.
+// A P (wait()) operation that is initiated when the value of the semaphore is 0 suspends the calling thread.
+// The calling thread may continue when the value becomes positive again. 
 //
-// Note: semaphore userdata are copyable/sharable between threads.
+// Note: semaphore userdata are sharable between threads.
 // @module semaphore
 
 #include "Semaphore.h"
@@ -14,6 +19,8 @@ int luaopen_poco_semaphore(lua_State* L)
 
 namespace LuaPoco
 {
+
+const char* POCO_SEMAPHORE_METATABLE_NAME = "Poco.Semaphore.metatable";
 
 SemaphoreUserdata::SemaphoreUserdata(int n) :
     mSemaphore(new Poco::Semaphore(n))
@@ -37,35 +44,25 @@ SemaphoreUserdata::~SemaphoreUserdata()
 
 bool SemaphoreUserdata::copyToState(lua_State *L)
 {
-    void* ud = lua_newuserdata(L, sizeof(SemaphoreUserdata));
-    luaL_getmetatable(L, "Poco.Semaphore.metatable");
-    lua_setmetatable(L, -2);
-    
-    SemaphoreUserdata* sud = new(ud) SemaphoreUserdata(mSemaphore);
-    setPrivateUserdata(L, -1, sud);
+    SemaphoreUserdata* sud = new(lua_newuserdata(L, sizeof *sud)) SemaphoreUserdata(mSemaphore);
+    setupPocoUserdata(L, sud, POCO_SEMAPHORE_METATABLE_NAME);
     return true;
 }
 
 // register metatable for this class
 bool SemaphoreUserdata::registerSemaphore(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.Semaphore.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "set", set },
+        { "tryWait", tryWait },
+        { "wait", wait },
+        { NULL, NULL}
+    };
     
-    // methods
-    lua_pushcfunction(L, set);
-    lua_setfield(L, -2, "set");
-    lua_pushcfunction(L, tryWait);
-    lua_setfield(L, -2, "tryWait");
-    lua_pushcfunction(L, wait);
-    lua_setfield(L, -2, "wait");
-    lua_pop(L, 1);
-    
+    setupUserdataMetatable(L, POCO_SEMAPHORE_METATABLE_NAME, methods);
     return true;
 }
 
@@ -84,21 +81,18 @@ int SemaphoreUserdata::Semaphore(lua_State* L)
     int n = luaL_checkinteger(L, firstArg);
     if (top > firstArg)
         max = luaL_checkinteger(L, firstArg + 1);
-
-    void* ud = lua_newuserdata(L, sizeof(SemaphoreUserdata));
-    luaL_getmetatable(L, "Poco.Semaphore.metatable");
-    lua_setmetatable(L, -2);
+    
     try
     {
-        rv = 1;
-        
         SemaphoreUserdata* sud = NULL;
-        if (top > firstArg)
-            sud = new(ud) SemaphoreUserdata(n, max);
-        else
-            sud = new(ud) SemaphoreUserdata(n);
         
-        setPrivateUserdata(L, -1, sud);
+        if (top > firstArg)
+            SemaphoreUserdata* sud = new(lua_newuserdata(L, sizeof *sud)) SemaphoreUserdata(n, max);
+        else
+            SemaphoreUserdata* sud = new(lua_newuserdata(L, sizeof *sud)) SemaphoreUserdata(n);
+        
+        setupPocoUserdata(L, sud, POCO_SEMAPHORE_METATABLE_NAME);
+        rv = 1;
     }
     catch (const Poco::Exception& e)
     {

@@ -19,6 +19,8 @@ int luaopen_poco_dynamicany(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_DYNAMICANY_METATABLE_NAME = "Poco.DynamicAny.metatable";
+
 DynamicAnyUserdata::DynamicAnyUserdata(const Poco::DynamicAny& da) : mDynamicAny(da)
 {
 }
@@ -29,60 +31,37 @@ DynamicAnyUserdata::~DynamicAnyUserdata()
 
 bool DynamicAnyUserdata::copyToState(lua_State* L)
 {
-    void* ud = lua_newuserdata(L, sizeof *this);
-    luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-    lua_setmetatable(L, -2);
-    
-    DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(mDynamicAny);
-    setPrivateUserdata(L, -1, daud);
-    
+    DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(mDynamicAny);
+    setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
     return true;
 }
 
 // register metatable for this class
 bool DynamicAnyUserdata::registerDynamicAny(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.DynamicAny.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "convert", convert },
+        { "isNumeric", isNumeric },
+        { "isInteger", isInteger },
+        { "isSigned", isSigned },
+        { "isString", isString },
+        { "toNumber", toNumber },
+        { "toString", toString },
+        { "toBoolean", toBoolean },
+        { "__add", metamethod__add },
+        { "__sub", metamethod__sub },
+        { "__mul", metamethod__mul },
+        { "__div", metamethod__div },
+        { "__eq", metamethod__eq },
+        { "__lt", metamethod__lt },
+        { "__le", metamethod__le },
+        { NULL, NULL }
+    };
     
-    // methods
-    lua_pushcfunction(L, convert);
-    lua_setfield(L, -2, "convert");
-    lua_pushcfunction(L, isNumeric);
-    lua_setfield(L, -2, "isNumeric");
-    lua_pushcfunction(L, isInteger);
-    lua_setfield(L, -2, "isInteger");
-    lua_pushcfunction(L, isSigned);
-    lua_setfield(L, -2, "isSigned");
-    lua_pushcfunction(L, isString);
-    lua_setfield(L, -2, "isString");
-    lua_pushcfunction(L, toNumber);
-    lua_setfield(L, -2, "toNumber");
-    lua_pushcfunction(L, toString);
-    lua_setfield(L, -2, "toString");
-    lua_pushcfunction(L, toBoolean);
-    lua_setfield(L, -2, "toBoolean");
-    lua_pushcfunction(L, metamethod__add);
-    lua_setfield(L, -2, "__add");
-    lua_pushcfunction(L, metamethod__sub);
-    lua_setfield(L, -2, "__sub");
-    lua_pushcfunction(L, metamethod__mul);
-    lua_setfield(L, -2, "__mul");
-    lua_pushcfunction(L, metamethod__div);
-    lua_setfield(L, -2, "__div");
-    lua_pushcfunction(L, metamethod__eq);
-    lua_setfield(L, -2, "__eq");
-    lua_pushcfunction(L, metamethod__lt);
-    lua_setfield(L, -2, "__lt");
-    lua_pushcfunction(L, metamethod__le);
-    lua_setfield(L, -2, "__le");
-    lua_pop(L, 1);
-    
+    setupUserdataMetatable(L, POCO_DYNAMICANY_METATABLE_NAME, methods);
     return true;
 }
 
@@ -101,43 +80,30 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
     {
         if (type == LUA_TNUMBER)
         {
-            void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-            luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-            lua_setmetatable(L, -2);
             lua_Number val = lua_tonumber(L, firstArg);
-            DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
-            setPrivateUserdata(L, -1, daud);
+            DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(val);
+            setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
             rv = 1;
         }
         else if (type == LUA_TSTRING)
         {
-            void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-            luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-            lua_setmetatable(L, -2);
             const char* val = lua_tostring(L, firstArg);
-            DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
-            setPrivateUserdata(L, -1, daud);
+            DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(val);
+            setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
             rv = 1;
         }
         else if (type == LUA_TBOOLEAN)
         {
-            void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-            luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-            lua_setmetatable(L, -2);
             bool val = lua_toboolean(L, firstArg);
-            DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(val);
-            setPrivateUserdata(L, -1, daud);
+            DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(val);
+            setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
             rv = 1;
         }
         else if (type == LUA_TUSERDATA)
         {
             DynamicAnyUserdata* daudFrom = checkPrivateUserdata<DynamicAnyUserdata>(L, firstArg);
-            void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-            luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-            lua_setmetatable(L, -2);
-            
-            DynamicAnyUserdata* daud = new(ud) DynamicAnyUserdata(daudFrom->mDynamicAny);
-            setPrivateUserdata(L, -1, daud);
+            DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(daudFrom->mDynamicAny);
+            setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
             rv = 1;
         }
         else
@@ -219,11 +185,8 @@ int DynamicAnyUserdata::convert(lua_State* L)
             return 2;
         }
         
-        void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-        luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-        lua_setmetatable(L, -2);
-        DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(newValue);
-        setPrivateUserdata(L, -1, daud);
+        DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(newValue);
+        setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -388,12 +351,10 @@ int DynamicAnyUserdata::metamethod__add(lua_State* L)
     
     try
     {
-        void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-        luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-        lua_setmetatable(L, -2);
-        DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(Poco::DynamicAny());
-        setPrivateUserdata(L, -1, daud);
-        
+        DynamicAnyUserdata* newValueUd = new(lua_newuserdata(L, sizeof *daud))
+            DynamicAnyUserdata(Poco::DynamicAny());
+        setupPocoUserdata(L, newValueUd, POCO_DYNAMICANY_METATABLE_NAME);
+
         if (lua_isuserdata(L, valIndex))
         {
             lua_getmetatable(L, udIndex);
@@ -453,11 +414,9 @@ int DynamicAnyUserdata::metamethod__sub(lua_State* L)
     
     try
     {
-        void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-        luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-        lua_setmetatable(L, -2);
-        DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(Poco::DynamicAny());
-        setPrivateUserdata(L, -1, daud);
+        DynamicAnyUserdata* newValueUd = new(lua_newuserdata(L, sizeof *daud)) 
+            DynamicAnyUserdata(Poco::DynamicAny());
+        setupPocoUserdata(L, newValueUd, POCO_DYNAMICANY_METATABLE_NAME);
         
         if (lua_isuserdata(L, valIndex))
         {
@@ -520,11 +479,9 @@ int DynamicAnyUserdata::metamethod__mul(lua_State* L)
     
     try
     {
-        void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-        luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-        lua_setmetatable(L, -2);
-        DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(Poco::DynamicAny());
-        setPrivateUserdata(L, -1, daud);
+        DynamicAnyUserdata* newValueUd = new(lua_newuserdata(L, sizeof *daud))
+            DynamicAnyUserdata(Poco::DynamicAny());
+        setupPocoUserdata(L, newValueUd, POCO_DYNAMICANY_METATABLE_NAME);
         
         if (lua_isuserdata(L, valIndex))
         {
@@ -579,11 +536,8 @@ int DynamicAnyUserdata::metamethod__div(lua_State* L)
     
     try
     {
-        void* ud = lua_newuserdata(L, sizeof (DynamicAnyUserdata));
-        luaL_getmetatable(L, "Poco.DynamicAny.metatable");
-        lua_setmetatable(L, -2);
-        DynamicAnyUserdata* newValueUd = new(ud) DynamicAnyUserdata(Poco::DynamicAny());
-        setPrivateUserdata(L, -1, daud);
+        DynamicAnyUserdata* newValueUd = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(Poco::DynamicAny());
+        setupPocoUserdata(L, newValueUd, POCO_DYNAMICANY_METATABLE_NAME);
         
         if (lua_isuserdata(L, valIndex))
         {

@@ -15,6 +15,8 @@ int luaopen_poco_pipe(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_PIPE_METATABLE_NAME = "Poco.Pipe.metatable";
+
 PipeUserdata::PipeUserdata() :
     mPipe()
 {
@@ -31,35 +33,25 @@ PipeUserdata::~PipeUserdata()
 
 bool PipeUserdata::copyToState(lua_State *L)
 {
-    void* ud = lua_newuserdata(L, sizeof(PipeUserdata));
-    luaL_getmetatable(L, "Poco.Pipe.metatable");
-    lua_setmetatable(L, -2);
-    
-    PipeUserdata* pud = new(ud) PipeUserdata();
-    setPrivateUserdata(L, -1, pud);
+    PipeUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PipeUserdata();
+    setupPocoUserdata(L, pud, POCO_PIPE_METATABLE_NAME);
     return true;
 }
 
 // register metatable for this class
 bool PipeUserdata::registerPipe(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.Pipe.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "readBytes", readBytes },
+        { "writeBytes", writeBytes },
+        { "close", close },
+        { NULL, NULL}
+    };
     
-    // methods
-    lua_pushcfunction(L, readBytes);
-    lua_setfield(L, -2, "readBytes");
-    lua_pushcfunction(L, writeBytes);
-    lua_setfield(L, -2, "writeBytes");
-    lua_pushcfunction(L, close);
-    lua_setfield(L, -2, "close");
-    lua_pop(L, 1);
-    
+    setupUserdataMetatable(L, POCO_PIPE_METATABLE_NAME, methods);
     return true;
 }
 
@@ -69,12 +61,8 @@ bool PipeUserdata::registerPipe(lua_State* L)
 // @function new
 int PipeUserdata::Pipe(lua_State* L)
 {
-    void* ud = lua_newuserdata(L, sizeof(PipeUserdata));
-    luaL_getmetatable(L, "Poco.Pipe.metatable");
-    lua_setmetatable(L, -2);
-    
-    PipeUserdata* pud = new(ud) PipeUserdata();
-    setPrivateUserdata(L, -1, pud);
+    PipeUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PipeUserdata();
+    setupPocoUserdata(L, pud, POCO_PIPE_METATABLE_NAME);
     return 1;
 }
 

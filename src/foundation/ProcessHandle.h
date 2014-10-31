@@ -8,6 +8,8 @@
 namespace LuaPoco
 {
 
+extern const char* POCO_PROCESSHANDLE_METATABLE_NAME;
+
 class ProcessHandleUserdata : public Userdata
 {
 public:

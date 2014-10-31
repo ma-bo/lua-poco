@@ -40,6 +40,32 @@ int pushUnknownException(lua_State* L)
     return 2;
 }
 
+void setMetatableFunctions(lua_State* L, UserdataMethod* methods)
+{
+    while (methods->name && methods->fn)
+    {
+        lua_pushcfunction(L, methods->fn);
+        lua_setfield(L, -2, methods->name);
+        ++methods;
+    }
+}
+
+void setupUserdataMetatable(lua_State* L, const char* metatableName, UserdataMethod* methods)
+{
+    luaL_newmetatable(L, metatableName);
+    setMetatableFunctions(L, methods);
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    lua_pop(L, 1);
+}
+
+void setupPocoUserdata(lua_State* L, Userdata* ud, const char* metatableName)
+{
+    luaL_getmetatable(L, metatableName);
+    lua_setmetatable(L, -2);
+    setPrivateUserdata(L, -1, ud);
+}
+
 void setupPrivateUserdata(lua_State* L)
 {
     // start private table with 20 slots hash table slots for userdata.

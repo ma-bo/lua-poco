@@ -14,6 +14,8 @@ int luaopen_poco_mutex(lua_State* L)
 namespace LuaPoco
 {
 
+const char* POCO_MUTEX_METATABLE_NAME = "Poco.Mutex.metatable";
+
 MutexUserdata::MutexUserdata() :
     mMutex(new Poco::Mutex())
 {
@@ -31,35 +33,25 @@ MutexUserdata::~MutexUserdata()
 
 bool MutexUserdata::copyToState(lua_State *L)
 {
-    void* ud = lua_newuserdata(L, sizeof(MutexUserdata));
-    luaL_getmetatable(L, "Poco.Mutex.metatable");
-    lua_setmetatable(L, -2);
-    
-    MutexUserdata* mud = new(ud) MutexUserdata(mMutex);
-    setPrivateUserdata(L, -1, mud);
+    MutexUserdata* mud = new(lua_newuserdata(L, sizeof *mud)) MutexUserdata(mMutex);
+    setupPocoUserdata(L, mud, POCO_MUTEX_METATABLE_NAME);
     return true;
 }
 
 // register metatable for this class
 bool MutexUserdata::registerMutex(lua_State* L)
 {
-    luaL_newmetatable(L, "Poco.Mutex.metatable");
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, metamethod__gc);
-    lua_setfield(L, -2, "__gc");
-    lua_pushcfunction(L, metamethod__tostring);
-    lua_setfield(L, -2, "__tostring");
-    
-    // methods
-    lua_pushcfunction(L, lock);
-    lua_setfield(L, -2, "lock");
-    lua_pushcfunction(L, tryLock);
-    lua_setfield(L, -2, "tryLock");
-    lua_pushcfunction(L, unlock);
-    lua_setfield(L, -2, "unlock");
-    lua_pop(L, 1);
-    
+    struct UserdataMethod methods[] = 
+    {
+        { "__gc", metamethod__gc },
+        { "__tostring", metamethod__tostring },
+        { "lock", lock },
+        { "tryLock", tryLock },
+        { "unlock", unlock },
+        { NULL, NULL}
+    };
+
+    setupUserdataMetatable(L, POCO_MUTEX_METATABLE_NAME, methods);
     return true;
 }
 
@@ -70,14 +62,12 @@ bool MutexUserdata::registerMutex(lua_State* L)
 int MutexUserdata::Mutex(lua_State* L)
 {
     int rv = 0;
-    void* ud = lua_newuserdata(L, sizeof(MutexUserdata));
-    luaL_getmetatable(L, "Poco.Mutex.metatable");
-    lua_setmetatable(L, -2);
+
     try
     {
+        MutexUserdata* mud = new(lua_newuserdata(L, sizeof *mud)) MutexUserdata();
+        setupPocoUserdata(L, mud, POCO_MUTEX_METATABLE_NAME);
         rv = 1;
-        MutexUserdata* mud = new(ud) MutexUserdata();
-        setPrivateUserdata(L, -1, mud);
     }
     catch (const Poco::Exception& e)
     {

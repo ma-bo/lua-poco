@@ -10,19 +10,20 @@
 
 int luaopen_poco_process(lua_State* L)
 {
+    struct LuaPoco::UserdataMethod methods[] = 
+    {
+        { "kill", LuaPoco::Process::kill },
+        { "id", LuaPoco::Process::id },
+        { "requestTermination", LuaPoco::Process::requestTermination },
+        { "times", LuaPoco::Process::times },
+        { "launch", LuaPoco::Process::launch },
+        { NULL, NULL}
+    };
+    
     if (LuaPoco::loadMetatables(L))
     {
         lua_createtable(L, 0, 5);
-        lua_pushcfunction(L, LuaPoco::Process::kill);
-        lua_setfield(L, -2, "kill");
-        lua_pushcfunction(L, LuaPoco::Process::id);
-        lua_setfield(L, -2, "id");
-        lua_pushcfunction(L, LuaPoco::Process::requestTermination);
-        lua_setfield(L, -2, "requestTermination");
-        lua_pushcfunction(L, LuaPoco::Process::times);
-        lua_setfield(L, -2, "times");
-        lua_pushcfunction(L, LuaPoco::Process::launch);
-        lua_setfield(L, -2, "launch");
+        setMetatableFunctions(L, methods);
     }
     
     return 1;
@@ -289,17 +290,13 @@ int Process::launch(lua_State* L)
     
     try
     {
-        void *ud = lua_newuserdata(L, sizeof(ProcessHandleUserdata*));
-        luaL_getmetatable(L, "Poco.ProcessHandle.metatable");
-        lua_setmetatable(L, -2);
-        
         if (haveEnv)
         {
             Poco::ProcessHandle ph = Poco::Process::launch(command, args, 
                 workingDir ? workingDir : Poco::Path::current(),
                 inPipe, outPipe, errPipe, env);
-            ProcessHandleUserdata* phud = new (ud) ProcessHandleUserdata(ph);
-            setPrivateUserdata(L, -1, phud);
+            ProcessHandleUserdata* phud = new(lua_newuserdata(L, sizeof *phud)) ProcessHandleUserdata(ph);
+            setupPocoUserdata(L, phud, POCO_PROCESSHANDLE_METATABLE_NAME);
             rv = 1;
         }
         else
@@ -307,8 +304,9 @@ int Process::launch(lua_State* L)
             Poco::ProcessHandle ph = Poco::Process::launch(command, args, 
                 workingDir ? workingDir : Poco::Path::current(),
                 inPipe, outPipe, errPipe);
-            ProcessHandleUserdata* phud = new (ud) ProcessHandleUserdata(ph);
-            setPrivateUserdata(L, -1, phud);
+
+            ProcessHandleUserdata* phud = new(lua_newuserdata(L, sizeof *phud)) ProcessHandleUserdata(ph);
+            setupPocoUserdata(L, phud, POCO_PROCESSHANDLE_METATABLE_NAME);
             rv = 1;
         }
     }
