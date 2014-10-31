@@ -1,6 +1,6 @@
 /// Environment variables and system information.
 // Functions to access environment variables and system information.
-// @module env
+// @module environment
 
 #include "Userdata.h"
 #include "Environment.h"
