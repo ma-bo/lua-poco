@@ -213,8 +213,8 @@ bool transferValue(lua_State* toL, lua_State* fromL)
     case LUA_TUSERDATA:
     {
         Userdata* ud = getPrivateUserdata(fromL, -1);
-        if (ud && ud->copyToState(toL))
-            result = true;
+        if (ud)
+            result = ud->copyToState(toL);
         break;
     }
     case LUA_TTHREAD:
