@@ -45,7 +45,9 @@ bool loadMetatables(lua_State* L)
             MutexUserdata::registerMutex(L) &&
             ThreadUserdata::registerThread(L) &&
             EventUserdata::registerEvent(L) &&
-            PipeOStreamUserdata::registerPipeOStream(L)
+            PipeOStreamUserdata::registerPipeOStream(L) && 
+            IStreamUserdata::registerIStream(L) &&
+            OStreamUserdata::registerOStream(L)
         )
         {
             setupPrivateUserdata(L);
