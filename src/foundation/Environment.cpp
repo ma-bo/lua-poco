@@ -6,7 +6,7 @@
 #include "Environment.h"
 #include "Poco/Exception.h"
 
-int luaopen_poco_env(lua_State* L)
+int luaopen_poco_environment(lua_State* L)
 {
     struct LuaPoco::UserdataMethod methods[] = 
     {
