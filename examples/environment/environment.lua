@@ -3,11 +3,9 @@ local environment = assert(require("poco.environment"))
 
 -- print out environment attributes
 print("\npoco.environment functions:\n")
-print("libraryVersion:\t", environment.libraryVersion())
 print("nodeId:        \t", environment.nodeId())
 print("nodeName:      \t", environment.nodeName())
 print("osArchitecture:\t", environment.osArchitecture())
-print("osDisplayName: \t", environment.osDisplayName())
 print("osName:        \t", environment.osName())
 print("osVerison:     \t", environment.osVersion())
 
