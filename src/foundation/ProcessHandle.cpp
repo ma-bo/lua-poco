@@ -108,7 +108,7 @@ int ProcessHandleUserdata::kill(lua_State* L)
 {
     ProcessHandleUserdata* phud = checkPrivateUserdata<ProcessHandleUserdata>(L, 1);
     
-    Poco::Process::kill(phud->mProcessHandle);
+    Poco::Process::kill(phud->mProcessHandle.id());
     
     return 0;
 }
