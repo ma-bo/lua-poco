@@ -313,7 +313,9 @@ int Process::launch(lua_State* L)
         else
         {
             Poco::ProcessHandle ph = Poco::Process::launch(command, args, 
+#if POCO_VERSION >= 0x01040400
                 workingDir ? workingDir : Poco::Path::current(),
+#endif
                 inPipe, outPipe, errPipe);
 
             ProcessHandleUserdata* phud = new(lua_newuserdata(L, sizeof *phud)) ProcessHandleUserdata(ph);
