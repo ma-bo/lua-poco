@@ -6,27 +6,54 @@
 namespace LuaPoco
 {
 
+#define DEFAULT_TRANSFER_BUFF_SIZE 1000
+
 TransferBuffer::TransferBuffer() :
-    Buffer<char>(1000), mWriteIdx(0)
+    mBuffer(NULL), mReadIdx(0), mWriteIdx(0)
 {
+    mCapacity = DEFAULT_TRANSFER_BUFF_SIZE;
+    mBuffer = static_cast<char*>(std::malloc(mCapacity));
+    if (!mBuffer) throw std::bad_alloc();
 }
 
 TransferBuffer::TransferBuffer(size_t startSize) :
-    Buffer<char>(startSize), mWriteIdx(0)
+    mBuffer(NULL), mReadIdx(0), mWriteIdx(0)
 {
+    mCapacity = startSize > 0 ? startSize : DEFAULT_TRANSFER_BUFF_SIZE;
+    mBuffer = static_cast<char*>(std::malloc(mCapacity));
+    if (!mBuffer) throw std::bad_alloc();
 }
 
 TransferBuffer::~TransferBuffer()
 {
+    std::free(mBuffer);
+    mBuffer = NULL;
 }
 
 void TransferBuffer::insert(const char* data, size_t amount)
 {
-    if (amount > size() - mWriteIdx)
-        resize(size() + amount + 1000, true);
+    if (amount > mCapacity - mWriteIdx)
+    {
+        mCapacity += amount + 1000;
+        
+        char* tempBuffer = static_cast<char*>(std::realloc(mBuffer, mCapacity));
+        if (tempBuffer) mBuffer = tempBuffer;
+        else throw std::bad_alloc();
+    }
     
-    std::memcpy(begin() + mWriteIdx, data, amount);
+    std::memcpy(mBuffer + mWriteIdx, data, amount);
     mWriteIdx += amount;
+}
+
+void TransferBuffer::get(const char*& data, size_t& amount)
+{
+    size_t available = mWriteIdx - mReadIdx;
+    
+    amount = available;
+    if (available == 0) data = NULL;
+    else data = mBuffer + mReadIdx;
+    
+    mReadIdx += amount;
 }
 
 size_t TransferBuffer::contentSize()
@@ -57,9 +84,7 @@ const char* functionReader(lua_State* L, void* data, size_t* size)
 {
     const char* rv = NULL;
     TransferBuffer* tb = static_cast<TransferBuffer*>(data);
-    
-    rv = tb->begin();
-    *size = tb->size();
+    tb->get(rv, *size);
     
     return rv;
 }

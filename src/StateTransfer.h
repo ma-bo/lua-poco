@@ -7,18 +7,22 @@
 namespace LuaPoco
 {
 
-class TransferBuffer : public Poco::Buffer<char>
+class TransferBuffer
 {
 public:
     TransferBuffer();
     TransferBuffer(size_t startSize);
     ~TransferBuffer();
     void insert(const char* data, size_t amount);
+    void get(const char*& data, size_t& amount);
     size_t contentSize();
 private:
     TransferBuffer(const TransferBuffer&);
     TransferBuffer& operator= (const TransferBuffer&);
+    size_t mReadIdx;
     size_t mWriteIdx;
+    size_t mCapacity;
+    char* mBuffer;
 };
 
 int functionWriter(lua_State* L, const void* p, size_t sz, void* ud);
