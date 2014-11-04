@@ -248,10 +248,12 @@ void getArgs(lua_State* L, Poco::Process::Args& args)
 ///
 // @field command the program to launch.
 // @field workingDir [optional] a path to be used as the working directory for the command.
+// On Poco Library versions older than 1.4.4, the supplied environment field will be ignored.
 // @field inPipe [optional] a poco.pipe userdata that will be attached to the commands stdin.
 // @field outPipe [optional] a poco.pipe userdata that will be attached to the commands stdout.
 // @field errPipe [optional] a poco.pipe userdata that will be attached to the commands stderr.
 // @field env [optional] a table representing key/value pairs for the commands process environment.
+// On Poco Library versions older than 1.4.4, the supplied environment field will be ignored.
 // @table launchParam
 
 /// Launches a new process with command and returns a processhandle userdata.
