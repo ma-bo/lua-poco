@@ -1,4 +1,4 @@
-/// Generic interface from reading from ostream userdata.
+/// Generic interface for writing to ostream userdata.
 // @module ostream
 
 #include "OStream.h"
@@ -11,6 +11,12 @@ namespace LuaPoco
 const char* POCO_OSTREAM_METATABLE_NAME = "Poco.OStream.metatable";
 
 // userdata methods
+
+/// Write bytes to ostream.
+// @string data string containing bytes to be written to the ostream.
+// @return true or nil. (error)
+// @return error message.
+// @function write
 int OStream::write(lua_State* L)
 {
     int rv = 0;
