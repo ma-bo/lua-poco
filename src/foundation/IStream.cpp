@@ -242,9 +242,9 @@ int IStream::read(lua_State* L)
     return rv;
 }
 
-/// Reads one line at a time from istream.
-// This function behaves identically to Lua file:lines() iterator.  To be used in
-// a generic for loop.
+/// Returns a line iterator that reads one line at a time from the istream.
+// This function behaves identically to Lua file:lines() iterator.  Intended to be used in
+// a Lua generic for loop.
 // @return line iterator function.
 // @return userdata.
 // @function lines
@@ -282,11 +282,11 @@ int IStream::line_iterator(lua_State* L)
     return rv;
 }
 
-/// Sets and gets the file position.
-// Position is measured in bytes from the beginning of the file, to the position given by offset plus a base specified by the string paramter whence.
-// @string[opt] whence "set" (default: beginning of file), "cur" (current positition), or "end" (end of file)
+/// Sets and gets the istream position.
+// Position is measured in bytes from the beginning of the stream, to the position given by offset plus a base specified by the string paramter whence.
+// @string[opt] whence "set" (default: beginning of istream), "cur" (current positition), or "end" (end of istream)
 // @int[opt] offset (default: 0)
-// @return number representing file position in bytes from the beginning of the file or nil. (error)
+// @return number representing istream position in bytes from the beginning of the file or nil. (error)
 // @return error message.
 // @function seek
 int IStream::seek(lua_State* L)
