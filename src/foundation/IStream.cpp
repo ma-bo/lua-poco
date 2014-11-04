@@ -1,4 +1,4 @@
-/// Generic interface from reading from istream userdata.
+/// Generic interface for reading from istream userdata.
 // @module istream
 
 #include "IStream.h"
@@ -247,20 +247,20 @@ int IStream::read(lua_State* L)
 // a generic for loop.
 // @return line iterator function.
 // @return userdata.
-// @function lines.
+// @function lines
 int IStream::lines(lua_State* L)
 {
     int rv = 3;
     IStream* isud = checkPrivateUserdata<IStream>(L, 1);
     
-    lua_pushcfunction(L, line);
+    lua_pushcfunction(L, line_iterator);
     lua_pushvalue(L, 1);
     lua_pushnil(L);
     
     return rv;
 }
 
-int IStream::line(lua_State* L)
+int IStream::line_iterator(lua_State* L)
 {
     int rv = 0;
     IStream* isud = checkPrivateUserdata<IStream>(L, 1);

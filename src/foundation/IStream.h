@@ -19,7 +19,7 @@ protected:
     // userdata methods
     static int read(lua_State* L);
     static int lines(lua_State* L);
-    static int line(lua_State* L);
+    static int line_iterator(lua_State* L);
     static int seek(lua_State* L);
 };
 
