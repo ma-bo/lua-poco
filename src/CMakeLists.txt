@@ -24,6 +24,7 @@ set(FOUNDATION_SRC
     foundation/OStream.cpp
     foundation/PipeOStream.cpp
     foundation/PipeIStream.cpp
+    foundation/FileIStream.cpp
     )
 
 # check if Version.h is present for 1.3.6 compatability issues.
