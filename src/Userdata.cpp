@@ -22,7 +22,8 @@ bool Userdata::copyToState(lua_State *L)
 int Userdata::metamethod__gc(lua_State* L)
 {
     Userdata* ud = getPrivateUserdata(L, 1);
-    ud->~Userdata();
+    if (ud) ud->~Userdata();
+    else luaL_error(L, "attempting to __gc a NULL userdata!");
     return 0;
 }
 
