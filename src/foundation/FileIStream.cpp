@@ -3,7 +3,6 @@
 // @module fileistream
 #include "FileIStream.h"
 #include "Poco/Exception.h"
-#include <iostream>
 
 int luaopen_poco_fileistream(lua_State* L)
 {
@@ -88,7 +87,7 @@ int FileIStreamUserdata::metamethod__tostring(lua_State* L)
 
 // methods
 
-/// Closes fileinputstream.
+/// Closes fileistream.
 // @function close
 int FileIStreamUserdata::close(lua_State* L)
 {
