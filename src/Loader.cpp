@@ -20,6 +20,7 @@
 #include "foundation/PipeOStream.h"
 #include "foundation/PipeIStream.h"
 #include "foundation/FileIStream.h"
+#include "foundation/FileOStream.h"
 
 namespace LuaPoco
 {
@@ -33,28 +34,31 @@ bool loadMetatables(lua_State* L)
     if (lua_isnil(L, -1))
     {
         if (
-            FileUserdata::registerFile(L) &&
-            RegularExpressionUserdata::registerRegularExpression(L) &&
-            DynamicAnyUserdata::registerDynamicAny(L) &&
-            TimestampUserdata::registerTimestamp(L) &&
-            ChecksumUserdata::registerChecksum(L) &&
-            PipeUserdata::registerPipe(L) &&
-            NamedEventUserdata::registerNamedEvent(L) && 
-            NamedMutexUserdata::registerNamedMutex(L) &&
-            ProcessHandleUserdata::registerProcessHandle(L) &&
-            SemaphoreUserdata::registerSemaphore(L) &&
-            FastMutexUserdata::registerFastMutex(L) &&
-            MutexUserdata::registerMutex(L) &&
-            ThreadUserdata::registerThread(L) &&
-            EventUserdata::registerEvent(L) &&
-            PipeOStreamUserdata::registerPipeOStream(L) && 
-            PipeIStreamUserdata::registerPipeIStream(L) && 
-            IStreamUserdata::registerIStream(L) &&
-            OStreamUserdata::registerOStream(L) && 
-            FileIStreamUserdata::registerFileIStream(L)
+            FileUserdata::registerFile(L)
+            && RegularExpressionUserdata::registerRegularExpression(L)
+            && DynamicAnyUserdata::registerDynamicAny(L)
+            && TimestampUserdata::registerTimestamp(L)
+            && ChecksumUserdata::registerChecksum(L)
+            && PipeUserdata::registerPipe(L)
+            && NamedEventUserdata::registerNamedEvent(L)
+            && NamedMutexUserdata::registerNamedMutex(L)
+            && ProcessHandleUserdata::registerProcessHandle(L)
+            && SemaphoreUserdata::registerSemaphore(L)
+            && FastMutexUserdata::registerFastMutex(L)
+            && MutexUserdata::registerMutex(L)
+            && ThreadUserdata::registerThread(L)
+            && EventUserdata::registerEvent(L)
+            && PipeOStreamUserdata::registerPipeOStream(L)
+            && PipeIStreamUserdata::registerPipeIStream(L)
+            && IStreamUserdata::registerIStream(L)
+            && OStreamUserdata::registerOStream(L)
+            && FileIStreamUserdata::registerFileIStream(L)
+            && FileOStreamUserdata::registerFileOStream(L)
         )
         {
             setupPrivateUserdata(L);
+            lua_pushboolean(L, 1);
+            lua_setfield(L, LUA_REGISTRYINDEX, "poco.metatables.registered");
             rv = true;
         }
     }
