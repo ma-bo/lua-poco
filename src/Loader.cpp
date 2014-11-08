@@ -22,6 +22,7 @@
 #include "foundation/FileIStream.h"
 #include "foundation/FileOStream.h"
 #include "foundation/InflatingIStream.h"
+#include "foundation/InflatingOStream.h"
 
 namespace LuaPoco
 {
@@ -56,6 +57,7 @@ bool loadMetatables(lua_State* L)
             && FileIStreamUserdata::registerFileIStream(L)
             && FileOStreamUserdata::registerFileOStream(L)
             && InflatingIStreamUserdata::registerInflatingIStream(L)
+            && InflatingOStreamUserdata::registerInflatingOStream(L)
         )
         {
             setupPrivateUserdata(L);
