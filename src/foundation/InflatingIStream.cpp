@@ -3,6 +3,7 @@
 // @module inflatingistream
 #include "InflatingIStream.h"
 #include "Poco/Exception.h"
+#include <cstring>
 
 int luaopen_poco_inflatingistream(lua_State* L)
 {
