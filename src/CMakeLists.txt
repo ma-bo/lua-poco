@@ -28,6 +28,7 @@ set(FOUNDATION_SRC
     foundation/FileOStream.cpp
     foundation/InflatingIStream.cpp
     foundation/InflatingOStream.cpp
+    foundation/DeflatingIStream.cpp
     foundation/DeflatingOStream.cpp
     )
 

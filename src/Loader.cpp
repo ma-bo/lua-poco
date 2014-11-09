@@ -23,6 +23,7 @@
 #include "foundation/FileOStream.h"
 #include "foundation/InflatingIStream.h"
 #include "foundation/InflatingOStream.h"
+#include "foundation/DeflatingIStream.h"
 #include "foundation/DeflatingOStream.h"
 
 namespace LuaPoco
@@ -59,6 +60,7 @@ bool loadMetatables(lua_State* L)
             && FileOStreamUserdata::registerFileOStream(L)
             && InflatingIStreamUserdata::registerInflatingIStream(L)
             && InflatingOStreamUserdata::registerInflatingOStream(L)
+            && DeflatingIStreamUserdata::registerDeflatingIStream(L)
             && DeflatingOStreamUserdata::registerDeflatingOStream(L)
         )
         {
