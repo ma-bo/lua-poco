@@ -4,12 +4,6 @@ compiler: gcc
 
 before_install:
 - sudo apt-get update -qq
-libssl1.0.0
-libexpat1
-zlib1g
-libpcre3
-libsqlite3-0
-libexpat1
 - sudo apt-get install -y libmysqlclient18 libodbc1 unixodbc mysql-common libssl1.0.0 libexpat1 zlib1g libpcre3 libsqlite3-0 libexpat1
 - sudo apt-get install lua5.1 lua5.2 luajit liblua5.1-0-dev libluajit-5.1-dev liblua5.2-dev
 - wget http://http.us.debian.org/debian/pool/main/p/poco/libpoco-dev_1.4.6p1-1_i386.deb
