@@ -1,0 +1,30 @@
+language: cpp
+
+compiler: gcc
+
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -y lua5.1 lua5.2 luajit liblua5.1-0-dev libluajit-5.1-dev liblua5.2-dev libmysqlclient18 libodbc1 mysql-common
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpoco-dev_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpococrypto16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpocodata16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpocodatamysql16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpocodataodbc16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpocodatasqlite16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpocofoundation16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpoconet16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpoconetssl16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpocoutil16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpocoxml16_1.4.6p1-1_i386.deb
+- wget http://http.us.debian.org/debian/pool/main/p/poco/libpocozip16_1.4.6p1-1_i386.deb
+- sudo dpkg -i libpoco*.deb
+
+before_script:
+- mkdir build
+- cd build
+- cmake -DCMAKE_BUILD_TYPE=Debug -DLUA51=TRUE ..
+
+script: make
+
+notifications:
+  irc: "chat.freenode.net#lua-poco"
