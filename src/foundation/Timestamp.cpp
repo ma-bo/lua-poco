@@ -204,11 +204,7 @@ int TimestampUserdata::metamethod__add(lua_State* L)
     int otherIndex = 2;
     
     if (!lua_isuserdata(L, 1) || !lua_isuserdata(L, 2))
-    {
-        lua_pushnil(L);
-        lua_pushfstring(L, "Poco.Timestamp and Poco.DynamicAny required for __add");
-        return 2;
-    }
+        return luaL_error(L, "Poco.Timestamp and Poco.DynamicAny required for __add");
 
     lua_getmetatable(L, 1);
     luaL_getmetatable(L, "Poco.Timestamp.metatable");
