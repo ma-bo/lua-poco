@@ -253,34 +253,18 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
     int otherIndex = 2;
     
     if (!lua_isuserdata(L, 1) || !lua_isuserdata(L, 2))
-    {
-        lua_pushnil(L);
-        lua_pushfstring(L, "Poco.Timestamp and Poco.DynamicAny required for __sub");
-        return 2;
-    }
-
-    lua_getmetatable(L, 1);
-    luaL_getmetatable(L, "Poco.Timestamp.metatable");
-    if (!lua_rawequal(L, -1, -2))
-    {
-        tsIndex = 2;
-        otherIndex = 1;
-    }
-    lua_pop(L, 2);
+        return luaL_error(L, "Poco.Timestamp and Poco.DynamicAny required for __sub");
     
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, tsIndex);
     DynamicAnyUserdata* daud = checkPrivateUserdata<DynamicAnyUserdata>(L, otherIndex);
     
     try
     {
-        Poco::Int64 val;
+        Poco::Timestamp::TimeDiff val;
         daud->mDynamicAny.convert(val);
         Poco::Timestamp newTs;
         
-        if (tsIndex == 1)
-            newTs = tsud->mTimestamp - val;
-        else
-            newTs = val - tsud->mTimestamp;
+        newTs = tsud->mTimestamp - val;
         
         TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(newTs);
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
