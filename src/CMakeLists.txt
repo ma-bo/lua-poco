@@ -30,6 +30,7 @@ set(FOUNDATION_SRC
     foundation/InflatingOStream.cpp
     foundation/DeflatingIStream.cpp
     foundation/DeflatingOStream.cpp
+    foundation/Path.cpp
     )
 
 # check if Version.h is present for 1.3.6 compatability issues.
