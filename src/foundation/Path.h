@@ -21,7 +21,7 @@ class PathUserdata : public Userdata
 public:
     PathUserdata();
     PathUserdata(const char* path, Poco::Path::Style style, bool absolute);
-    PathUserdata(Poco::Path& path);
+    PathUserdata(Poco::Path path);
     virtual ~PathUserdata();
     virtual bool copyToState(lua_State *L);
     // register metatable for this class

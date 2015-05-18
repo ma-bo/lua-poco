@@ -50,7 +50,7 @@ PathUserdata::PathUserdata(const char* path, Poco::Path::Style style, bool absol
     mPath.assign(path, style);
 }
 
-PathUserdata::PathUserdata(Poco::Path& path) :
+PathUserdata::PathUserdata(Poco::Path path) :
     mPath(path)
 {
 }
@@ -219,7 +219,7 @@ int PathUserdata::find(lua_State* L)
     }
     
     Poco::Path path;
-    if (Poco::Path::find(paths.cbegin(), paths.cend(), pathStr, path))
+    if (Poco::Path::find(paths.begin(), paths.end(), pathStr, path))
     {
         PathUserdata* newpud = new(lua_newuserdata(L, sizeof *newpud)) PathUserdata(path);
         setupPocoUserdata(L, newpud, POCO_PATH_METATABLE_NAME);
