@@ -330,8 +330,8 @@ int ThreadUserdata::join(lua_State* L)
             
             if (thud->mThreadResult != 0)
             {
-                lua_pushboolean(L, 1);
-                lua_pushstring(L, lua_tostring(thud->mThreadState, -1));
+                lua_pushnil(L);
+                lua_pushstring(L, thud->mErrorMsg.c_str());
                 rv = 2;
             }
             else
@@ -465,6 +465,7 @@ void ThreadUserdata::run()
     int top = lua_gettop(mThreadState);
     
     mThreadResult = lua_pcall(mThreadState, mParamCount, 0, 0);
+    if (mThreadResult != 0) mErrorMsg = lua_tostring(mThreadState, -1);
 }
 
 } // LuaPoco

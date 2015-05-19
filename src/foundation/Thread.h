@@ -47,6 +47,7 @@ private:
     bool mStarted;
     int mParamCount;
     int mThreadResult;
+    std::string mErrorMsg;
 };
 
 } // LuaPoco
