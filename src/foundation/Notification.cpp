@@ -1,6 +1,5 @@
 #include "Loader.h"
 #include "Notification.h"
-#include <cstdio>
 
 namespace LuaPoco
 {
