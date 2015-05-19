@@ -33,7 +33,7 @@ PipeUserdata::~PipeUserdata()
 
 bool PipeUserdata::copyToState(lua_State *L)
 {
-    PipeUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PipeUserdata();
+    PipeUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PipeUserdata(mPipe);
     setupPocoUserdata(L, pud, POCO_PIPE_METATABLE_NAME);
     return true;
 }
