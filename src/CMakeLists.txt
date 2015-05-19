@@ -31,6 +31,9 @@ set(FOUNDATION_SRC
     foundation/DeflatingIStream.cpp
     foundation/DeflatingOStream.cpp
     foundation/Path.cpp
+    foundation/Notification.cpp
+    foundation/NotificationFactory.cpp
+    foundation/NotificationQueue.cpp
     )
 
 # check if Version.h is present for 1.3.6 compatability issues.
