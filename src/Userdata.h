@@ -10,6 +10,16 @@
 namespace LuaPoco
 {
 
+// a utility class for doing RAII style cleanup of a Lua state due to early returns.
+class LuaStateHolder
+{
+public:
+    lua_State* state;
+    LuaStateHolder(lua_State* L);
+    ~LuaStateHolder();
+    lua_State* extract();
+};
+
 // base class for all userdata
 class Userdata
 {

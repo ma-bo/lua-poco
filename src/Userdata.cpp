@@ -3,6 +3,24 @@
 namespace LuaPoco
 {
 
+// LuaStateHolder implementation.
+LuaStateHolder::LuaStateHolder(lua_State* L)
+{
+    state = L;
+}
+
+LuaStateHolder::~LuaStateHolder()
+{
+    if (state) lua_close(state);
+}
+
+lua_State* LuaStateHolder::extract()
+{
+    lua_State* L = state;
+    state = NULL;
+    return L;
+}
+
 // public member functions
 Userdata::Userdata()
 {

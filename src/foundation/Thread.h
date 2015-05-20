@@ -6,6 +6,7 @@
 #include "Userdata.h"
 #include "Poco/Thread.h"
 #include "Poco/Runnable.h"
+#include "Poco/Mutex.h"
 
 extern "C"
 {
@@ -41,6 +42,7 @@ private:
     static int stackSize(lua_State* L);
     static int start(lua_State* L);
     
+    Poco::FastMutex mThreadMutex;
     Poco::Thread mThread;
     lua_State* mThreadState;
     bool mJoined;

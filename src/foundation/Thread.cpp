@@ -330,6 +330,7 @@ int ThreadUserdata::join(lua_State* L)
             
             if (thud->mThreadResult != 0)
             {
+                Poco::ScopedLock<Poco::FastMutex> lock(thud->mThreadMutex);
                 lua_pushnil(L);
                 lua_pushstring(L, thud->mErrorMsg.c_str());
                 rv = 2;
@@ -417,9 +418,20 @@ int ThreadUserdata::start(lua_State* L)
         
     luaL_checktype(L, 2, LUA_TFUNCTION);
     
-    thud->mThreadState = luaL_newstate();
-    luaL_openlibs(thud->mThreadState);
-    if (!loadMetatables(thud->mThreadState))
+    if (thud->mStarted)
+    {
+        lua_pushnil(L);
+        lua_pushstring(L, "thread already started.");
+        return 2;
+    }
+    
+    Poco::ScopedLock<Poco::FastMutex> lock(thud->mThreadMutex);
+    
+    // any code that returns due to a failure will clean up the allocated state 
+    // and it will not be assigned to the mState member variable.
+    LuaStateHolder holder(luaL_newstate());
+    luaL_openlibs(holder.state);
+    if (!loadMetatables(holder.state))
     {
         lua_pushnil(L);
         lua_pushstring(L, "could not load poco library into thread's state.");
@@ -429,7 +441,7 @@ int ThreadUserdata::start(lua_State* L)
     for (int i = 2; i <= top; ++i)
     {
         lua_pushvalue(L, i);
-        if (!transferValue(thud->mThreadState, L))
+        if (!transferValue(holder.state, L))
         {
             lua_pushnil(L);
             lua_pushfstring(L, "non-copyable value at parameter %d\n", i);
@@ -455,15 +467,16 @@ int ThreadUserdata::start(lua_State* L)
         rv = pushUnknownException(L);
     }
     
+    // extract the state from the holder, which prevents it from being closed.
+    thud->mThreadState = holder.extract();
     return rv;
 }
 
 // ThreadUserdata is a Poco::Runnable, so this is executed as part of Poco::Thread::start().
 void ThreadUserdata::run()
 {
-    const char* msg;
+    Poco::ScopedLock<Poco::FastMutex> lock(mThreadMutex);
     int top = lua_gettop(mThreadState);
-    
     mThreadResult = lua_pcall(mThreadState, mParamCount, 0, 0);
     if (mThreadResult != 0) mErrorMsg = lua_tostring(mThreadState, -1);
 }
