@@ -64,13 +64,8 @@ private:
     static int setSize(lua_State* L);
     static int setWritable(lua_State* L);
     
-    Poco::File* mFile;
+    Poco::File mFile;
 };
-
-inline Poco::File* FileUserdata::getFileInternal()
-{
-    return mFile;
-}
 
 } // LuaPoco
 
