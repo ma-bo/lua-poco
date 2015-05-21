@@ -89,10 +89,14 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },
         { "extract", extract },
-        { "match", match },
+        { "oldmatch", oldmatch },
         { "extractPositions", extractPositions },
         { "extractCaptures", extractCaptures },
         { "substitute", substitute },
+        { "find", find },
+        { "match", match },
+        { "gmatch", gmatch },
+        { "gsub", gsub },
         { NULL, NULL}
     };
     
@@ -216,7 +220,7 @@ int RegularExpressionUserdata::extract(lua_State* L)
 // @return the starting position of the match as a number or nil. (error)
 // @return the length of the match or error message.
 // @function match
-int RegularExpressionUserdata::match(lua_State* L)
+int RegularExpressionUserdata::oldmatch(lua_State* L)
 {
     int rv = 0;
     RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
@@ -447,6 +451,26 @@ int RegularExpressionUserdata::extractPositions(lua_State* L)
     }
     
     return rv;
+}
+
+int RegularExpressionUserdata::find(lua_State* L)
+{
+    return 0;
+}
+
+int RegularExpressionUserdata::match(lua_State* L)
+{
+    return 0;
+}
+
+int RegularExpressionUserdata::gmatch(lua_State* L)
+{
+    return 0;
+}
+
+int RegularExpressionUserdata::gsub(lua_State* L)
+{
+    return 0;
 }
 
 } // LuaPoco

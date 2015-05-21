@@ -37,10 +37,16 @@ private:
     
     // userdata methods
     static int extract(lua_State* L);
-    static int match(lua_State* L);
+    static int oldmatch(lua_State* L);
     static int extractPositions(lua_State* L);
     static int extractCaptures(lua_State* L);
     static int substitute(lua_State* L);
+    
+    // pattern compatible userdata methods
+    static int find(lua_State* L);
+    static int match(lua_State* L);
+    static int gmatch(lua_State* L);
+    static int gsub(lua_State* L);
     
     Poco::RegularExpression mRegularExpression;
 };
@@ -48,3 +54,4 @@ private:
 } // LuaPoco
 
 #endif
+
