@@ -88,11 +88,6 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },
-        { "extract", extract },
-        { "oldmatch", oldmatch },
-        { "extractPositions", extractPositions },
-        { "extractCaptures", extractCaptures },
-        { "substitute", substitute },
         { "find", find },
         { "match", match },
         { "gmatch", gmatch },
@@ -119,7 +114,7 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     int top = lua_gettop(L);
     
-    const char* pattern = luaL_checkstring(L, 1);
+    const char* pattern = luaL_checkstring(L, firstArg);
     const char* optionsStr = "";
     int options = 0;
     bool study = true;
@@ -163,30 +158,37 @@ int RegularExpressionUserdata::metamethod__tostring(lua_State* L)
 
 // userdata methods
 
-/// Extracts the primary regex match.
-// Subgroups are returned in the match count, but only the primary match is extracted.
-// @string subject the string which will be processed with the regex.
-// @string[opt] options regex options for the match.
-// @int[opt] startPos the position to start the match.
-// @return the count of matches as a number, or nil. (error)
-// @return the substring matched by the expression, or error message.
-// @function extract
-int RegularExpressionUserdata::extract(lua_State* L)
+/// Looks for the first match of pattern in the string s. 
+// If it finds a match, then find returns the indices of s where this occurrence starts and ends; otherwise, it returns nil.
+// A third, optional numerical argument init specifies where to start the search; 
+// its default value is 1 and can be negative. A value of true as a fourth, optional argument plain turns off the pattern matching facilities, 
+// so the function does a plain "find substring" operation, with no characters in pattern being considered "magic". Note that if plain is given, then init must be given as well.
+// If the pattern has captures, then in a successful match the captured values are also returned, after the two indices.
+//
+// @string s string to search using the regex.
+// @string[opt] regex options for the match.
+// @int[opt] init position in the string to start the find.
+// @return indicies of the match including captures or nil.
+// @function find
+int RegularExpressionUserdata::find(lua_State* L)
 {
     int rv = 0;
     RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
     
-    const char* subject = luaL_checkstring(L, 2);
+    size_t subjectSize = 0;
+    const char* subject = luaL_checklstring(L, 2, &subjectSize);
+    
     int options = 0;
     int startPosition = 0;
     
     int top = lua_gettop(L);
-    if (top > 3)
+    if (top > 2)
     {
         const char* optionsStr = luaL_checkstring(L, 3);
         options = parseRegexOptions(optionsStr);
     }
-    if (top > 4)
+    
+    if (top > 3)
     {
         startPosition = luaL_checkint(L, 4) - 1;
         startPosition = startPosition < 0 ? 0 : startPosition;
@@ -194,11 +196,23 @@ int RegularExpressionUserdata::extract(lua_State* L)
     
     try
     {
-        std::string match;
-        int matchCount = reud->mRegularExpression.extract(subject, startPosition, match, options);
-        lua_pushnumber(L, matchCount);
-        lua_pushlstring(L, match.c_str(), match.size());
-        rv = 2;
+        Poco::RegularExpression::MatchVec matches;
+        int matchCount = reud->mRegularExpression.match(subject, startPosition, matches, options);
+        if (matchCount > 0)
+        {
+            for (size_t i = 0; matchCount > 0 && i < matches.size(); ++i)
+            {
+                // overwrite values from 1 to matchCount
+                lua_pushnumber(L, matches[i].offset + 1);
+                lua_pushnumber(L, matches[i].offset + matches[i].length);
+            }
+            rv = matchCount * 2;
+        }
+        else
+        {
+            lua_pushnil(L);
+            rv = 1;
+        }
     }
     catch (const Poco::Exception& e)
     {
@@ -212,20 +226,19 @@ int RegularExpressionUserdata::extract(lua_State* L)
     return rv;
 }
 
-/// Matches pattern against string.
-// Returns match position and length.
-// @string subject attempt to match the pattern against subject string.
+// @string s string to search using the regex.
 // @string[opt] regex options for the match.
-// @int[opt] startPos starting position for the match.
-// @return the starting position of the match as a number or nil. (error)
-// @return the length of the match or error message.
+// @int[opt] init position in the string to start the find.
+// @return match strings including captures or nil.
 // @function match
-int RegularExpressionUserdata::oldmatch(lua_State* L)
+int RegularExpressionUserdata::match(lua_State* L)
 {
     int rv = 0;
     RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
     
-    const char* subject = luaL_checkstring(L, 2);
+    size_t subjectSize = 0;
+    const char* subject = luaL_checklstring(L, 2, &subjectSize);
+    
     int options = 0;
     int startPosition = 0;
     
@@ -243,22 +256,16 @@ int RegularExpressionUserdata::oldmatch(lua_State* L)
     
     try
     {
-        Poco::RegularExpression::Match match;
-        int matchCount = reud->mRegularExpression.match(subject, startPosition, match, options);
+        Poco::RegularExpression::MatchVec matches;
+        int matchCount = reud->mRegularExpression.match(subject, startPosition, matches, options);
         lua_pushnumber(L, matchCount);
-        if (matchCount > 0)
+        for (size_t i = 0; matchCount > 0 && i < matches.size(); ++i)
         {
-            // return a 1-based start position and end position, 
-            // instead of offset + length
-            lua_pushnumber(L, match.offset + 1);
-            lua_pushnumber(L, match.offset + match.length);
+            lua_pushlstring(L, subject + matches[i].offset, matches[i].length);
+            // overwrite values from 1 to matchCount
+            lua_rawseti(L, 3, i + 1);
         }
-        else
-        {
-            lua_pushnil(L);
-            lua_pushnil(L);
-        }
-        rv = 3;
+        rv = 1;
     }
     catch (const Poco::Exception& e)
     {
@@ -272,15 +279,101 @@ int RegularExpressionUserdata::oldmatch(lua_State* L)
     return rv;
 }
 
-/// Replace match in string with a substitute.
-// @string subject attempt to match the pattern against subject string.
-// @string replacement string that will be used to replace the matched pattern.
+// 1. userdata
+// 2. string
+// 3. options
+// 4. start position
+int RegularExpressionUserdata::gmatch_iter(lua_State* L)
+{
+    int rv = 0;
+    RegularExpressionUserdata* reud = static_cast<RegularExpressionUserdata*>(lua_touserdata(L, lua_upvalueindex(1)));
+    const char* subject = lua_tostring(L, lua_upvalueindex(2));
+    int options = lua_tointeger(L, lua_upvalueindex(3));
+    int startPosition = lua_tointeger(L, lua_upvalueindex(4));
+    
+    try
+    {
+        Poco::RegularExpression::MatchVec matches;
+        int matchCount = reud->mRegularExpression.match(subject, startPosition, matches, options);
+        if (matchCount > 0)
+        {
+            lua_pushinteger(L, matches[0].offset + matches[0].length);
+            lua_replace(L, lua_upvalueindex(4));
+            for (size_t i = 0; matchCount > 0 && i < matches.size(); ++i)
+            {
+                lua_pushlstring(L, subject + matches[i].offset, matches[i].length);
+            }
+            rv = matchCount;
+        }
+        else
+        {
+            lua_pushnil(L);
+            rv = 1;
+        }
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
+}
+
+/// Iterates a string returning pattern matches.
+// Returns an iterator function that, each time it is called, returns the next captures from pattern over string s.
+// If pattern specifies no captures, then the whole match is produced in each call.
+//
+// @string s string to search using the regex.
+// @string[opt] regex options for the match.
+// @return gmatch_iter function to iterate matches in s.
+// @function gmatch
+int RegularExpressionUserdata::gmatch(lua_State* L)
+{
+    int rv = 0;
+    RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
+    
+    size_t subjectSize = 0;
+    const char* subject = luaL_checklstring(L, 2, &subjectSize);
+    
+    int options = 0;
+    int startPosition = 0;
+    
+    int top = lua_gettop(L);
+    if (top > 2)
+    {
+        const char* optionsStr = luaL_checkstring(L, 3);
+        options = parseRegexOptions(optionsStr);
+    }
+    
+    // userdata
+    lua_pushvalue(L, 1);
+    // string
+    lua_pushvalue(L, 2);
+    // options
+    lua_pushinteger(L, options);
+    // start position
+    lua_pushinteger(L, startPosition);
+    
+    lua_pushcclosure(L, gmatch_iter, 4);
+    
+    return 1;
+}
+
+/// Replace all matches in string with a substition.
+// @string s subject string to match against.
+// @string string that will be used to replace matches in subject.
+// Captures may be referenced in the replacement by using:
+//  $0 (entire match), $1 (first capture), $2 (second capture), etc.
 // @string[opt] options regex options for the match.
+// Note: The RE_GLOBAL flag is always set for gsub.
 // @int[opt] startPos starting position for the match.
-// @return the count of matches replaced or nil. (error)
-// @return the newly replaced string or error message.
-// @function substitute
-int RegularExpressionUserdata::substitute(lua_State* L)
+// @return the newly replaced string or nil.
+// @function gsub
+int RegularExpressionUserdata::gsub(lua_State* L)
 {
     int rv = 0;
     RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
@@ -289,7 +382,7 @@ int RegularExpressionUserdata::substitute(lua_State* L)
     const char* subject = luaL_checklstring(L, 2, &subjectSize);
     const char* replacement = luaL_checkstring(L, 3);
     
-    int options = 0;
+    int options = Poco::RegularExpression::RE_GLOBAL;
     int startPosition = 0;
     
     int top = lua_gettop(L);
@@ -323,154 +416,6 @@ int RegularExpressionUserdata::substitute(lua_State* L)
     }
     
     return rv;
-}
-
-/// Extracts all matches into supplied table.
-//
-// Note: matches are written to the table starting at index 1.
-// It is up to the user to clear the table before calling this function, or 
-// observe the return value when iterating the table.
-// @string subject attempt to match the pattern against subject string.
-// @param extractTable a table where matches will be stored starting at index 1.
-// @string[opt] regex options for the match.
-// @int[opt] startPos starting position for the match.
-// @return the count of matches replaced or nil. (error)
-// @return error message.
-// @function extractCaptures
-int RegularExpressionUserdata::extractCaptures(lua_State* L)
-{
-    int rv = 0;
-    RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
-    
-    size_t subjectSize = 0;
-    const char* subject = luaL_checklstring(L, 2, &subjectSize);
-    
-    int options = 0;
-    int startPosition = 0;
-    
-    luaL_checktype(L, 3, LUA_TTABLE);
-    
-    int top = lua_gettop(L);
-    if (top > 3)
-    {
-        const char* optionsStr = luaL_checkstring(L, 4);
-        options = parseRegexOptions(optionsStr);
-    }
-    
-    if (top > 4)
-    {
-        startPosition = luaL_checkint(L, 5) - 1;
-        startPosition = startPosition < 0 ? 0 : startPosition;
-    }
-    
-    try
-    {
-        Poco::RegularExpression::MatchVec matches;
-        int matchCount = reud->mRegularExpression.match(subject, startPosition, matches, options);
-        lua_pushnumber(L, matchCount);
-        for (size_t i = 0; matchCount > 0 && i < matches.size(); ++i)
-        {
-            lua_pushlstring(L, subject + matches[i].offset, matches[i].length);
-            // overwrite values from 1 to matchCount
-            lua_rawseti(L, 3, i + 1);
-        }
-        rv = 1;
-    }
-    catch (const Poco::Exception& e)
-    {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
-    return rv;
-}
-
-/// Extracts all match positions into the supplied table.
-//
-// Note: positions are written to the table starting at index 1.
-// It is up to the user to clear the table before calling this function, or 
-// observe the return value when iterating the table.
-// @string subject attempt to match the pattern against subject string.
-// @param extractTable a table where matches will be stored starting at index 1.
-// @string[opt] regex options for the match.
-// @int[opt] startPos starting position for the match.
-// @return the count of matches replaced or nil. (error)
-// @return error message.
-// @function extractPositions
-int RegularExpressionUserdata::extractPositions(lua_State* L)
-{
-    int rv = 0;
-    RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
-    
-    size_t subjectSize = 0;
-    const char* subject = luaL_checklstring(L, 2, &subjectSize);
-    
-    int options = 0;
-    int startPosition = 0;
-    
-    luaL_checktype(L, 3, LUA_TTABLE);
-    
-    int top = lua_gettop(L);
-    if (top > 3)
-    {
-        const char* optionsStr = luaL_checkstring(L, 4);
-        options = parseRegexOptions(optionsStr);
-    }
-    
-    if (top > 4)
-    {
-        startPosition = luaL_checkint(L, 5) - 1;
-        startPosition = startPosition < 0 ? 0 : startPosition;
-    }
-    
-    try
-    {
-        Poco::RegularExpression::MatchVec matches;
-        int matchCount = reud->mRegularExpression.match(subject, startPosition, matches, options);
-        lua_pushnumber(L, matchCount);
-        for (size_t i = 0; matchCount > 0 && i < matches.size(); ++i)
-        {
-            // overwrite values from 1 to matchCount
-            lua_pushnumber(L, matches[i].offset + 1);
-            lua_rawseti(L, 3, i + 1);
-            lua_pushnumber(L, matches[i].offset + matches[i].length);
-            lua_rawseti(L, 3, i + 2);
-        }
-        rv = 1;
-    }
-    catch (const Poco::Exception& e)
-    {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
-    return rv;
-}
-
-int RegularExpressionUserdata::find(lua_State* L)
-{
-    return 0;
-}
-
-int RegularExpressionUserdata::match(lua_State* L)
-{
-    return 0;
-}
-
-int RegularExpressionUserdata::gmatch(lua_State* L)
-{
-    return 0;
-}
-
-int RegularExpressionUserdata::gsub(lua_State* L)
-{
-    return 0;
 }
 
 } // LuaPoco
