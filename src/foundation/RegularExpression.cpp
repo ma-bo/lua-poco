@@ -103,7 +103,7 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 
 /// Constructs a new regex userdata
 // @string pattern the regular expression pattern
-// @string[opt] options 
+// @string[opt] options regex options for the match.
 // @string[opt] study 
 // @return userdata or nil. (error)
 // @return error message.
@@ -166,7 +166,7 @@ int RegularExpressionUserdata::metamethod__tostring(lua_State* L)
 // If the pattern has captures, then in a successful match the captured values are also returned, after the two indices.
 //
 // @string s string to search using the regex.
-// @string[opt] regex options for the match.
+// @string[opt] options regex options for the match.
 // @int[opt] init position in the string to start the find.
 // @return indicies of the match including captures or nil.
 // @function find
@@ -225,11 +225,12 @@ int RegularExpressionUserdata::find(lua_State* L)
     
     return rv;
 }
-
+/// Looks for the first match of the regex in the subject string.
 // @string s string to search using the regex.
-// @string[opt] regex options for the match.
+// @string[opt] options regex options for the match.
 // @int[opt] init position in the string to start the find.
-// @return match strings including captures or nil.
+// @return captures or nil.
+// If there were no captures specified, returns the entire match.
 // @function match
 int RegularExpressionUserdata::match(lua_State* L)
 {
@@ -328,7 +329,7 @@ int RegularExpressionUserdata::gmatch_iter(lua_State* L)
 // If pattern specifies no captures, then the whole match is produced in each call.
 //
 // @string s string to search using the regex.
-// @string[opt] regex options for the match.
+// @string[opt] options regex options for the match.
 // @return gmatch_iter function to iterate matches in s.
 // @function gmatch
 int RegularExpressionUserdata::gmatch(lua_State* L)
@@ -364,47 +365,200 @@ int RegularExpressionUserdata::gmatch(lua_State* L)
 }
 
 /// Replace all matches in string with a substition.
+//
+// The replacement parameter may be of the following types:
+//
+// 1. string - The string value will be used to replace the match. The string may contain $0 for the full match, 
+// $1 for the first capture, $2 second capture, etc.
+//
+// 2. table - The first capture in the match will be used as the key in the table to look up the replacement string.
+// If there are no captures, the entire match will be used as the key.
+//
+// function - The function will be called with the captures in the match as parameters in order.
+// If there are no captures, the function will be called with the entire match as a single parameter.
+//
 // @string s subject string to match against.
-// @string string that will be used to replace matches in subject.
-// Captures may be referenced in the replacement by using:
-//  $0 (entire match), $1 (first capture), $2 (second capture), etc.
+// @param replace string, table, or function.
 // @string[opt] options regex options for the match.
-// Note: The RE_GLOBAL flag is always set for gsub.
-// @int[opt] startPos starting position for the match.
+// @int[opt] n number of matches to replace.
 // @return the newly replaced string or nil.
 // @function gsub
 int RegularExpressionUserdata::gsub(lua_State* L)
 {
     int rv = 0;
+    int top = lua_gettop(L);    
+    int options = 0;
+    int replaceCount = -1;
+    size_t startPosition = 0;
+    int replaced = 0;
+    
+    // regex:gsub
     RegularExpressionUserdata* reud = checkPrivateUserdata<RegularExpressionUserdata>(L, 1);
     
+    // @string s
     size_t subjectSize = 0;
     const char* subject = luaL_checklstring(L, 2, &subjectSize);
-    const char* replacement = luaL_checkstring(L, 3);
+    std::string subjectMutable(subject);
     
-    int options = Poco::RegularExpression::RE_GLOBAL;
-    int startPosition = 0;
+    // @param replace
+    int replaceType = lua_type(L, 3);
+    if (replaceType != LUA_TSTRING && replaceType != LUA_TTABLE && replaceType != LUA_TFUNCTION)
+        return luaL_error(L, "parameter #3 must be a 'string', 'table', or 'function', got: %s", lua_typename(L, replaceType));
     
-    int top = lua_gettop(L);
+    // @string[opt] options
     if (top > 3)
     {
         const char* optionsStr = luaL_checkstring(L, 4);
         options = parseRegexOptions(optionsStr);
     }
     
+    // @int[opt] n
     if (top > 4)
     {
-        startPosition = luaL_checkint(L, 5) - 1;
-        startPosition = startPosition < 0 ? 0 : startPosition;
+        replaceCount = luaL_checkint(L, 5);
+        if (replaceCount < 0) replaceCount = 0;
     }
     
     try
     {
-        std::string subjectMutable(subject);
-        int replacedCount = reud->mRegularExpression.subst(subjectMutable, startPosition, replacement, options);
-        lua_pushnumber(L, replacedCount);
-        lua_pushlstring(L, subjectMutable.c_str(), subjectMutable.size());
-        rv = 2;
+        if (replaceType == LUA_TSTRING)
+        {
+            std::string replacement(lua_tostring(L, 3));
+            
+            // optimize for the most common case where the user wants to replace all matches.
+            // ie: don't do the excess iteration.
+            if (replaceCount < 0)
+            {
+                // force RE_GLOBAL to replace all.
+                replaced = reud->mRegularExpression.subst(subjectMutable, replacement, options | Poco::RegularExpression::RE_GLOBAL);
+                lua_pushlstring(L, subjectMutable.c_str(), subjectMutable.size());
+                lua_pushnumber(L, replaced);
+                rv = 2;
+            }
+            else
+            {
+                Poco::RegularExpression::Match match;
+                while(0 < replaceCount && reud->mRegularExpression.match(subjectMutable, startPosition, match, options) > 0)
+                {
+                    int subjectSizeBefore = static_cast<int>(subjectMutable.size());
+                    // perform the replacement
+                    if (reud->mRegularExpression.subst(subjectMutable, startPosition, replacement, options) > 0)
+                    {
+                        ++replaced;
+                        --replaceCount;
+                    }
+                    else
+                        break;
+                    
+                    // The match will have been replaced by string of possibly different size.
+                    // Calculate the previous end of match, and apply the delta to it for the next start position.
+                    int replaceDelta = static_cast<int>(subjectMutable.size()) - subjectSizeBefore;
+                    startPosition = match.offset + match.length + replaceDelta;
+                }
+    
+                lua_pushlstring(L, subjectMutable.c_str(), subjectMutable.size());
+                lua_pushnumber(L, replaced);
+                rv = 2;
+            }
+        }
+        else if (replaceType == LUA_TTABLE)
+        {
+            Poco::RegularExpression::MatchVec matches;
+            int matchCount = 0;
+            while ((matchCount = reud->mRegularExpression.match(subjectMutable, startPosition, matches, options)) > 0)
+            {
+                // if we were supplied a replaceCount (-1 == replace all), 
+                // break if desired number of replacements have been made.
+                if (replaceCount > -1 && 0 >= replaceCount)
+                    break;
+
+                int subjectSizeBefore = static_cast<int>(subjectMutable.size());
+                
+                // use the first capture (1) if captures are present, otherwise use the whole match (0).
+                int matchIdx = matchCount > 1 ? 1 : 0;
+                
+                // extract match to look up in table.
+                lua_pushlstring(L, subjectMutable.c_str() + matches[matchIdx].offset, matches[matchIdx].length);
+                lua_gettable(L, 3);
+                if (!lua_isnil(L, -1) && lua_isstring(L, -1))
+                {
+                    std::string replacement(lua_tostring(L, -1));
+                    // perform the replacement
+                    if (reud->mRegularExpression.subst(subjectMutable, startPosition, replacement, options) > 0)
+                    {
+                        ++replaced;
+                        --replaceCount;
+                    }
+                    else
+                        break;
+                }
+                lua_pop(L, 1);
+                
+                // The match will have been replaced by string of possibly different size.
+                // Calculate the previous end of match, and apply the delta to it for the next start position.
+                int replaceDelta = static_cast<int>(subjectMutable.size()) - subjectSizeBefore;
+                startPosition = matches[0].offset + matches[0].length + replaceDelta;
+            }
+
+            lua_pushlstring(L, subjectMutable.c_str(), subjectMutable.size());
+            lua_pushnumber(L, replaced);
+            rv = 2;
+        }
+        else if (replaceType == LUA_TFUNCTION)
+        {
+            Poco::RegularExpression::MatchVec matches;
+            int matchCount = 0;
+            while ((matchCount = reud->mRegularExpression.match(subjectMutable, startPosition, matches, options)) > 0)
+            {
+                // if we were supplied a replaceCount (-1 == replace all), 
+                // break if desired number of replacements have been made.
+                if (replaceCount > -1 && 0 >= replaceCount)
+                    break;
+
+                int subjectSizeBefore = static_cast<int>(subjectMutable.size());
+                
+                // use the first capture (1) if captures are present, otherwise use the whole match (0).
+                int matchIdx = matchCount > 1 ? 1 : 0;
+                
+                // push captures or entire match and pcall function.
+                lua_pushvalue(L, 3);
+                for (size_t i = matchIdx; i < matchCount; ++i)
+                {
+                    lua_pushlstring(L, subjectMutable.c_str() + matches[i].offset, matches[i].length);
+                }
+                int rv = lua_pcall(L, matchCount - matchIdx, 1, 0);
+                
+                // use function's string return value as the replacement.
+                if (!lua_isnil(L, -1) && lua_isstring(L, -1))
+                {
+                    std::string replacement(lua_tostring(L, -1));
+                    // perform the replacement
+                    if (reud->mRegularExpression.subst(subjectMutable, startPosition, replacement, options) > 0)
+                    {
+                        ++replaced;
+                        --replaceCount;
+                    }
+                    else
+                        break;
+                }
+                else
+                {
+                    lua_pushnil(L);
+                    lua_pushvalue(L, -2);
+                    return 2;
+                }
+                lua_pop(L, 1);
+                
+                // The match will have been replaced by string of possibly different size.
+                // Calculate the previous end of match, and apply the delta to it for the next start position.
+                int replaceDelta = static_cast<int>(subjectMutable.size()) - subjectSizeBefore;
+                startPosition = matches[matchIdx].offset + matches[matchIdx].length + replaceDelta;
+            }
+
+            lua_pushlstring(L, subjectMutable.c_str(), subjectMutable.size());
+            lua_pushnumber(L, replaced);
+            rv = 2;
+        }
     }
     catch (const Poco::Exception& e)
     {
