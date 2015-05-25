@@ -259,14 +259,13 @@ int RegularExpressionUserdata::match(lua_State* L)
     {
         Poco::RegularExpression::MatchVec matches;
         int matchCount = reud->mRegularExpression.match(subject, startPosition, matches, options);
-        lua_pushnumber(L, matchCount);
-        for (size_t i = 0; matchCount > 0 && i < matches.size(); ++i)
+        // if there are captures (matchCount > 1), return the captures only, 
+        // otherwise return the whole match.
+        for (size_t i = matchCount > 1 ? 1 : 0; i < matchCount; ++i)
         {
             lua_pushlstring(L, subject + matches[i].offset, matches[i].length);
-            // overwrite values from 1 to matchCount
-            lua_rawseti(L, 3, i + 1);
+            ++rv;
         }
-        rv = 1;
     }
     catch (const Poco::Exception& e)
     {
@@ -300,11 +299,11 @@ int RegularExpressionUserdata::gmatch_iter(lua_State* L)
         {
             lua_pushinteger(L, matches[0].offset + matches[0].length);
             lua_replace(L, lua_upvalueindex(4));
-            for (size_t i = 0; matchCount > 0 && i < matches.size(); ++i)
+            for (size_t i = matchCount > 1 ? 1 : 0; i < matchCount; ++i)
             {
                 lua_pushlstring(L, subject + matches[i].offset, matches[i].length);
+                ++rv;
             }
-            rv = matchCount;
         }
         else
         {
