@@ -27,6 +27,7 @@
 #include "foundation/DeflatingOStream.h"
 #include "foundation/Path.h"
 #include "foundation/NotificationQueue.h"
+#include "foundation/Buffer.h"
 
 namespace LuaPoco
 {
@@ -66,6 +67,7 @@ bool loadMetatables(lua_State* L)
             && DeflatingOStreamUserdata::registerDeflatingOStream(L)
             && PathUserdata::registerPath(L)
             && NotificationQueueUserdata::registerNotificationQueue(L)
+            && BufferUserdata::registerBuffer(L)
         )
         {
             setupPrivateUserdata(L);
