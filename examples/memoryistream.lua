@@ -36,4 +36,4 @@ for line in is:lines() do
     end
 end
 
-io.write("read ", tostring(hello_world_count), " Hello World!'s from example_data.txt.gz")
+io.write("read ", tostring(hello_world_count), " Hello World!'s from example_data.txt.gz.\n")
