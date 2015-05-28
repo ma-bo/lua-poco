@@ -28,6 +28,7 @@
 #include "foundation/Path.h"
 #include "foundation/NotificationQueue.h"
 #include "foundation/Buffer.h"
+#include "foundation/MemoryIStream.h"
 
 namespace LuaPoco
 {
@@ -68,6 +69,7 @@ bool loadMetatables(lua_State* L)
             && PathUserdata::registerPath(L)
             && NotificationQueueUserdata::registerNotificationQueue(L)
             && BufferUserdata::registerBuffer(L)
+            && MemoryIStreamUserdata::registerMemoryIStream(L)
         )
         {
             setupPrivateUserdata(L);

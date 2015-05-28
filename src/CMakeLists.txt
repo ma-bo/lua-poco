@@ -35,6 +35,7 @@ set(FOUNDATION_SRC
     foundation/NotificationFactory.cpp
     foundation/NotificationQueue.cpp
     foundation/Buffer.cpp
+    foundation/MemoryIStream.cpp
     )
 
 # check if Version.h is present for 1.3.6 compatability issues.
