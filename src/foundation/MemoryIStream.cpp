@@ -56,7 +56,6 @@ bool MemoryIStreamUserdata::registerMemoryIStream(lua_State* L)
 // @function new
 // @see istream
 // @see buffer
-// @see sharedmemory
 int MemoryIStreamUserdata::MemoryIStream(lua_State* L)
 {
     int firstArg = lua_istable(L, 1) ? 2 : 1;
