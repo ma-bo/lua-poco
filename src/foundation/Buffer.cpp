@@ -3,6 +3,7 @@
 // Note: buffer userdata are copyable between threads.
 // @module buffer
 
+#include <iostream>
 #include "Buffer.h"
 #include "Poco/Exception.h"
 
@@ -66,10 +67,10 @@ int BufferUserdata::Buffer(lua_State* L)
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     
     luaL_checkany(L, firstArg);
-    size_t dataSize;
-    const char* dataInit;
+    size_t dataSize = 0;
+    const char* dataInit = NULL;
     
-    if (lua_isstring(L, firstArg)) dataInit = luaL_checklstring(L, firstArg, &dataSize);
+    if (lua_type(L, firstArg) == LUA_TSTRING) dataInit = luaL_checklstring(L, firstArg, &dataSize);
     else dataSize = static_cast<size_t>(luaL_checknumber(L, firstArg));
 
     try
