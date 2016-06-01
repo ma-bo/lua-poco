@@ -36,6 +36,7 @@ set(FOUNDATION_SRC
     foundation/NotificationQueue.cpp
     foundation/Buffer.cpp
     foundation/MemoryIStream.cpp
+    foundation/MemoryOStream.cpp
     )
 
 # check if Version.h is present for 1.3.6 compatability issues.
@@ -44,15 +45,16 @@ if (POCO_VERSION_H)
     add_definitions(-DLUA_POCO_VERSION_H)
 endif()
 
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if (WIN32)
     add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
+    find_library(LIBIPHLPAPI Iphlpapi)
+    set(PLATFORM_EXTRAS ${LIBIPHLPAPI})
 endif()
 
 add_library(poco SHARED ${LUAPOCO_SRC} ${FOUNDATION_SRC})
-target_link_libraries(poco ${LUA_LIB} ${LIBPocoFoundation})
+target_link_libraries(poco ${LUA_LIB} ${LIBPocoFoundation} ${PLATFORM_EXTRAS})
 set_target_properties(poco PROPERTIES PREFIX "")
 
 install(TARGETS poco RUNTIME DESTINATION ${CMAKE_BINARY_DIR} LIBRARY DESTINATION ${CMAKE_BINARY_DIR})

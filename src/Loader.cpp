@@ -29,6 +29,7 @@
 #include "foundation/NotificationQueue.h"
 #include "foundation/Buffer.h"
 #include "foundation/MemoryIStream.h"
+#include "foundation/MemoryOStream.h"
 
 namespace LuaPoco
 {
@@ -70,6 +71,7 @@ bool loadMetatables(lua_State* L)
             && NotificationQueueUserdata::registerNotificationQueue(L)
             && BufferUserdata::registerBuffer(L)
             && MemoryIStreamUserdata::registerMemoryIStream(L)
+            && MemoryOStreamUserdata::registerMemoryOStream(L)
         )
         {
             setupPrivateUserdata(L);
