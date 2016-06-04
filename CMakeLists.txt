@@ -50,8 +50,8 @@ if (MSVC)
 
     set(PocoInternalSuffix "mt${PocoInternalSuffix}")
 elseif(UNIX)
-    set(CMAKE_C_FLAGS "$CMAKE_C_FLAGS -fPIC")
-    set(CMAKE_CXX_FLAGS "$CMAKE_CXX_FLAGS -fPIC")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif()
 
 ### Setup internal Poco C++ library.
@@ -61,7 +61,7 @@ set(POCO_INSTALL_DIR ${POCO_DIR}/install)
 ExternalProject_Add(poco_static 
     PREFIX ${POCO_DIR}
     URL http://pocoproject.org/releases/poco-1.7.3/poco-1.7.3-all.tar.gz
-    CMAKE_COMMAND "${CMAKE_COMMAND}" "-E env CXXFLAGS=${CMAKE_CXX_FLAGS} CFLAGS=${CMAKE_C_FLAGS}"
+    CMAKE_COMMAND "${CMAKE_COMMAND}" -E env "CXXFLAGS=${CMAKE_CXX_FLAGS}" "CFLAGS=${CMAKE_C_FLAGS}" "${CMAKE_COMMAND}"
 #    URL file://c:/users/matt/desktop/poco-1.7.3-all.tar.gz
     INSTALL_DIR ${POCO_INSTALL_DIR}
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DPOCO_STATIC=ON -DPOCO_MT=ON -DCMAKE_INSTALL_PREFIX=${POCO_INSTALL_DIR} -DENABLE_MONGODB=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF
