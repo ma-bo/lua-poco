@@ -48,7 +48,10 @@ if (MSVC)
         string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
     endforeach()
 
-    set(PocoInternalSuffix "mt${PocoInternalSuffix}")    
+    set(PocoInternalSuffix "mt${PocoInternalSuffix}")
+elseif(UNIX)
+    set(CMAKE_C_FLAGS "$CMAKE_C_FLAGS -fPIC")
+    set(CMAKE_CXX_FLAGS "$CMAKE_CXX_FLAGS -fPIC")
 endif()
 
 ### Setup internal Poco C++ library.
