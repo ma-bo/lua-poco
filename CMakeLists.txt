@@ -57,12 +57,13 @@ endif()
 ### Setup internal Poco C++ library.
 set(POCO_DIR ${CMAKE_CURRENT_BINARY_DIR}/poco_internal)
 set(POCO_INSTALL_DIR ${POCO_DIR}/install)
-
+if(NOT POCO_URL)
+    set(POCO_URL http://pocoproject.org/releases/poco-1.7.3/poco-1.7.3-all.tar.gz)
+endif()
 ExternalProject_Add(poco_static 
     PREFIX ${POCO_DIR}
-    URL http://pocoproject.org/releases/poco-1.7.3/poco-1.7.3-all.tar.gz
+    URL ${POCO_URL}
     CMAKE_COMMAND "${CMAKE_COMMAND}" -E env "CXXFLAGS=${CMAKE_CXX_FLAGS}" "CFLAGS=${CMAKE_C_FLAGS}" "${CMAKE_COMMAND}"
-#    URL file://c:/users/matt/desktop/poco-1.7.3-all.tar.gz
     INSTALL_DIR ${POCO_INSTALL_DIR}
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DPOCO_STATIC=ON -DPOCO_MT=ON -DCMAKE_INSTALL_PREFIX=${POCO_INSTALL_DIR} -DENABLE_MONGODB=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF
 )
