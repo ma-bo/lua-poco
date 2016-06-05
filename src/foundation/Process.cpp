@@ -7,9 +7,7 @@
 #include "Pipe.h"
 #include "Poco/Exception.h"
 #include "Poco/Path.h"
-#ifdef LUA_POCO_VERSION_H
 #include "Poco/Version.h"
-#endif
 
 int luaopen_poco_process(lua_State* L)
 {

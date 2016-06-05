@@ -39,12 +39,6 @@ set(FOUNDATION_SRC
     foundation/MemoryOStream.cpp
     )
 
-# check if Version.h is present for 1.3.6 compatability issues.
-find_path(POCO_VERSION_H Poco/Version.h)
-if (POCO_VERSION_H)
-    add_definitions(-DLUA_POCO_VERSION_H)
-endif()
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if (WIN32)
