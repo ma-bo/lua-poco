@@ -185,7 +185,6 @@ void getPipes(lua_State* L, PipeUserdata*& inPipe, PipeUserdata*& outPipe, PipeU
     lua_pop(L, 1);
 }
 
-#if POCO_VERSION >= 0x01040400
 // requires that the env table is at -1 on the stack
 bool getEnv(lua_State* L, Poco::Process::Env& env)
 {
@@ -216,7 +215,6 @@ bool getEnv(lua_State* L, Poco::Process::Env& env)
     
     return result;
 }
-#endif
 
 void getArgs(lua_State* L, Poco::Process::Args& args)
 {
@@ -291,31 +289,25 @@ int Process::launch(lua_State* L)
     Poco::Pipe* errPipe = errPipeUd ? &errPipeUd->mPipe : NULL;
 
     bool haveEnv = false;
-#if POCO_VERSION >= 0x01040400
     Poco::Process::Env env;
     haveEnv = getEnv(L, env);
-#endif
     
     
     try
     {
         if (haveEnv)
         {
-#if POCO_VERSION >= 0x01040400
             Poco::ProcessHandle ph = Poco::Process::launch(command, args, 
                 workingDir ? workingDir : Poco::Path::current(),
                 inPipe, outPipe, errPipe, env);
             ProcessHandleUserdata* phud = new(lua_newuserdata(L, sizeof *phud)) ProcessHandleUserdata(ph);
             setupPocoUserdata(L, phud, POCO_PROCESSHANDLE_METATABLE_NAME);
             rv = 1;
-#endif
         }
         else
         {
             Poco::ProcessHandle ph = Poco::Process::launch(command, args, 
-#if POCO_VERSION >= 0x01040400
                 workingDir ? workingDir : Poco::Path::current(),
-#endif
                 inPipe, outPipe, errPipe);
 
             ProcessHandleUserdata* phud = new(lua_newuserdata(L, sizeof *phud)) ProcessHandleUserdata(ph);
