@@ -30,6 +30,7 @@
 #include "foundation/Buffer.h"
 #include "foundation/MemoryIStream.h"
 #include "foundation/MemoryOStream.h"
+#include "foundation/TeeOStream.h"
 
 namespace LuaPoco
 {
@@ -72,6 +73,7 @@ bool loadMetatables(lua_State* L)
             && BufferUserdata::registerBuffer(L)
             && MemoryIStreamUserdata::registerMemoryIStream(L)
             && MemoryOStreamUserdata::registerMemoryOStream(L)
+            && TeeOStreamUserdata::registerTeeOStream(L)
         )
         {
             setupPrivateUserdata(L);
