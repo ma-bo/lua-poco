@@ -74,6 +74,10 @@ T* checkPrivateUserdata(lua_State* L, int userdataIdx)
     userdataIdx = userdataIdx < 0 ? lua_gettop(L) + 1 + userdataIdx : userdataIdx;
     
     luaL_checktype(L, userdataIdx, LUA_TUSERDATA);
+    // 1. getPrivateUserdata returns NULL if passed an userdata which is not present in the
+    //    poco_userdata_private table in the registry.
+    // 2. in getPrivateUserdata, lua_touserdata() returns NULL when passed nil. (ie: not found)
+    // 3. dynamic_cast applied to NULL results in NULL.
     derived = dynamic_cast<T*>(getPrivateUserdata(L, userdataIdx));
     if (derived == NULL) luaL_error(L, "invalid userdata, expected: %s", typeid(T).name());
     
