@@ -1,5 +1,8 @@
 /// teeostream
-// A single ostream interface that can mirror writes to children ostreams.
+// An ostream interface that will mirror writes to all ostreams added to it.
+// All ostreams added to the teeostream will be referenced to avoid garbage collection.
+// The teeostream interface is particularly useful for debugging writes to other ostreams like
+// pipes and sockets, as they can be also sent to a file.
 // @module teeostream
 #include "TeeOStream.h"
 #include "Buffer.h"
@@ -47,13 +50,26 @@ bool TeeOStreamUserdata::registerTeeOStream(lua_State* L)
 }
 
 /// Constructs a new teeostream userdata.
+// @param ...  one or more ostream's to be placed into the teeostream.
 // @return userdata
 // @function new
 int TeeOStreamUserdata::TeeOStream(lua_State* L)
 {
     int firstArg = lua_istable(L, 1) ? 2 : 1;
+    int top = lua_gettop(L);
+    
     TeeOStreamUserdata* tosud = new(lua_newuserdata(L, sizeof *tosud)) TeeOStreamUserdata();
     setupPocoUserdata(L, tosud, POCO_TEEOSTREAM_METATABLE_NAME);
+
+    for (int i = firstArg; i <= top; ++i)
+    {
+        if (lua_isnil(L, i)) break;
+        OStream* osud = checkPrivateUserdata<OStream>(L, i);
+        tosud->mTeeOutputStream.addStream(osud->ostream());
+        // copy the value to the top of the stack, such that luaL_ref can pop it back off.
+        lua_pushvalue(L, i);
+        tosud->mUdReference.push_back(luaL_ref(L, LUA_REGISTRYINDEX));
+    }
     
     return 1;
 }

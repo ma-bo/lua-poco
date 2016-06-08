@@ -1,5 +1,5 @@
 --[[ teeostream.lua
-    This example shows how a teeostream can be used to split an output into several
+    This example shows how a teeostream can be used to split an output into one or more 
     ostream channels.
 --]]
 
@@ -13,11 +13,7 @@ local fileostream = require("poco.fileostream")
 local data = assert(io.open("example_data.txt", "rb")):read("*a")
 
 -- adding several ostreams to a single teeostream, such that all writes go to all ostreams.
-local fos1 = assert(fileostream("file1.txt"))
-local fos2 = assert(fileostream("file2.txt"))
-local tos = teeostream()
-print(fos1, fos2)
-tos:addStream(fos1, fos2)
+local tos = teeostream(assert(fileostream("file1.txt")), assert(fileostream("file2.txt")))
 assert(tos:write("Hello World from teeostream.lua."))
 assert(tos:flush())
 print("done writing to teeostream, file1.txt and file2.txt written.")
