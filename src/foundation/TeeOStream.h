@@ -15,7 +15,7 @@ LUAPOCO_API int luaopen_poco_teeostream(lua_State* L);
 namespace LuaPoco
 {
 
-extern const char* POCO_TEEISTREAM_METATABLE_NAME;
+extern const char* POCO_TEEOSTREAM_METATABLE_NAME;
 
 class TeeOStreamUserdata : public Userdata, public OStream
 {
