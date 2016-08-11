@@ -2,7 +2,7 @@ set(LUAPOCO_SRC
     Loader.cpp
     Userdata.cpp
     StateTransfer.cpp)
-    
+
 set(FOUNDATION_SRC
     foundation/File.cpp
     foundation/Timestamp.cpp
@@ -44,8 +44,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if (WIN32)
     add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
-    find_library(LIBIPHLPAPI Iphlpapi)
-    set(PLATFORM_EXTRAS ${LIBIPHLPAPI})
+    set(PLATFORM_EXTRAS Iphlpapi.lib)
 elseif(UNIX)
     find_library(LIBPTHREAD pthread)
     find_library(LIBRT rt)
