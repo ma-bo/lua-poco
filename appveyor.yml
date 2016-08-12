@@ -6,18 +6,11 @@ configuration:
 - Release
 
 install:
-  - cmd: md .appveyor
-  - appveyor DownloadFile https://cdn.rawgit.com/ignacio/lua-appveyor-example/0f1932a380ae29d0962db065934556edaf700794/.appveyor/install.bat -FileName .appveyor/install.bat
-  - appveyor DownloadFile https://cdn.rawgit.com/ignacio/lua-appveyor-example/0f1932a380ae29d0962db065934556edaf700794/.appveyor/set_compiler_env.bat -FileName .appveyor/set_compiler_env.bat
-  - appveyor DownloadFile https://cdn.rawgit.com/ignacio/lua-appveyor-example/0f1932a380ae29d0962db065934556edaf700794/.appveyor/winmake.bat -FileName .appveyor/winmake.bat
-  - call .appveyor\set_compiler_env.bat >NUL 2>&1
-  - call .appveyor\install.bat >NUL 2>&1
-  - set PATH=c:\lua\5.1.5\bin\;c:\lua\5.1.5\LuaRocks;c:\lua\5.1.5\LuaRocks\systree\bin;%PATH%
-  - set LUA_PATH=;;c:\lua\5.1.5\LuaRocks\lua\?.lua;c:\lua\5.1.5\LuaRocks\lua\?\init.lua;c:\lua\5.1.5\LuaRocks\systree\share\lua\5.1\?.lua;c:\lua\5.1.5\LuaRocks\systree\share\lua\5.1\?\init.lua
-  - set LUA_CPATH=;;c:\lua\5.1.5\LuaRocks\systree\lib\lua\5.1\?.dll
+  - appveyor DownloadFile https://dl.bintray.com/xpol/luavm/LuaVM-0.1.10-vs2015-x64.exe
+  - LuaVM-0.1.8-vs2015-x64.exe /verysilent /dir=C:\luavm
 
 before_build:
-- cmake -H. -Bbuild -G"Visual Studio 14 2015 Win64" -DLUA_LIB_NAME=lua51 -DLUA_LIB_PATH="c:\lua\5.1.5\lib" -DLUA_INCLUDE="c:\lua\5.1.5\include"
+- cmake -H. -Bbuild -G"Visual Studio 14 2015 Win64" -DLUA_LIB_NAME=lua51 -DLUA_LIB_PATH="C:\luavm\luavm\versions\5.1" -DLUA_INCLUDE="C:\luavm\luavm\versions\5.1\include"
 
 build_script:
 - cmake --build build --config Release
