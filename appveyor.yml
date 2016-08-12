@@ -7,7 +7,7 @@ configuration:
 
 install:
   - appveyor DownloadFile https://dl.bintray.com/xpol/luavm/LuaVM-0.1.10-vs2015-x64.exe
-  - LuaVM-0.1.8-vs2015-x64.exe /verysilent /dir=C:\luavm
+  - LuaVM-0.1.10-vs2015-x64.exe /verysilent /dir=C:\luavm
 
 before_build:
 - cmake -H. -Bbuild -G"Visual Studio 14 2015 Win64" -DLUA_LIB_NAME=lua51 -DLUA_LIB_PATH="C:\luavm\luavm\versions\5.1" -DLUA_INCLUDE="C:\luavm\luavm\versions\5.1\include"
