@@ -4,7 +4,7 @@ include(ExternalProject)
 
 ### Pick Lua implementation to use.
 if (LUA_INCLUDE AND LUA_LIB_PATH AND LUA_LIB_NAME)
-    find_library(LUA_LIB ${LUA_LIB_NAME} PATHS ${LUA_LIB_PATH} NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
+    find_library(LUA_LIB ${LUA_LIB_NAME} PATHS ${LUA_LIB_PATH} NO_DEFAULT_PATH)
     include_directories(${LUA_INCLUDE})
     set(LUA_INCLUDE_DIR ${LUA_INCLUDE})
 else()
