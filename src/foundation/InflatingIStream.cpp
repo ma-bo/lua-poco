@@ -81,7 +81,7 @@ int InflatingIStreamUserdata::InflatingIStream(lua_State* L)
     InflatingIStreamUserdata* iisud = NULL;
     if (lua_isnumber(L, firstArg + 1))
     {
-        int num = static_cast<int>(luaL_checkint(L, firstArg + 1));
+        int num = static_cast<int>(luaL_checkinteger(L, firstArg + 1));
         iisud = new(lua_newuserdata(L, sizeof *iisud)) InflatingIStreamUserdata(is->istream(), num, ref);
     }
     else

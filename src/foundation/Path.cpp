@@ -386,7 +386,7 @@ int PathUserdata::directory(lua_State* L)
 {
     int rv = 0;
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
-    int directoryIndex = luaL_checkint(L, 2);
+    int directoryIndex = luaL_checkinteger(L, 2);
     
     if (directoryIndex > 0)
     {

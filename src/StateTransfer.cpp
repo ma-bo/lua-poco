@@ -98,10 +98,13 @@ bool transferFunction(lua_State* toL, lua_State* fromL)
         try
         {
             TransferBuffer tb;
+            
+            #if LUA_VERSION_NUM > 502
+            if (lua_dump(fromL, functionWriter, &tb, 0) == 0)
+            #else
             if (lua_dump(fromL, functionWriter, &tb) == 0)
+            #endif
             {
-                // sigh, was hoping to do this without any ifdefs... 
-                // alas, i don't see how this one can be avoided
                 #if LUA_VERSION_NUM > 501
                 if (lua_load(toL, functionReader, &tb, "transferFunction", NULL) == 0)
                     result = true;

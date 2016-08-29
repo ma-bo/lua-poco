@@ -92,7 +92,7 @@ int DeflatingOStreamUserdata::DeflatingOStream(lua_State* L)
     DeflatingOStreamUserdata* dosud = NULL;
     if (lua_isnumber(L, firstArg + 1))
     {
-        int num = static_cast<int>(luaL_checkint(L, firstArg + 1));
+        int num = static_cast<int>(luaL_checkinteger(L, firstArg + 1));
         dosud = new(lua_newuserdata(L, sizeof *dosud)) DeflatingOStreamUserdata(os->ostream(), num, level, ref);
     }
     else

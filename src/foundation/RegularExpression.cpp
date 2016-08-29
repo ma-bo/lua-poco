@@ -190,7 +190,7 @@ int RegularExpressionUserdata::find(lua_State* L)
     
     if (top > 3)
     {
-        startPosition = luaL_checkint(L, 4) - 1;
+        startPosition = luaL_checkinteger(L, 4) - 1;
         startPosition = startPosition < 0 ? 0 : startPosition;
     }
     
@@ -251,7 +251,7 @@ int RegularExpressionUserdata::match(lua_State* L)
     }
     if (top > 3)
     {
-        startPosition = luaL_checkint(L, 4) - 1;
+        startPosition = luaL_checkinteger(L, 4) - 1;
         startPosition = startPosition < 0 ? 0 : startPosition;
     }
     
@@ -414,7 +414,7 @@ int RegularExpressionUserdata::gsub(lua_State* L)
     // @int[opt] n
     if (top > 4)
     {
-        replaceCount = luaL_checkint(L, 5);
+        replaceCount = luaL_checkinteger(L, 5);
         if (replaceCount < 0) replaceCount = 0;
     }
     
