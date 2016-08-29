@@ -58,7 +58,7 @@ endif()
 set(POCO_DIR ${CMAKE_CURRENT_BINARY_DIR}/poco_internal)
 set(POCO_INSTALL_DIR ${POCO_DIR}/install)
 if(NOT POCO_URL)
-    set(POCO_URL http://pocoproject.org/releases/poco-1.7.3/poco-1.7.3-all.tar.gz)
+    set(POCO_URL http://pocoproject.org/releases/poco-1.7.3/poco-1.7.5-all.tar.gz)
 endif()
 ExternalProject_Add(poco_static 
     PREFIX ${POCO_DIR}
