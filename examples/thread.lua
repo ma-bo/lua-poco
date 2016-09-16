@@ -23,7 +23,7 @@ local function ping_average(host, file_mutex, filename)
 
         -- collect ping times from ping output.
         for line in ping_output:lines() do
-            ping_value = line:match(" time.([%d%.]+) ?ms")
+            ping_value = line:match(" time=([%d%.]+) ?ms")
             if ping_value then
                 sum = sum + tonumber(ping_value)
                 count = count + 1
