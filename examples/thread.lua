@@ -11,7 +11,7 @@
 -- are not preserved in the new Lua state which hosts the thread, only the values
 -- passed as arguments.
 local function ping_average(host, file_mutex, filename)
-    -- Windows command: ping -t 10 hostname
+    -- Windows command: ping -n 10 hostname
     -- Posix command:   ping -c 10 hostname
     local environment = require("poco.environment")
     local ping_command = string.format("ping %s 10 %s", environment.osName():find("Windows") and "-n" or "-c", host)
