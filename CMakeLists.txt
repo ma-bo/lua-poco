@@ -55,6 +55,8 @@ elseif(UNIX)
 endif()
 
 ### Setup internal Poco C++ library.
+#### POCO_URL can be defined at cmake invocation via a file:// URI to point at a local version of
+#### the poco-x.x.x-all.tar.gz file.  ie: file://c:/users/username/src/poco-1.9.0-all.tar.gz
 set(POCO_DIR ${CMAKE_CURRENT_BINARY_DIR}/poco_internal)
 set(POCO_INSTALL_DIR ${POCO_DIR}/install)
 if(NOT POCO_URL)
