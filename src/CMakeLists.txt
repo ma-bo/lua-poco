@@ -38,6 +38,7 @@ set(FOUNDATION_SRC
     foundation/MemoryIStream.cpp
     foundation/MemoryOStream.cpp
     foundation/TeeOStream.cpp
+    foundation/TeeIStream.cpp
     )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
