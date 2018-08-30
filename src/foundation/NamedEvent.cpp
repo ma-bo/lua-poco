@@ -40,7 +40,6 @@ bool NamedEventUserdata::registerNamedEvent(lua_State* L)
     };
     
     setupUserdataMetatable(L, POCO_NAMEDEVENT_METATABLE_NAME, methods);
-    lua_pop(L, 1);
     
     return true;
 }
