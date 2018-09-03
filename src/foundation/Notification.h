@@ -12,7 +12,7 @@ class Notification : public Poco::Notification
 {
 public:
     Notification();
-    ~Notification();
+    virtual ~Notification();
     bool setupState();
     lua_State* state;
 };
