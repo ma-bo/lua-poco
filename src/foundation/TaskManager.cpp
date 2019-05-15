@@ -617,7 +617,7 @@ void TaskManagerContainer::addObserver(Poco::AutoPtr<TaskObserver>& observer)
 void TaskManagerContainer::removeObserver(TaskObserver* observer)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(mObserverMutex);
-    for (std::vector<Poco::AutoPtr<TaskObserver>>::iterator i = mObservers.begin();
+    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator i = mObservers.begin();
             i != mObservers.end(); ++i)
     {
         if ((*i) == observer)
@@ -969,11 +969,11 @@ int TaskManagerContainer::lud_dequeueNotification(lua_State* L)
 }
 
 void TaskManagerContainer::getObserversOfType(
-        std::vector<Poco::AutoPtr<TaskObserver>>& observersToNotify,
+        std::vector<Poco::AutoPtr<TaskObserver> >& observersToNotify,
         int taskNotificationType)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(mObserverMutex);    
-    for (std::vector<Poco::AutoPtr<TaskObserver>>::iterator observer = mObservers.begin();
+    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = mObservers.begin();
         observer != mObservers.end(); ++observer)
     {
         if ((*observer)->mNotificationTypes & taskNotificationType)
@@ -1054,10 +1054,10 @@ void TaskManagerContainer::onTaskStarted(Poco::TaskStartedNotification* sn)
 
     if (mQueueEnabled) { mQueue.enqueueNotification(tsn); }
     
-    std::vector<Poco::AutoPtr<TaskObserver>> observersToNotify;
+    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
     getObserversOfType(observersToNotify, TASK_NOTIFICATION_START);
 
-    for (std::vector<Poco::AutoPtr<TaskObserver>>::iterator observer = observersToNotify.begin();
+    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
         observer != observersToNotify.end(); ++observer)
     {
         notifyObserver(*observer, tsn->task(), TASK_START_FUNCTION_NAME);
@@ -1070,10 +1070,10 @@ void TaskManagerContainer::onTaskCancelled(Poco::TaskCancelledNotification* cn)
     
     if (mQueueEnabled) { mQueue.enqueueNotification(tcn); }
     
-    std::vector<Poco::AutoPtr<TaskObserver>> observersToNotify;
+    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
     getObserversOfType(observersToNotify, TASK_NOTIFICATION_CANCELLED);
 
-    for (std::vector<Poco::AutoPtr<TaskObserver>>::iterator observer = observersToNotify.begin();
+    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
         observer != observersToNotify.end(); ++observer)
     {
         notifyObserver(*observer, tcn->task(), TASK_CANCEL_FUNCTION_NAME);
@@ -1086,10 +1086,10 @@ void TaskManagerContainer::onTaskFinished(Poco::TaskFinishedNotification* fn)
     
     if (mQueueEnabled) { mQueue.enqueueNotification(tfn); }
     
-    std::vector<Poco::AutoPtr<TaskObserver>> observersToNotify;
+    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
     getObserversOfType(observersToNotify, TASK_NOTIFICATION_FINISHED);
 
-    for (std::vector<Poco::AutoPtr<TaskObserver>>::iterator observer = observersToNotify.begin();
+    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
         observer != observersToNotify.end(); ++observer)
     {
         notifyObserver(*observer, tfn->task(), TASK_FINISH_FUNCTION_NAME);
@@ -1102,10 +1102,10 @@ void TaskManagerContainer::onTaskFailed(Poco::TaskFailedNotification* fn)
     
     if (mQueueEnabled) { mQueue.enqueueNotification(tfn); }
     
-    std::vector<Poco::AutoPtr<TaskObserver>> observersToNotify;
+    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
     getObserversOfType(observersToNotify, TASK_NOTIFICATION_FAILED);
 
-    for (std::vector<Poco::AutoPtr<TaskObserver>>::iterator observer = observersToNotify.begin();
+    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
         observer != observersToNotify.end(); ++observer)
     {
         const Poco::Exception& e = tfn->reason();
@@ -1121,10 +1121,10 @@ void TaskManagerContainer::onTaskProgress(Poco::TaskProgressNotification* pn)
     
     if (mQueueEnabled) { mQueue.enqueueNotification(tpn); }
     
-    std::vector<Poco::AutoPtr<TaskObserver>> observersToNotify;
+    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
     getObserversOfType(observersToNotify, TASK_NOTIFICATION_PROGRESS);
 
-    for (std::vector<Poco::AutoPtr<TaskObserver>>::iterator observer = observersToNotify.begin();
+    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
         observer != observersToNotify.end(); ++observer)
     {
         lua_pushnumber((*observer)->mState, static_cast<lua_Number>(tpn->progress()));
@@ -1154,10 +1154,10 @@ void TaskManagerContainer::onTaskCustom(Notification* n)
     lua_pop(cn->state, 1);
     customTop = lua_gettop(cn->state);
 
-    std::vector<Poco::AutoPtr<TaskObserver>> observersToNotify;
+    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
     getObserversOfType(observersToNotify, TASK_NOTIFICATION_CUSTOM);
 
-    for (std::vector<Poco::AutoPtr<TaskObserver>>::iterator observer = observersToNotify.begin();
+    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
         observer != observersToNotify.end(); ++observer)
     {
         transferNotification((*observer)->mState, cn);
