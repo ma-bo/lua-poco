@@ -120,7 +120,7 @@ private:
     Poco::ThreadPool mThreadPool;
     
     void getObserversOfType(
-        std::vector<Poco::AutoPtr<TaskObserver> >& observersToNotify,
+        std::vector<Poco::AutoPtr<TaskObserver>>& observersToNotify,
         int taskNotificationType);
         
     bool notifyObserver(
@@ -131,7 +131,7 @@ private:
     Poco::AtomicCounter mQueueEnabled;
     Poco::NotificationQueue mQueue;
     Poco::FastMutex mObserverMutex;
-    std::vector<Poco::AutoPtr<TaskObserver> > mObservers;
+    std::vector<Poco::AutoPtr<TaskObserver>> mObservers;
 };
 
 class TaskManagerUserdata : public Userdata
