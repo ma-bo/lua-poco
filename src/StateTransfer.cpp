@@ -7,6 +7,10 @@
 namespace LuaPoco
 {
 
+const char* STATE_TRANSFER_SOURCE_TABLES = "Poco.StateTransfer.Source.Tables";
+const char* STATE_TRANSFER_SOURCE_TABLES_LASTINDEX = "Poco.StateTransfer.Source.LastIndex";
+const char* STATE_TRANSFER_DESTINATION_TABLES = "Poco.StateTransfer.Destination.Tables";
+
 #define DEFAULT_TRANSFER_BUFF_SIZE 1000
 
 TransferBuffer::TransferBuffer() :
@@ -125,88 +129,54 @@ bool transferFunction(lua_State* toL, lua_State* fromL)
     return result;
 }
 
+// creates a table on toL, and stores it in REGISTRY[STATE_TRANSFER_DESTINATION_TABLES].
+// the source table at the top of fromL, is stored in REGISTRY[STATE_TRANSFER_SOURCE_TABLES]
+// populateTables() will later take each source and destination values from the registry and use
+// populateTableValues() to transfer individual values.
+//
+// the rationale is to create an iterative way to populate nested tables across states, rather than
+// a recursive approach which is constrained by the call stack size.
 bool transferTable(lua_State* toL, lua_State* fromL)
 {
     bool result = false;
-    size_t nestLevel = 1;
-    int fromEntryTop = lua_gettop(fromL);
-    int toEntryTop = lua_gettop(toL);
-    
-    if (!lua_istable(fromL, -1))
-        return false;
-    
+
+    // create new table, which will be left on stack when done.
     lua_newtable(toL);
-    
-    lua_pushnil(fromL);
-    // get next element from table
-    while (nestLevel > 0)
+  
+    // fetch the transfer tables.
+    lua_getfield(toL, LUA_REGISTRYINDEX, STATE_TRANSFER_DESTINATION_TABLES);
+    lua_getfield(fromL, LUA_REGISTRYINDEX, STATE_TRANSFER_SOURCE_TABLES);
+
+    // these transfer tables are required to be present, but check for safety sake anyway.
+    if (lua_istable(fromL, -1) && lua_istable(toL, -1))
     {
-        if (lua_next(fromL, -2) != 0)
-        {
-            if (lua_istable(fromL, -1))
-            {
-                // create the new table first as we will need to potentially 
-                // write values to it in the new state later
-                lua_newtable(toL);
-                // push copy of key to fromTop, such that it can be transfered
-                lua_pushvalue(fromL, -2);
-                if (!transferValue(toL, fromL))
-                    break;
-                // pop the key off leaving fromL: -1 = sub table value, -2 = key, -3 = table
-                lua_pop(fromL, 1);
-                
-                // copy the newly created table and set the key/newtable pair as a 
-                // value into the parent table
-                lua_pushvalue(toL, -2);
-                // set table leaving us with -1 = newtable, -2 = parent table
-                lua_settable(toL, -4);
-                
-                // iterate this child table
-                ++nestLevel;
-                lua_pushnil(fromL);
-            }
-            else
-            {
-                // push copy of key to top, such that it can be transfered
-                lua_pushvalue(fromL, -2);
-                if (!transferValue(toL, fromL))
-                    break;
-                // pop the key off leaving -1 = value, -2 = key, -3 = table
-                lua_pop(fromL, 1);
-                // transfer the value
-                if (!transferValue(toL, fromL))
-                    break;
-                // settable in the remote state
-                lua_settable(toL, -3);
-                // pop value from top, leaving key for the call to lua_next()
-                lua_pop(fromL, 1);
-            }
-        }
-        else
-        {
-            // pop the child table off both stacks leaving the just the parent on
-            // the to state, and key/table on the fromState (for iteration)
-            // except on the last pass, as we want to keep the original tables in place
-            if (nestLevel > 1)
-            {
-                lua_pop(fromL, 1);
-                lua_pop(toL, 1);
-            }
-            --nestLevel;
-        }
-    }
-    
-    if (nestLevel == 0)
+        // fetch the lastindex where a table is stored, 0/nil means no tables stored.
+        lua_getfield(fromL, -1, STATE_TRANSFER_SOURCE_TABLES_LASTINDEX);
+        lua_Integer lastIndex = lua_tointeger(fromL, -1);
+        lua_pop(fromL, 1);
+        ++lastIndex;
+
+        // duplicate the tables to be transferred and set them in the respective transfer table.
+        lua_pushvalue(fromL, -2);
+        lua_rawseti(fromL, -2, lastIndex);
+
+        lua_pushvalue(toL, -2);
+        lua_rawseti(toL, -2, lastIndex);
+
+        lua_pushinteger(fromL, lastIndex);
+        lua_setfield(fromL, -2, STATE_TRANSFER_SOURCE_TABLES_LASTINDEX);
+
         result = true;
-    
-    // clean up any residual stuff on both states in the case of a failure
-    lua_pop(fromL, fromEntryTop - lua_gettop(fromL));
-    lua_pop(fromL, toEntryTop - lua_gettop(toL));
-    
+    }
+
+    // remove transfer tables from stack, leaving the orignals that were transferred.
+    lua_pop(fromL, 1);
+    lua_pop(toL, 1);
+
     return result;
 }
 
-bool transferValue(lua_State* toL, lua_State* fromL)
+bool transferValueInternal(lua_State* toL, lua_State* fromL)
 {
     bool result = false;
     int type = lua_type(fromL, -1);
@@ -234,8 +204,10 @@ bool transferValue(lua_State* toL, lua_State* fromL)
         break;
     }
     case LUA_TTABLE:
+    {
         result = transferTable(toL, fromL);
         break;
+    }
     case LUA_TFUNCTION:
         result = transferFunction(toL, fromL);
         break;
@@ -255,6 +227,137 @@ bool transferValue(lua_State* toL, lua_State* fromL)
         break;
     default:
         break;
+    }
+    
+    return result;
+}
+
+// destination table, and source table should be at -1 index.
+bool transferTableValues(lua_State* toL, lua_State* fromL)
+{
+    bool result = true;
+
+    lua_pushnil(fromL);
+
+    // iterate key/value pairs
+    // transfer them to the target state
+    // set them in the destination table.
+    while (lua_next(fromL, -2))
+    {
+        // duplicate key so it can be transferred first.
+        lua_pushvalue(fromL, -2);
+
+        // transfer key
+        if (transferValueInternal(toL, fromL))
+        {
+            // pop extra key
+            lua_pop(fromL, 1);
+            // transfer value
+            if (transferValueInternal(toL, fromL))
+            {
+                // pop value
+                lua_pop(fromL, 1);
+                // set the transfered value, key, leaving just the table.
+                lua_rawset(toL, -3);
+            }
+            else
+            {
+                result = false;
+                break;
+            }
+        }
+        else
+        {
+            result = false;
+            break;
+        }
+    }
+    
+    return result;
+}
+
+bool populateTables(lua_State* toL, lua_State* fromL)
+{
+    bool result = true;
+    int fromTop = lua_gettop(fromL);
+    int toTop = lua_gettop(toL);
+
+    lua_getfield(fromL, LUA_REGISTRYINDEX, STATE_TRANSFER_SOURCE_TABLES);
+    lua_getfield(toL, LUA_REGISTRYINDEX, STATE_TRANSFER_DESTINATION_TABLES);
+    
+    if (lua_istable(fromL, -1) && lua_istable(toL, -1))
+    {
+        while (true)
+        {
+            // lastIndex = registry.source_tables.lastindex
+            lua_getfield(fromL, -1, STATE_TRANSFER_SOURCE_TABLES_LASTINDEX);
+            lua_Integer lastIndex = lua_tointeger(fromL, -1);
+            lua_pop(fromL, 1);
+
+            // check if there is work to do, if not return.
+            if (lastIndex == 0) { break; }
+
+            // fetch the last added source/destination table pair.
+            lua_rawgeti(fromL, -1, lastIndex);
+            lua_rawgeti(toL, -1, lastIndex);
+
+            // remove these tables from the in-progress transfer table list.
+            // this frees up this slot and prevents "holes" in the table for any upcoming
+            // nested tables.
+            lua_pushnil(fromL);
+            lua_rawseti(fromL, -3, lastIndex);
+            lua_pushnil(toL);
+            lua_rawseti(toL, -3, lastIndex);
+            
+            // reset the last index value
+            lua_pushinteger(fromL, --lastIndex);
+            lua_setfield(fromL, -3, STATE_TRANSFER_SOURCE_TABLES_LASTINDEX);
+
+            if (!transferTableValues(toL, fromL))
+            {
+                result = false;
+                break;
+            }
+            
+            // source key/value pairs have been copied to destination table.
+            // pop source/destination from stack.
+            lua_pop(fromL, 1);
+            lua_pop(toL, 1);
+        }
+    }
+
+    lua_settop(fromL, fromTop);
+    lua_settop(toL, toTop);
+
+    return result;
+}
+
+bool transferValue(lua_State* toL, lua_State* fromL)
+{
+    bool result = false;
+    bool isTableTransfer = lua_istable(fromL, -1);
+
+    // prepare transfer tables only if we're operating on a table
+    if (isTableTransfer)
+    {
+        lua_newtable(fromL);
+        lua_setfield(fromL, LUA_REGISTRYINDEX, STATE_TRANSFER_SOURCE_TABLES);
+        lua_newtable(toL);
+        lua_setfield(toL, LUA_REGISTRYINDEX, STATE_TRANSFER_DESTINATION_TABLES);
+    }
+
+    result = transferValueInternal(toL, fromL);
+
+    // remove transfer tables in registry
+    if (isTableTransfer)
+    {
+        // do not attempt populating the tables if table creation failed.
+        if (result) { result = populateTables(toL, fromL); }
+        
+        lua_pushnil(fromL);
+        lua_setfield(fromL, LUA_REGISTRYINDEX, STATE_TRANSFER_SOURCE_TABLES);
+        lua_pushnil(toL);
+        lua_setfield(toL, LUA_REGISTRYINDEX, STATE_TRANSFER_DESTINATION_TABLES);
     }
     
     return result;
