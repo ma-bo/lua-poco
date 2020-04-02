@@ -442,7 +442,10 @@ int Task::lud_postNotification(lua_State* L)
             lua_pop(L, 1);
         }
 
-        task->postNotification(notification);
+        // Task::postNotification accepts a raw pointer
+        // the AutoPtr yields with operator C* (), which does not maintain the reference count
+        // when handing the pointer to the TaskManager, so a duplicate call is required.
+        task->postNotification(notification.duplicate());
 
         lua_pushboolean(L, 1);
         rv = 1;
