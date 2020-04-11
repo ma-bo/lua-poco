@@ -54,11 +54,13 @@ elseif(UNIX)
     set(PLATFORM_EXTRAS ${LIBPTHREAD} ${LIBRT})
 endif()
 
+set(CXX_STANDARD_REQUIRED ON)
+
 add_definitions(-DPOCO_STATIC)
 link_directories(${POCO_INSTALL_DIR}/lib)
 add_library(poco SHARED ${LUAPOCO_SRC} ${FOUNDATION_SRC})
 add_dependencies(poco poco_static)
 target_link_libraries(poco ${LUA_LIB} PocoFoundation${PocoInternalSuffix} ${PLATFORM_EXTRAS})
-set_target_properties(poco PROPERTIES PREFIX "")
+set_target_properties(poco PROPERTIES PREFIX "" CXX_STANDARD 11)
 
 install(TARGETS poco RUNTIME DESTINATION ${CMAKE_BINARY_DIR} LIBRARY DESTINATION ${CMAKE_BINARY_DIR})
