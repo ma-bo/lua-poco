@@ -5,7 +5,8 @@
 // @module timestamp
 
 #include "Timestamp.h"
-#include "DynamicAny.h"
+#include "Poco/Format.h"
+#include "Poco/NumberFormatter.h"
 #include <ctime>
 
 int luaopen_poco_timestamp(lua_State* L)
@@ -129,20 +130,19 @@ int TimestampUserdata::TimestampFromEpoch(lua_State* L)
     return rv;
 }
 
-/// Constructs a new timestamp userdata from UTC value.
-// @int utc value used to create timestamp.
+/// Constructs a new timestamp userdata from 64-bit UTC value encoded as a string.
+// Creates a timestamp from a UTC time value (100 nanosecond intervals since midnight, October 15, 1582).
+// @string value used to create timestamp.
 // @return userdata or nil. (error)
 // @return error message.
-// @function fromEpoch
+// @function fromUTC
 int TimestampUserdata::TimestampFromUtc(lua_State* L)
 {
     int rv = 0;
-    Poco::Int64 val = 0;
-    DynamicAnyUserdata* daud = checkPrivateUserdata<DynamicAnyUserdata>(L, 1);
+    Poco::Int64 val = static_cast<Poco::Int64>(luaL_checkinteger(L, 1));
     
     try
     {
-        daud->mDynamicAny.convert(val);
         TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(val);
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
@@ -201,30 +201,19 @@ int TimestampUserdata::metamethod__add(lua_State* L)
 {
     int rv = 0;
     int tsIndex = 1;
-    int otherIndex = 2;
-    
-    if (!lua_isuserdata(L, 1) || !lua_isuserdata(L, 2))
-        return luaL_error(L, "Poco.Timestamp and Poco.DynamicAny required for __add");
+    int stringIndex = 2;
 
-    lua_getmetatable(L, 1);
-    luaL_getmetatable(L, "Poco.Timestamp.metatable");
-    if (!lua_rawequal(L, -1, -2))
-    {
-        tsIndex = 2;
-        otherIndex = 1;
-    }
-    lua_pop(L, 2);
-    
+    if (lua_isstring(L, 1)) { stringIndex = 1; }
+    else if (lua_isstring(L, 2)) { stringIndex = 2; };
+
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, tsIndex);
-    DynamicAnyUserdata* daud = checkPrivateUserdata<DynamicAnyUserdata>(L, otherIndex);
+    const char* toAddStr = luaL_checkstring(L, stringIndex);
     
     try
     {
         Poco::Int64 val;
-        daud->mDynamicAny.convert(val);
-        Poco::Timestamp newTs;
-        
-        newTs = tsud->mTimestamp + val;
+        Poco::strToInt(toAddStr, val, 10);
+        Poco::Timestamp newTs= tsud->mTimestamp + val;
         TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(newTs);
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         
@@ -247,21 +236,31 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
     int rv = 0;
     int tsIndex = 1;
     int otherIndex = 2;
+    int stringIndex = 0;
+
+    if (lua_isstring(L, 1)) { tsIndex = 2; stringIndex = 1; }
+    else if (lua_isstring(L, 2)) { tsIndex = 1; stringIndex = 2; };
     
-    if (!lua_isuserdata(L, 1) || !lua_isuserdata(L, 2))
-        return luaL_error(L, "Poco.Timestamp and Poco.DynamicAny required for __sub");
     
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, tsIndex);
-    DynamicAnyUserdata* daud = checkPrivateUserdata<DynamicAnyUserdata>(L, otherIndex);
     
     try
     {
-        Poco::Timestamp::TimeDiff val;
-        daud->mDynamicAny.convert(val);
-        Poco::Timestamp newTs;
+        Poco::Timestamp newTs(0);
         
-        newTs = tsud->mTimestamp - val;
-        
+        if (stringIndex)
+        {
+            const char* toSubStr = luaL_checkstring(L, otherIndex);
+            Poco::Timestamp::TimeDiff val = 0;
+            Poco::strToInt(toSubStr, val, 10);
+            newTs = tsud->mTimestamp - val;
+        }
+        else
+        {
+            TimestampUserdata* tsudOther = checkPrivateUserdata<TimestampUserdata>(L, otherIndex);
+            newTs = tsud->mTimestamp - tsudOther->mTimestamp;
+        }
+
         TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(newTs);
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
@@ -315,9 +314,8 @@ int TimestampUserdata::metamethod__le(lua_State* L)
 
 
 /// Get time elapsed since time denoted by timestamp in microseconds.
-// The value returned is stored within a dynamicany userdata as an Int64.
-// @see dynamicany
-// @return dynamicany userdata or nil. (error)
+// The value returned is returned as an Int64 encoded in a string.
+// @return string or nil. (error)
 // @return error message.
 // @function elapsed
 int TimestampUserdata::elapsed(lua_State* L)
@@ -329,8 +327,8 @@ int TimestampUserdata::elapsed(lua_State* L)
     
     try
     {
-        DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(elapsed);
-        setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
+        std::string elapsedStr = Poco::NumberFormatter::format(elapsed);
+        lua_pushlstring(L, elapsedStr.c_str(), elapsedStr.size());
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -346,9 +344,8 @@ int TimestampUserdata::elapsed(lua_State* L)
 }
 
 /// Get the timestamp expressed in microseconds since the Unix epoch, midnight, January 1, 1970.
-// The value returned is stored within a dynamicany userdata as an Int64.
-// @see dynamicany
-// @return dynamicany userdata or nil. (error)
+// The value returned as an Int64 encoded in a string
+// @return string userdata or nil. (error)
 // @return error message.
 // @function epochMicroseconds
 int TimestampUserdata::epochMicroseconds(lua_State* L)
@@ -360,8 +357,8 @@ int TimestampUserdata::epochMicroseconds(lua_State* L)
     
     try
     {
-        DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(epochMs);
-        setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
+        std::string epochStr = Poco::NumberFormatter::format(epochMs);
+        lua_pushlstring(L, epochStr.c_str(), epochStr.size());
         rv = 1;
     }
     catch (const Poco::Exception& e)
@@ -376,24 +373,21 @@ int TimestampUserdata::epochMicroseconds(lua_State* L)
     return rv;
 }
 
-/// Gets the timestamp expressed in time_t (a Lua number). time_t base time is midnight, January 1, 1970. Resolution is one second.
-// The value returned is stored within a dynamicany userdata as an Int64.
-// @see dynamicany
-// @return dynamicany userdata or nil. (error)
+/// Gets the timestamp expressed in time_t (a Lua integer). time_t base time is midnight, January 1, 1970. Resolution is one second.
+// @return int
 // @return error message.
 // @function epochTime
 int TimestampUserdata::epochTime(lua_State* L)
 {
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, 1);
-    // Lua 5.1 and 5.2 represent os.time() values as lua_Numbers.
-    lua_Number epoch = static_cast<lua_Number>(tsud->mTimestamp.epochTime());
-    lua_pushnumber(L, epoch);
+    lua_pushinteger(L, tsud->mTimestamp.epochTime());
     
     return 1;
 }
 
 /// Returns true if and only if the given interval (in microseconds) has passed since the time denoted by the timestamp.
-// @int interval time duration in microseconds to check.
+// Parameter can be passed as an integer for numbers not requiring 64-bits to represent, otherwise passed as a 64-bit number encoded as a string.
+// @param (integer or string) interval time duration in microseconds to check has elapsed.
 // @return boolean
 // @function isElapsed
 int TimestampUserdata::isElapsed(lua_State* L)
@@ -406,10 +400,11 @@ int TimestampUserdata::isElapsed(lua_State* L)
         interval = luaL_checkinteger(L, 2);
     else
     {
-        DynamicAnyUserdata* daud = checkPrivateUserdata<DynamicAnyUserdata>(L, 2);
+        const char* intervalStr = luaL_checkstring(L, 1);
+        
         try
         {
-            daud->mDynamicAny.convert(interval);
+            Poco::strToInt(intervalStr, interval, 10);
         }
         catch (const Poco::Exception& e)
         {
@@ -436,12 +431,13 @@ int TimestampUserdata::resolution(lua_State* L)
 {
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, 1);
     
-    lua_Number res = tsud->mTimestamp.resolution();
-    lua_pushnumber(L, res);
+    lua_pushinteger(L, tsud->mTimestamp.resolution());
     
     return 1;
 }
 
+/// Updates the existing timestamp with a the current timestamp value.
+// @function update
 int TimestampUserdata::update(lua_State* L)
 {
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, 1);
@@ -450,10 +446,9 @@ int TimestampUserdata::update(lua_State* L)
     return 0;
 }
 
-/// Gets the timestamp expressed in UTC-based time. UTC base time is midnight, October 15, 1582. Resolution is 100 nanoseconds.
-// The value returned is stored within a dynamicany userdata as an Int64.
-// @see dynamicany
-// @return dynamicany userdata or nil. (error)
+/// Gets the timestamp expressed in UTC-based time. UTC base time is midnight, October 15, 1582.
+// Resolution is 100 nanoseconds.  The value returned is an Int64 encoded as a string.
+// @return string or nil. (error)
 // @return error message.
 // @function utcTime
 int TimestampUserdata::utcTime(lua_State* L)
@@ -461,12 +456,12 @@ int TimestampUserdata::utcTime(lua_State* L)
     int rv = 0;
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, 1);
     
-    Poco::DynamicAny val = tsud->mTimestamp.utcTime();
+    Poco::Int64 val = tsud->mTimestamp.utcTime();
     
     try
     {
-        DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(val);
-        setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
+        std::string utcStr = Poco::NumberFormatter::format(tsud->mTimestamp.utcTime());
+        lua_pushlstring(L, utcStr.c_str(), utcStr.size());
         rv = 1;
     }
     catch (const Poco::Exception& e)
