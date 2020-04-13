@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 2.6)
 project(luapoco)
 include(ExternalProject)
 
+### Note if this option is off, POCO libraries are expected to be found on the linker path.
+option(USE_EMBEDDED_POCO "build poco library and static link into lua-poco." ON)
+
 ### Pick Lua implementation to use.
 if (LUA_INCLUDE AND LUA_LIB_PATH AND LUA_LIB_NAME)
     find_library(LUA_LIB ${LUA_LIB_NAME} PATHS ${LUA_LIB_PATH} NO_DEFAULT_PATH)
@@ -27,15 +30,15 @@ endif()
 message(STATUS "lua-poco using Lua headers: ${LUA_INCLUDE_DIR}/${LUA_INCLUDE_PATH}")
 message(STATUS "lua-poco using Lua library: ${LUA_LIB}")
 
-### lua-poco on Windows will use a static/interal copy of the Poco C++ library.
-### It will also use a statically linked C/C++ runtime to avoid the redistributable mess.
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(PocoInternalSuffix "d")
-else()
-    set(PocoInternalSuffix )
-endif()
-
 if (MSVC)
+    ### lua-poco on Windows will by default use a static/interal copy of the Poco C++ library.
+    ### It will also use a statically linked C/C++ runtime to avoid the redistributable mess.
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(PocoInternalSuffix "d")
+    else()
+        set(PocoInternalSuffix "")
+    endif()
+    
     set(CompilerFlags
         CMAKE_CXX_FLAGS
         CMAKE_CXX_FLAGS_DEBUG
@@ -49,28 +52,35 @@ if (MSVC)
     endforeach()
 
     set(PocoInternalSuffix "mt${PocoInternalSuffix}")
+elseif(MINGW)
+    ## MinGW builds link against mingw's supplied Lua and Poco, so no suffix is present.
+    set(PocoInternalSuffix "")
 elseif(UNIX)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif()
 
-### Setup internal Poco C++ library.
-#### POCO_URL can be defined at cmake invocation via a file:// URI to point at a local version of
-#### the poco-x.x.x-all.tar.gz file.  ie: file://c:/users/username/src/poco-1.9.0-all.tar.gz
-set(POCO_DIR ${CMAKE_CURRENT_BINARY_DIR}/poco_internal)
-set(POCO_INSTALL_DIR ${POCO_DIR}/install)
-if(NOT POCO_URL)
-    set(POCO_URL https://pocoproject.org/releases/poco-1.10.1/poco-1.10.1-all.tar.gz)
-    
-endif()
-ExternalProject_Add(poco_static 
-    PREFIX ${POCO_DIR}
-    URL ${POCO_URL}
-    CMAKE_COMMAND "${CMAKE_COMMAND}" -E env "CXXFLAGS=${CMAKE_CXX_FLAGS}" "CFLAGS=${CMAKE_C_FLAGS}" "${CMAKE_COMMAND}"
-    INSTALL_DIR ${POCO_INSTALL_DIR}
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DPOCO_STATIC=ON -DPOCO_MT=ON -DCMAKE_INSTALL_PREFIX=${POCO_INSTALL_DIR} -DENABLE_MONGODB=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF
-)
+if (USE_EMBEDDED_POCO)
+    ### Setup internal Poco C++ library.
+    #### POCO_DOWNLOAD_URL can be defined at cmake invocation via a file:// URI to point at a local version of
+    #### the poco-x.x.x-all.tar.gz file.  ie: file://c:/users/username/src/poco-1.9.0-all.tar.gz
 
-include_directories(${POCO_INSTALL_DIR}/include)
+    if(NOT POCO_URL)
+        set(POCO_DOWNLOAD_URL https://pocoproject.org/releases/poco-1.10.1/poco-1.10.1-all.tar.gz)
+    endif()
+
+    set(POCO_DIR ${CMAKE_CURRENT_BINARY_DIR}/poco_internal)
+    set(POCO_INSTALL_DIR ${POCO_DIR}/install)
+
+    include_directories(${POCO_INSTALL_DIR}/include)
+
+    ExternalProject_Add(poco_static 
+        PREFIX ${POCO_DIR}
+        URL ${POCO_DOWNLOAD_URL}
+        CMAKE_COMMAND "${CMAKE_COMMAND}" -E env "CXXFLAGS=${CMAKE_CXX_FLAGS}" "CFLAGS=${CMAKE_C_FLAGS}" "${CMAKE_COMMAND}"
+        INSTALL_DIR ${POCO_INSTALL_DIR}
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${POCO_INSTALL_DIR} -DBUILD_SHARED_LIBS=OFF -DPOCO_UNBUNDLED=OFF -DPOCO_MT=ON -DENABLE_MONGODB=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_JWT=OFF -DENABLE_APACHECONNECTOR=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_DATA_POSTGRESQL=OFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_SQLITE=OFF -DENABLE_REDIS=OFF -DENABLE_PDF=OFF -DENABLE_POCODOC=OFF
+    )
+endif()
 
 add_subdirectory(src)

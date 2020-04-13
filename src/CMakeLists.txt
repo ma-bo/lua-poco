@@ -44,10 +44,12 @@ set(FOUNDATION_SRC
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-if (WIN32)
+if(WIN32)
     add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
-    find_library(LIBIPHLPAPI Iphlpapi)
-    set(PLATFORM_EXTRAS ${LIBIPHLPAPI})
+    if(MSVC)
+        find_library(LIBIPHLPAPI iphlpapi)
+        set(PLATFORM_EXTRAS ${LIBIPHLPAPI})
+    endif()
 elseif(UNIX)
     find_library(LIBPTHREAD pthread)
     find_library(LIBRT rt)
@@ -56,11 +58,17 @@ endif()
 
 set(CXX_STANDARD_REQUIRED ON)
 
-add_definitions(-DPOCO_STATIC)
-link_directories(${POCO_INSTALL_DIR}/lib)
+if(USE_EMBEDDED_POCO)
+    link_directories(${POCO_INSTALL_DIR}/lib)
+endif()
+
 add_library(poco SHARED ${LUAPOCO_SRC} ${FOUNDATION_SRC})
-add_dependencies(poco poco_static)
+
+if(USE_EMBEDDED_POCO)
+    add_dependencies(poco poco_static)
+endif()
+
 target_link_libraries(poco ${LUA_LIB} PocoFoundation${PocoInternalSuffix} ${PLATFORM_EXTRAS})
-set_target_properties(poco PROPERTIES PREFIX "" CXX_STANDARD 11)
+set_target_properties(poco PROPERTIES PREFIX "" CXX_STANDARD 14)
 
 install(TARGETS poco RUNTIME DESTINATION ${CMAKE_BINARY_DIR} LIBRARY DESTINATION ${CMAKE_BINARY_DIR})
