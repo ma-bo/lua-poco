@@ -6,28 +6,21 @@ include(ExternalProject)
 option(USE_EMBEDDED_POCO "build poco library and static link into lua-poco." ON)
 
 ### Pick Lua implementation to use.
-if (LUA_INCLUDE AND LUA_LIB_PATH AND LUA_LIB_NAME)
-    find_library(LUA_LIB ${LUA_LIB_NAME} PATHS ${LUA_LIB_PATH} NO_DEFAULT_PATH)
+if (LUA_INCLUDE)
+    ### On Windows and Linux, specify where to find the Lua header files.
     include_directories(${LUA_INCLUDE})
-    set(LUA_INCLUDE_DIR ${LUA_INCLUDE})
-else()
-    if(LUA51)
-        set(LUA_INCLUDE_PATH lua5.1)
-        set(LUA_LIB_NAME lua5.1)
-    elseif(LUAJIT)
-        set(LUA_INCLUDE_PATH luajit-2.0)
-        set(LUA_LIB_NAME luajit-5.1)
-    else() # default to whatever is installed as lua.h/lua.so
-        set(LUA_INCLUDE_PATH "")
-        set(LUA_LIB_NAME lua)
+    ### These are mostly only useful for windows to specify:
+    ### The name of the Lua DLL to link against.
+    ### The path where the Lua DLL resides.
+    if (LUA_LIB_PATH AND LUA_LIB_NAME)
+        find_library(LUA_LIB ${LUA_LIB_NAME} PATHS ${LUA_LIB_PATH} NO_DEFAULT_PATH)
     endif()
-    
-    find_path(LUA_INCLUDE_DIR ${LUA_INCLUDE_PATH}/lua.h)
-    include_directories("${LUA_INCLUDE_DIR}/${LUA_INCLUDE_PATH}")
-    find_library(LUA_LIB "${LUA_LIB_NAME}")
+else()
+    ### For a generic unixy build that assumes the lua.h resides some where in a default CMAKE path.
+    find_path(LUA_INCLUDE lua.h)
 endif()
 
-message(STATUS "lua-poco using Lua headers: ${LUA_INCLUDE_DIR}/${LUA_INCLUDE_PATH}")
+message(STATUS "lua-poco using Lua headers: ${LUA_INCLUDE}")
 message(STATUS "lua-poco using Lua library: ${LUA_LIB}")
 
 if (MSVC)
@@ -53,7 +46,8 @@ if (MSVC)
 
     set(PocoInternalSuffix "mt${PocoInternalSuffix}")
 elseif(MINGW)
-    ## MinGW builds link against mingw's supplied Lua and Poco, so no suffix is present.
+    ## mingw-w64's build links against supplied Lua and POCO, so no suffix is present.
+    ## currently mingw-w64 cannot build the embedded poco without patches.
     set(PocoInternalSuffix "")
 elseif(UNIX)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
