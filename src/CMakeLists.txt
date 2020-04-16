@@ -40,6 +40,7 @@ set(FOUNDATION_SRC
     foundation/TeeOStream.cpp
     foundation/TeeIStream.cpp
     foundation/TaskManager.cpp
+    JSON/JSON.cpp
     )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -68,7 +69,7 @@ if(USE_EMBEDDED_POCO)
     add_dependencies(poco poco_static)
 endif()
 
-target_link_libraries(poco ${LUA_LIB} PocoFoundation${PocoInternalSuffix} ${PLATFORM_EXTRAS})
+target_link_libraries(poco ${LUA_LIB} PocoFoundation${PocoInternalSuffix} PocoJSON${PocoInternalSuffix} ${PLATFORM_EXTRAS})
 set_target_properties(poco PROPERTIES PREFIX "" CXX_STANDARD 14)
 
 install(TARGETS poco RUNTIME DESTINATION ${CMAKE_BINARY_DIR} LIBRARY DESTINATION ${CMAKE_BINARY_DIR})
