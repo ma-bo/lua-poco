@@ -45,7 +45,7 @@ class LuaHandler : public Poco::JSON::Handler
 {
 public:
 
-    LuaHandler(lua_State* L) : mState(L), mBaseTop(0) {}
+    LuaHandler(lua_State* L) : mState(L), mBaseTop(lua_gettop(L)) {}
     virtual ~LuaHandler() {}
 
     virtual void reset()
@@ -173,10 +173,16 @@ private:
             }
             else
             {
+                const char *tn = lua_typename(mState, lua_type(mState, -1));
                 lua_rawset(mState, ti.tableStackIndex);
             }
         }
-        else throw Poco::JSON::JSONException("attempt to set a value when no objects present");
+        else
+        {
+            // the last value is a table that should be left behind and returned.
+            if (lua_type(mState, -1) != LUA_TTABLE) 
+                throw Poco::JSON::JSONException("attempt to set a value when no objects present");
+        }
     }
 
     lua_State* mState;
