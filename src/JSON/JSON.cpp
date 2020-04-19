@@ -367,7 +367,7 @@ int JSON::encode(lua_State* L)
     unsigned indent = 0;
 
     luaL_checktype(L, 1, LUA_TTABLE);
-    if (lua_isinteger(L, 2)) { indent = static_cast<unsigned>(lua_tointeger(L, 2)); }
+    if (lua_isnumber(L, 2)) { indent = static_cast<unsigned>(lua_tointeger(L, 2)); }
     // TableEncoder expects the table it is encoding at the top of the stack.
     lua_pushvalue(L, 1);
 
