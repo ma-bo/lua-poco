@@ -44,12 +44,12 @@ struct TableInfo
     int tableStackIndex;
 };
 
-class LuaHandler : public Poco::JSON::Handler
+class JsonDecoder : public Poco::JSON::Handler
 {
 public:
 
-    LuaHandler(lua_State* L) : mState(L), mBaseTop(lua_gettop(L)) {}
-    virtual ~LuaHandler() {}
+    JsonDecoder(lua_State* L) : mState(L), mBaseTop(lua_gettop(L)) {}
+    virtual ~JsonDecoder() {}
 
     virtual void reset()
     {
@@ -403,7 +403,7 @@ int JSON::decode(lua_State* L)
 
     try
     {
-        Poco::SharedPtr<LuaHandler> lh(new LuaHandler(L));
+        Poco::SharedPtr<JsonDecoder> lh(new JsonDecoder(L));
         Poco::JSON::Parser jsonParser(lh);
         jsonParser.parse(jss);
 
