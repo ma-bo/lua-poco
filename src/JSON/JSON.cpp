@@ -24,7 +24,7 @@ int luaopen_poco_json(lua_State* L)
         { NULL, NULL}
     };
 
-    lua_createtable(L, 0, 2);
+    lua_createtable(L, 0, 5);
     setMetatableFunctions(L, methods);
 
     return 1;
