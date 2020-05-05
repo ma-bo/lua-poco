@@ -292,7 +292,7 @@ private:
         #if LUA_VERSION_NUM > 502
             if (lua_isinteger(mState, -1))
             {
-                lua_Integer i = lua_tointeger(mState, -1);
+                Poco::Int64 i = static_cast<Poco::Int64>(lua_tointeger(mState, -1));
                 mPrintHandler.value(i);
             }
             else
