@@ -2,6 +2,7 @@
 // Add files, directories, and recursive directories to a zip file.
 // @module compress
 
+#include <cstring>
 #include "Compress.h"
 #include <OStream.h>
 #include <FileOStream.h>
