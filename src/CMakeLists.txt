@@ -41,9 +41,10 @@ set(FOUNDATION_SRC
     foundation/TeeIStream.cpp
     foundation/TaskManager.cpp
     JSON/JSON.cpp
+    zip/Compress.cpp
     )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/foundation)
 
 if(WIN32)
     add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
@@ -69,7 +70,7 @@ if(USE_EMBEDDED_POCO)
     add_dependencies(poco poco_static)
 endif()
 
-target_link_libraries(poco ${LUA_LIB} PocoFoundation${PocoInternalSuffix} PocoJSON${PocoInternalSuffix} ${PLATFORM_EXTRAS})
+target_link_libraries(poco ${LUA_LIB} PocoFoundation${PocoInternalSuffix} PocoJSON${PocoInternalSuffix} PocoZip${PocoInternalSuffix} ${PLATFORM_EXTRAS})
 set_target_properties(poco PROPERTIES PREFIX "" CXX_STANDARD 14)
 
 install(TARGETS poco RUNTIME DESTINATION ${CMAKE_BINARY_DIR} LIBRARY DESTINATION ${CMAKE_BINARY_DIR})

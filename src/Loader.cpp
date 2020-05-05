@@ -33,6 +33,7 @@
 #include "foundation/TeeOStream.h"
 #include "foundation/TeeIStream.h"
 #include "foundation/TaskManager.h"
+#include "zip/Compress.h"
 
 namespace LuaPoco
 {
@@ -78,6 +79,7 @@ bool loadMetatables(lua_State* L)
             && TeeOStreamUserdata::registerTeeOStream(L)
             && TeeIStreamUserdata::registerTeeIStream(L)
             && TaskManagerUserdata::registerTaskManager(L)
+            && Zip::CompressUserdata::registerCompress(L)
         )
         {
             setupPrivateUserdata(L);
