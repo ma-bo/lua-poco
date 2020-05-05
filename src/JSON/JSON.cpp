@@ -357,7 +357,7 @@ private:
 };
 
 /// encodes a table into a JSON string.
-// @table table to encode
+// @tab table to encode
 // @return value as string or nil. (error)
 // @return error message.
 // @function encode
