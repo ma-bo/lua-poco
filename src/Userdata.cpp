@@ -71,10 +71,14 @@ void setCFunctions(lua_State* L, CFunctions* methods)
 
 void setupUserdataMetatable(lua_State* L, const char* metatableName, CFunctions* methods)
 {
-    luaL_newmetatable(L, metatableName);
-    setCFunctions(L, methods);
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
+    // exists == 0
+    // created == 1
+    if (luaL_newmetatable(L, metatableName))
+    {
+        setCFunctions(L, methods);
+        lua_pushvalue(L, -1);
+        lua_setfield(L, -2, "__index");
+    }
     lua_pop(L, 1);
 }
 
