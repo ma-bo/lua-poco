@@ -76,7 +76,7 @@ int CompressUserdata::Compress(lua_State* L)
 // register metatable for this class
 bool CompressUserdata::registerCompress(lua_State* L)
 {
-    struct UserdataMethod methods[] = 
+    struct CFunctions methods[] = 
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },

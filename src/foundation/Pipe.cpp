@@ -41,7 +41,7 @@ bool PipeUserdata::copyToState(lua_State *L)
 // register metatable for this class
 bool PipeUserdata::registerPipe(lua_State* L)
 {
-    struct UserdataMethod methods[] = 
+    struct CFunctions methods[] = 
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },

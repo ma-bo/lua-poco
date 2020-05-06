@@ -1203,7 +1203,7 @@ bool TaskManagerUserdata::copyToState(lua_State *L)
 // register metatable for this class
 bool TaskManagerUserdata::registerTaskManager(lua_State* L)
 {
-    struct UserdataMethod taskPublicMethods[] =
+    struct CFunctions taskPublicMethods[] =
     {
         { "isCancelled", Task::lud_isCancelled },
         { "cancel", Task::lud_cancel },
@@ -1214,7 +1214,7 @@ bool TaskManagerUserdata::registerTaskManager(lua_State* L)
         { NULL, NULL}
     };
 
-    struct UserdataMethod taskProtectedMethods[] =
+    struct CFunctions taskProtectedMethods[] =
     {
         // copy of public interface
         { "isCancelled", Task::lud_isCancelled },
@@ -1231,7 +1231,7 @@ bool TaskManagerUserdata::registerTaskManager(lua_State* L)
         { NULL, NULL}
     };
 
-    struct UserdataMethod taskManagerContainerMethods[] =
+    struct CFunctions taskManagerContainerMethods[] =
     {
         { "count", TaskManagerContainer::lud_count },
         { "taskList", TaskManagerContainer::lud_taskList },
@@ -1245,7 +1245,7 @@ bool TaskManagerUserdata::registerTaskManager(lua_State* L)
         { NULL, NULL }
     };
 
-    struct UserdataMethod taskManagerMethods[] =
+    struct CFunctions taskManagerMethods[] =
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },

@@ -14,7 +14,7 @@
 
 int luaopen_poco_json(lua_State* L)
 {
-    struct LuaPoco::UserdataMethod methods[] =
+    struct LuaPoco::CFunctions methods[] =
     {
         { "encode", LuaPoco::JSON::encode },
         { "decode", LuaPoco::JSON::decode },
@@ -25,7 +25,7 @@ int luaopen_poco_json(lua_State* L)
     };
 
     lua_createtable(L, 0, 5);
-    setMetatableFunctions(L, methods);
+    setCFunctions(L, methods);
 
     return 1;
 }

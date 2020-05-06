@@ -43,7 +43,7 @@ std::ostream& InflatingOStreamUserdata::ostream()
 // register metatable for this class
 bool InflatingOStreamUserdata::registerInflatingOStream(lua_State* L)
 {
-    struct UserdataMethod methods[] = 
+    struct CFunctions methods[] = 
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },

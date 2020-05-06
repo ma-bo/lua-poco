@@ -22,7 +22,7 @@ ProcessHandleUserdata::~ProcessHandleUserdata()
 // register metatable for this class
 bool ProcessHandleUserdata::registerProcessHandle(lua_State* L)
 {
-    struct UserdataMethod methods[] = 
+    struct CFunctions methods[] = 
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },

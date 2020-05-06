@@ -18,7 +18,7 @@
 
 int luaopen_poco_path(lua_State* L)
 {
-    struct LuaPoco::UserdataMethod methods[] = 
+    struct LuaPoco::CFunctions methods[] = 
     {
         { "current", LuaPoco::PathUserdata::current },
         { "expand", LuaPoco::PathUserdata::expand },
@@ -34,7 +34,7 @@ int luaopen_poco_path(lua_State* L)
     };
     
     int rv = LuaPoco::loadConstructor(L, LuaPoco::PathUserdata::Path);
-    if (rv) setMetatableFunctions(L, methods);
+    if (rv) setCFunctions(L, methods);
     
     return rv;
 }
@@ -69,7 +69,7 @@ bool PathUserdata::copyToState(lua_State *L)
 // register metatable for this class
 bool PathUserdata::registerPath(lua_State* L)
 {
-    struct UserdataMethod methods[] = 
+    struct CFunctions methods[] = 
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },

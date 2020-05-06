@@ -39,18 +39,18 @@ private:
 int pushPocoException(lua_State* L, const Poco::Exception& e);
 int pushUnknownException(lua_State* L);
 
-struct UserdataMethod
+struct CFunctions
 {
     const char* name;
     lua_CFunction fn;
 };
 
 // installs methods into table at the top of the stack.
-void setMetatableFunctions(lua_State* L, UserdataMethod* methods);
+void setCFunctions(lua_State* L, CFunctions* methods);
 
 // since the register functions between 5.1, and 5.2 changed, use an agnostic version.
 // creates a new metatable with metatableName, and installs methods into it.
-void setupUserdataMetatable(lua_State* L, const char* metatableName, UserdataMethod* methods);
+void setupUserdataMetatable(lua_State* L, const char* metatableName, CFunctions* methods);
 
 // NOTE: requires that the userdata value be on the top of the Lua stack.
 // attaches the appropriate metatable to the userdata

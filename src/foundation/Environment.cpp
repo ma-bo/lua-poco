@@ -8,7 +8,7 @@
 
 int luaopen_poco_environment(lua_State* L)
 {
-    struct LuaPoco::UserdataMethod methods[] = 
+    struct LuaPoco::CFunctions methods[] = 
     {
         { "get", LuaPoco::Environment::get },
         { "has", LuaPoco::Environment::has },
@@ -27,7 +27,7 @@ int luaopen_poco_environment(lua_State* L)
     };
     
     lua_createtable(L, 0, 11);
-    setMetatableFunctions(L, methods);
+    setCFunctions(L, methods);
     
     return 1;
 }

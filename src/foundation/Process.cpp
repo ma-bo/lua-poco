@@ -11,7 +11,7 @@
 
 int luaopen_poco_process(lua_State* L)
 {
-    struct LuaPoco::UserdataMethod methods[] = 
+    struct LuaPoco::CFunctions methods[] = 
     {
         { "kill", LuaPoco::Process::kill },
         { "id", LuaPoco::Process::id },
@@ -24,7 +24,7 @@ int luaopen_poco_process(lua_State* L)
     if (LuaPoco::loadMetatables(L))
     {
         lua_createtable(L, 0, 5);
-        setMetatableFunctions(L, methods);
+        setCFunctions(L, methods);
     }
     
     return 1;

@@ -34,7 +34,7 @@ std::istream& PipeIStreamUserdata::istream()
 // register metatable for this class
 bool PipeIStreamUserdata::registerPipeIStream(lua_State* L)
 {
-    struct UserdataMethod methods[] = 
+    struct CFunctions methods[] = 
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },

@@ -38,7 +38,7 @@ bool FileUserdata::copyToState(lua_State* L)
 
 bool FileUserdata::registerFile(lua_State* L)
 {
-    struct UserdataMethod methods[] = 
+    struct CFunctions methods[] = 
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },

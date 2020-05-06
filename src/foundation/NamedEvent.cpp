@@ -30,7 +30,7 @@ NamedEventUserdata::~NamedEventUserdata()
 // register metatable for this class
 bool NamedEventUserdata::registerNamedEvent(lua_State* L)
 {
-    struct UserdataMethod methods[] = 
+    struct CFunctions methods[] = 
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },

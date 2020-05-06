@@ -15,7 +15,7 @@ int luaopen_poco_timestamp(lua_State* L)
     
     if (LuaPoco::loadMetatables(L))
     {
-        struct LuaPoco::UserdataMethod methods[] = 
+        struct LuaPoco::CFunctions methods[] = 
         {
             { "new", LuaPoco::TimestampUserdata::Timestamp },
             { "__call", LuaPoco::TimestampUserdata::Timestamp },
@@ -25,7 +25,7 @@ int luaopen_poco_timestamp(lua_State* L)
         };
         
         lua_createtable(L, 0, 1);
-        setMetatableFunctions(L, methods);
+        setCFunctions(L, methods);
         // lua_pushvalue(L, -1);
         // lua_setfield(L, -2, "__index");
         lua_pushvalue(L, -1);
@@ -77,7 +77,7 @@ bool TimestampUserdata::copyToState(lua_State* L)
 // register metatable for this class
 bool TimestampUserdata::registerTimestamp(lua_State* L)
 {
-    struct UserdataMethod methods[] = 
+    struct CFunctions methods[] = 
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },
