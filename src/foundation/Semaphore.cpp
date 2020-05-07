@@ -14,6 +14,7 @@
 
 int luaopen_poco_semaphore(lua_State* L)
 {
+    LuaPoco::SemaphoreUserdata::registerSemaphore(L);
     return LuaPoco::loadConstructor(L, LuaPoco::SemaphoreUserdata::Semaphore);
 }
 
@@ -44,6 +45,7 @@ SemaphoreUserdata::~SemaphoreUserdata()
 
 bool SemaphoreUserdata::copyToState(lua_State *L)
 {
+    LuaPoco::SemaphoreUserdata::registerSemaphore(L);
     SemaphoreUserdata* sud = new(lua_newuserdata(L, sizeof *sud)) SemaphoreUserdata(mSemaphore);
     setupPocoUserdata(L, sud, POCO_SEMAPHORE_METATABLE_NAME);
     return true;

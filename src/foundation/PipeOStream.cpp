@@ -8,6 +8,7 @@
 
 int luaopen_poco_pipeostream(lua_State* L)
 {
+    LuaPoco::PipeOStreamUserdata::registerPipeOStream(L);
     return LuaPoco::loadConstructor(L, LuaPoco::PipeOStreamUserdata::PipeOStream);
 }
 

@@ -8,6 +8,7 @@
 
 int luaopen_poco_mutex(lua_State* L)
 {
+    LuaPoco::MutexUserdata::registerMutex(L);
     return LuaPoco::loadConstructor(L, LuaPoco::MutexUserdata::Mutex);
 }
 
@@ -33,6 +34,7 @@ MutexUserdata::~MutexUserdata()
 
 bool MutexUserdata::copyToState(lua_State *L)
 {
+    registerMutex(L);
     MutexUserdata* mud = new(lua_newuserdata(L, sizeof *mud)) MutexUserdata(mMutex);
     setupPocoUserdata(L, mud, POCO_MUTEX_METATABLE_NAME);
     return true;

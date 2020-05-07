@@ -8,6 +8,7 @@
 
 LUA_API int luaopen_poco_event(lua_State* L)
 {
+    LuaPoco::EventUserdata::registerEvent(L);
     return LuaPoco::loadConstructor(L, LuaPoco::EventUserdata::Event);
 }
 
@@ -32,6 +33,7 @@ EventUserdata::~EventUserdata()
 
 bool EventUserdata::copyToState(lua_State *L)
 {
+    registerEvent(L);
     EventUserdata* eud = new(lua_newuserdata(L, sizeof *eud)) EventUserdata(mEvent);
     setupPocoUserdata(L, eud, POCO_EVENT_METATABLE_NAME);
     return true;

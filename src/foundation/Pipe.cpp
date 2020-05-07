@@ -9,6 +9,7 @@
 
 int luaopen_poco_pipe(lua_State* L)
 {
+    LuaPoco::PipeUserdata::registerPipe(L);
     return LuaPoco::loadConstructor(L, LuaPoco::PipeUserdata::Pipe);
 }
 
@@ -33,6 +34,7 @@ PipeUserdata::~PipeUserdata()
 
 bool PipeUserdata::copyToState(lua_State *L)
 {
+    registerPipe(L);
     PipeUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PipeUserdata(mPipe);
     setupPocoUserdata(L, pud, POCO_PIPE_METATABLE_NAME);
     return true;

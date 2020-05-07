@@ -11,6 +11,8 @@
 
 int luaopen_poco_process(lua_State* L)
 {
+
+    LuaPoco::ProcessHandleUserdata::registerProcessHandle(L);
     struct LuaPoco::CFunctions methods[] = 
     {
         { "kill", LuaPoco::Process::kill },

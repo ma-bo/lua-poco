@@ -7,6 +7,7 @@
 
 int luaopen_poco_deflatingistream(lua_State* L)
 {
+    LuaPoco::DeflatingIStreamUserdata::registerDeflatingIStream(L);
     return LuaPoco::loadConstructor(L, LuaPoco::DeflatingIStreamUserdata::DeflatingIStream);
 }
 

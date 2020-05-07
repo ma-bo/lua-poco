@@ -7,6 +7,7 @@
 
 int luaopen_poco_inflatingostream(lua_State* L)
 {
+    LuaPoco::InflatingOStreamUserdata::registerInflatingOStream(L);
     return LuaPoco::loadConstructor(L, LuaPoco::InflatingOStreamUserdata::InflatingOStream);
 }
 

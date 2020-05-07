@@ -10,6 +10,7 @@
 
 int luaopen_poco_teeostream(lua_State* L)
 {
+    LuaPoco::TeeOStreamUserdata::registerTeeOStream(L);
     return LuaPoco::loadConstructor(L, LuaPoco::TeeOStreamUserdata::TeeOStream);
 }
 

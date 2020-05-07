@@ -1,39 +1,6 @@
 #include "LuaPoco.h"
-#include "foundation/File.h"
-#include "foundation/RegularExpression.h"
-#include "foundation/DynamicAny.h"
-#include "foundation/Timestamp.h"
-#include "foundation/Checksum.h"
-#include "foundation/Environment.h"
-#include "foundation/Pipe.h"
-#include "foundation/NamedEvent.h"
-#include "foundation/NamedMutex.h"
-#include "foundation/ProcessHandle.h"
-#include "foundation/Process.h"
-#include "foundation/Semaphore.h"
-#include "foundation/FastMutex.h"
-#include "foundation/Mutex.h"
-#include "foundation/Thread.h"
-#include "foundation/Event.h"
-#include "foundation/IStream.h"
-#include "foundation/OStream.h"
-#include "foundation/PipeOStream.h"
-#include "foundation/PipeIStream.h"
-#include "foundation/FileIStream.h"
-#include "foundation/FileOStream.h"
-#include "foundation/InflatingIStream.h"
-#include "foundation/InflatingOStream.h"
-#include "foundation/DeflatingIStream.h"
-#include "foundation/DeflatingOStream.h"
-#include "foundation/Path.h"
-#include "foundation/NotificationQueue.h"
-#include "foundation/Buffer.h"
-#include "foundation/MemoryIStream.h"
-#include "foundation/MemoryOStream.h"
-#include "foundation/TeeOStream.h"
-#include "foundation/TeeIStream.h"
-#include "foundation/TaskManager.h"
-#include "zip/Compress.h"
+#include "Loader.h"
+#include "Userdata.h"
 
 namespace LuaPoco
 {
@@ -46,47 +13,10 @@ bool loadMetatables(lua_State* L)
     lua_getfield(L, LUA_REGISTRYINDEX, "poco.metatables.registered");
     if (lua_isnil(L, -1))
     {
-        if (
-            FileUserdata::registerFile(L)
-            && RegularExpressionUserdata::registerRegularExpression(L)
-            && DynamicAnyUserdata::registerDynamicAny(L)
-            && TimestampUserdata::registerTimestamp(L)
-            && ChecksumUserdata::registerChecksum(L)
-            && PipeUserdata::registerPipe(L)
-            && NamedEventUserdata::registerNamedEvent(L)
-            && NamedMutexUserdata::registerNamedMutex(L)
-            && ProcessHandleUserdata::registerProcessHandle(L)
-            && SemaphoreUserdata::registerSemaphore(L)
-            && FastMutexUserdata::registerFastMutex(L)
-            && MutexUserdata::registerMutex(L)
-            && ThreadUserdata::registerThread(L)
-            && EventUserdata::registerEvent(L)
-            && PipeOStreamUserdata::registerPipeOStream(L)
-            && PipeIStreamUserdata::registerPipeIStream(L)
-            && IStreamUserdata::registerIStream(L)
-            && OStreamUserdata::registerOStream(L)
-            && FileIStreamUserdata::registerFileIStream(L)
-            && FileOStreamUserdata::registerFileOStream(L)
-            && InflatingIStreamUserdata::registerInflatingIStream(L)
-            && InflatingOStreamUserdata::registerInflatingOStream(L)
-            && DeflatingIStreamUserdata::registerDeflatingIStream(L)
-            && DeflatingOStreamUserdata::registerDeflatingOStream(L)
-            && PathUserdata::registerPath(L)
-            && NotificationQueueUserdata::registerNotificationQueue(L)
-            && BufferUserdata::registerBuffer(L)
-            && MemoryIStreamUserdata::registerMemoryIStream(L)
-            && MemoryOStreamUserdata::registerMemoryOStream(L)
-            && TeeOStreamUserdata::registerTeeOStream(L)
-            && TeeIStreamUserdata::registerTeeIStream(L)
-            && TaskManagerUserdata::registerTaskManager(L)
-            && Zip::CompressUserdata::registerCompress(L)
-        )
-        {
             setupPrivateUserdata(L);
             lua_pushboolean(L, 1);
             lua_setfield(L, LUA_REGISTRYINDEX, "poco.metatables.registered");
             rv = true;
-        }
     }
     else
         rv = true;

@@ -11,6 +11,7 @@
 
 int luaopen_poco_checksum(lua_State* L)
 {
+    LuaPoco::ChecksumUserdata::registerChecksum(L);
     return LuaPoco::loadConstructor(L, LuaPoco::ChecksumUserdata::Checksum);
 }
 
@@ -30,6 +31,7 @@ ChecksumUserdata::~ChecksumUserdata()
 
 bool ChecksumUserdata::copyToState(lua_State *L)
 {
+    registerChecksum(L);
     ChecksumUserdata* csud = new(lua_newuserdata(L, sizeof *csud)) ChecksumUserdata(csud->mChecksum.type());
     setupPocoUserdata(L, csud, POCO_CHECKSUM_METATABLE_NAME);
     csud->mChecksum = mChecksum;

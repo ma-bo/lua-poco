@@ -16,6 +16,7 @@
 
 int luaopen_poco_thread(lua_State* L)
 {
+    LuaPoco::ThreadUserdata::registerThread(L);
     return LuaPoco::loadConstructor(L, LuaPoco::ThreadUserdata::Thread);
 }
 

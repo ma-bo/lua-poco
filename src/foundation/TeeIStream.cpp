@@ -9,6 +9,7 @@
 
 int luaopen_poco_teeistream(lua_State* L)
 {
+    LuaPoco::TeeIStreamUserdata::registerTeeIStream(L);
     return LuaPoco::loadConstructor(L, LuaPoco::TeeIStreamUserdata::TeeIStream);
 }
 

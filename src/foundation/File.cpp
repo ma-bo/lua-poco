@@ -9,6 +9,8 @@
 
 int luaopen_poco_file(lua_State* L)
 {
+    LuaPoco::TimestampUserdata::registerTimestamp(L);
+    LuaPoco::FileUserdata::registerFile(L);
     return LuaPoco::loadConstructor(L, LuaPoco::FileUserdata::File);
 }
 
@@ -31,6 +33,8 @@ FileUserdata::~FileUserdata()
 
 bool FileUserdata::copyToState(lua_State* L)
 {
+    TimestampUserdata::registerTimestamp(L);
+    registerFile(L);
     FileUserdata* fud = new(lua_newuserdata(L, sizeof *fud)) FileUserdata(mFile);
     setupPocoUserdata(L, fud, POCO_FILE_METATABLE_NAME);
     return true;

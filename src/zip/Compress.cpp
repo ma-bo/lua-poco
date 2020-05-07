@@ -18,6 +18,7 @@
 
 int luaopen_poco_zip_compress(lua_State* L)
 {
+    LuaPoco::Zip::CompressUserdata::registerCompress(L);
     return LuaPoco::loadConstructor(L, LuaPoco::Zip::CompressUserdata::Compress);
 }
 

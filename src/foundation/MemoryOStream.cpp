@@ -7,6 +7,7 @@
 
 int luaopen_poco_memoryostream(lua_State* L)
 {
+    LuaPoco::MemoryOStreamUserdata::registerMemoryOStream(L);
     return LuaPoco::loadConstructor(L, LuaPoco::MemoryOStreamUserdata::MemoryOStream);
 }
 

@@ -6,6 +6,7 @@
 
 int luaopen_poco_fileistream(lua_State* L)
 {
+    LuaPoco::FileIStreamUserdata::registerFileIStream(L);
     return LuaPoco::loadConstructor(L, LuaPoco::FileIStreamUserdata::FileIStream);
 }
 

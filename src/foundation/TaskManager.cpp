@@ -47,6 +47,7 @@
 
 int luaopen_poco_taskmanager(lua_State* L)
 {
+    LuaPoco::TaskManagerUserdata::registerTaskManager(L);
     return LuaPoco::loadConstructor(L, LuaPoco::TaskManagerUserdata::TaskManager);
 }
 
@@ -1195,6 +1196,7 @@ TaskManagerUserdata::~TaskManagerUserdata()
 
 bool TaskManagerUserdata::copyToState(lua_State *L)
 {
+    registerTaskManager(L);
     TaskManagerUserdata* tmud = new(lua_newuserdata(L, sizeof *tmud)) TaskManagerUserdata(mContainer);
     setupPocoUserdata(L, tmud, POCO_TASK_MANAGER_METATABLE_NAME);
     return true;

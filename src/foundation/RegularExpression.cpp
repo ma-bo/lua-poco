@@ -7,6 +7,7 @@
 
 int luaopen_poco_regex(lua_State* L)
 {
+    LuaPoco::RegularExpressionUserdata::registerRegularExpression(L);
     return LuaPoco::loadConstructor(L, LuaPoco::RegularExpressionUserdata::RegularExpression);
 }
 

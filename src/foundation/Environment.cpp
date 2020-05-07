@@ -13,13 +13,11 @@ int luaopen_poco_environment(lua_State* L)
         { "get", LuaPoco::Environment::get },
         { "has", LuaPoco::Environment::has },
         { "set", LuaPoco::Environment::set },
-        // disabling this for compatibility with poco 1.3.6. (thanks debian/ubuntu...)
-        //{ "libraryVersion", LuaPoco::Environment::libraryVersion },
+        { "libraryVersion", LuaPoco::Environment::libraryVersion },
         { "nodeId", LuaPoco::Environment::nodeId },
         { "nodeName", LuaPoco::Environment::nodeName },
         { "osArchitecture", LuaPoco::Environment::osArchitecture },
-        // disabling this for compatibility with poco 1.3.6.
-        //{ "osDisplayName", LuaPoco::Environment::osDisplayName },
+        { "osDisplayName", LuaPoco::Environment::osDisplayName },
         { "osName", LuaPoco::Environment::osName },
         { "osVersion", LuaPoco::Environment::osVersion },
         { "processorCount", LuaPoco::Environment::processorCount },
@@ -117,7 +115,6 @@ int Environment::set(lua_State* L)
     return rv;
 }
 
-/* disabling for compatibility with poco 1.3.6
 /// gets the POCO C++ library version. 
 // number is in the format of 0xAABBCCDD, 
 // where AA is the major version number, BB is the minor version number, CC is the revision number,
@@ -130,7 +127,6 @@ int Environment::libraryVersion(lua_State* L)
     lua_pushinteger(L, ver);
     return 1;
 }
-*/
 
 /// gets the ethernet address of the first ethernet adapter found on the system.
 // @return string of bytes representing MAC address.
@@ -204,7 +200,6 @@ int Environment::osArchitecture(lua_State* L)
     return rv;
 }
 
-/* disabling for compabibility with poco 1.3.6
 /// gets the operating system name in a "user-friendly" way.
 // @return name as a string.
 // @function osDisplayName
@@ -228,7 +223,6 @@ int Environment::osDisplayName(lua_State* L)
     
     return rv;
 }
-*/
 
 /// gets the operating system name.
 // @return name as a string.

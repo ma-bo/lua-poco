@@ -18,6 +18,7 @@
 
 int luaopen_poco_notificationqueue(lua_State* L)
 {
+    LuaPoco::NotificationQueueUserdata::registerNotificationQueue(L);
     return LuaPoco::loadConstructor(L, LuaPoco::NotificationQueueUserdata::NotificationQueue);
 }
 
@@ -47,6 +48,7 @@ NotificationQueueUserdata::~NotificationQueueUserdata()
 
 bool NotificationQueueUserdata::copyToState(lua_State *L)
 {
+    LuaPoco::NotificationQueueUserdata::registerNotificationQueue(L);
     NotificationQueueUserdata* nqud = new(lua_newuserdata(L, sizeof *nqud)) NotificationQueueUserdata(mQueue, mPool);
     setupPocoUserdata(L, nqud, POCO_NOTIFICATIONQUEUE_METATABLE_NAME);
     return true;

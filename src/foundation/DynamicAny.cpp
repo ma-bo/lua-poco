@@ -13,6 +13,7 @@
 
 int luaopen_poco_dynamicany(lua_State* L)
 {
+    LuaPoco::DynamicAnyUserdata::registerDynamicAny(L);
     return LuaPoco::loadConstructor(L, LuaPoco::DynamicAnyUserdata::DynamicAny);
 }
 
@@ -31,6 +32,7 @@ DynamicAnyUserdata::~DynamicAnyUserdata()
 
 bool DynamicAnyUserdata::copyToState(lua_State* L)
 {
+    registerDynamicAny(L);
     DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(mDynamicAny);
     setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
     return true;

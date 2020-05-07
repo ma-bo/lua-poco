@@ -9,6 +9,7 @@
 
 int luaopen_poco_buffer(lua_State* L)
 {
+    LuaPoco::BufferUserdata::registerBuffer(L);
     return LuaPoco::loadConstructor(L, LuaPoco::BufferUserdata::Buffer);
 }
 
@@ -29,6 +30,7 @@ BufferUserdata::~BufferUserdata()
 
 bool BufferUserdata::copyToState(lua_State *L)
 {
+    registerBuffer(L);
     BufferUserdata* bud = new(lua_newuserdata(L, sizeof *bud)) BufferUserdata(mCapacity);
     setupPocoUserdata(L, bud, POCO_BUFFER_METATABLE_NAME);
     bud->mCapacity = mCapacity;

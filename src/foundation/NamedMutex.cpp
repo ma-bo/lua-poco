@@ -7,6 +7,7 @@
 
 int luaopen_poco_namedmutex(lua_State* L)
 {
+    LuaPoco::NamedMutexUserdata::registerNamedMutex(L);
     return LuaPoco::loadConstructor(L, LuaPoco::NamedMutexUserdata::NamedMutex);
 }
 

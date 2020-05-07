@@ -8,6 +8,7 @@
 
 int luaopen_poco_fastmutex(lua_State* L)
 {
+    LuaPoco::FastMutexUserdata::registerFastMutex(L);
     return LuaPoco::loadConstructor(L, LuaPoco::FastMutexUserdata::FastMutex);
 }
 
@@ -33,6 +34,7 @@ FastMutexUserdata::~FastMutexUserdata()
 
 bool FastMutexUserdata::copyToState(lua_State *L)
 {
+    registerFastMutex(L);
     FastMutexUserdata* fmud = new(lua_newuserdata(L, sizeof *fmud)) FastMutexUserdata(mFastMutex);
     setupPocoUserdata(L, fmud, POCO_FASTMUTEX_METATABLE_NAME);
     return true;

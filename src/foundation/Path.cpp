@@ -34,7 +34,7 @@ int luaopen_poco_path(lua_State* L)
     };
     
     int rv = LuaPoco::loadConstructor(L, LuaPoco::PathUserdata::Path);
-    if (rv) setCFunctions(L, methods);
+    if (rv == 1) { setCFunctions(L, methods); }
     
     return rv;
 }
@@ -61,6 +61,7 @@ PathUserdata::~PathUserdata()
 
 bool PathUserdata::copyToState(lua_State *L)
 {
+    registerPath(L);
     PathUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PathUserdata(mPath);
     setupPocoUserdata(L, pud, POCO_PATH_METATABLE_NAME);
     return true;

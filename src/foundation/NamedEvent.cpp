@@ -10,6 +10,7 @@
 
 int luaopen_poco_namedevent(lua_State* L)
 {
+    LuaPoco::NamedEventUserdata::registerNamedEvent(L);
     return LuaPoco::loadConstructor(L, LuaPoco::NamedEventUserdata::NamedEvent);
 }
 

@@ -11,34 +11,16 @@
 
 int luaopen_poco_timestamp(lua_State* L)
 {
-    int rv = 0;
+    struct LuaPoco::CFunctions methods[] = 
+    {
+        { "fromEpoch", LuaPoco::TimestampUserdata::TimestampFromEpoch },
+        { "fromUTC", LuaPoco::TimestampUserdata::TimestampFromUtc },
+        { NULL, NULL}
+    };
     
-    if (LuaPoco::loadMetatables(L))
-    {
-        struct LuaPoco::CFunctions methods[] = 
-        {
-            { "new", LuaPoco::TimestampUserdata::Timestamp },
-            { "__call", LuaPoco::TimestampUserdata::Timestamp },
-            { "fromEpoch", LuaPoco::TimestampUserdata::TimestampFromEpoch },
-            { "fromUTC", LuaPoco::TimestampUserdata::TimestampFromUtc },
-            { NULL, NULL}
-        };
-        
-        lua_createtable(L, 0, 1);
-        setCFunctions(L, methods);
-        // lua_pushvalue(L, -1);
-        // lua_setfield(L, -2, "__index");
-        lua_pushvalue(L, -1);
-        lua_setmetatable(L, -2);
-        
-        rv = 1;
-    }
-    else
-    {
-        lua_pushnil(L);
-        lua_pushstring(L, "failed to create required poco metatables");
-        rv = 2;
-    }
+    LuaPoco::TimestampUserdata::registerTimestamp(L);
+    int rv = LuaPoco::loadConstructor(L, LuaPoco::TimestampUserdata::Timestamp);
+    if (rv == 1) { setCFunctions(L, methods); }
     
     return rv;
 }
@@ -69,6 +51,7 @@ TimestampUserdata::~TimestampUserdata()
 
 bool TimestampUserdata::copyToState(lua_State* L)
 {
+    registerTimestamp(L);
     TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(mTimestamp);
     setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
     return true;
