@@ -4,12 +4,12 @@
 
 #include <cstring>
 #include "Compress.h"
-#include <OStream.h>
-#include <FileOStream.h>
-#include <IStream.h>
-#include <Path.h>
-#include <Timestamp.h>
-#include <MemoryOStream.h>
+#include "OStream.h"
+#include "FileOStream.h"
+#include "IStream.h"
+#include "Path.h"
+#include "Timestamp.h"
+#include "MemoryOStream.h"
 #include <Poco/Zip/Compress.h>
 #include <Poco/Zip/Decompress.h>
 #include <Poco/Zip/ZipArchive.h>

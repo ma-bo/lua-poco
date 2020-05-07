@@ -40,11 +40,11 @@ set(FOUNDATION_SRC
     foundation/TeeOStream.cpp
     foundation/TeeIStream.cpp
     foundation/TaskManager.cpp
-    JSON/JSON.cpp
-    zip/Compress.cpp
+    foundation/JSON.cpp
+    foundation/Compress.cpp
     )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/foundation)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if(WIN32)
     add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
