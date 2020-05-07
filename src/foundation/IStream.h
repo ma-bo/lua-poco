@@ -3,7 +3,6 @@
 
 #include <istream>
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 
 namespace LuaPoco

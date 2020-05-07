@@ -2,7 +2,6 @@
 #define LUA_POCO_MEMORYOSTREAM_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "OStream.h"
 #include <Poco/MemoryStream.h>

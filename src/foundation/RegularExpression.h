@@ -2,8 +2,6 @@
 #define LUA_POCO_REGULAREXPRESSION_H
 
 #include <string>
-#include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/RegularExpression.h"
 

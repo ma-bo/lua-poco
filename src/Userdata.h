@@ -60,6 +60,11 @@ void setupPocoUserdata(lua_State* L, Userdata* ud, const char* metatableName);
 // constructs the private table for mapping a specific Userdata pointer to the base Userdata pointer.
 void setupPrivateUserdata(lua_State* L);
 
+// prepares the module table for the normal userdata contructor pattern
+// that most modules use for creating a userdata via
+// module.new() or module()
+int loadConstructor(lua_State*L, lua_CFunction cons);
+
 // sets the association between a specific Userdata pointer and the base Userdata pointer.
 void setPrivateUserdata(lua_State* L, int userdataIdx, Userdata* ud);
 

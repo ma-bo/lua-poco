@@ -2,7 +2,6 @@
 #define LUA_POCO_PATH_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Path.h"
 

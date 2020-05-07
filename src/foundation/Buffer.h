@@ -2,7 +2,6 @@
 #define LUA_POCO_BUFFER_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Buffer.h"
 

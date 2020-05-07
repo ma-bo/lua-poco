@@ -2,7 +2,6 @@
 #define LUA_POCO_MUTEX_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Mutex.h"
 #include "Poco/SharedPtr.h"

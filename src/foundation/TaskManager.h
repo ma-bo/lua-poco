@@ -2,7 +2,6 @@
 #define LUA_POCO_TASK_MANAGER_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Notification.h"
 #include "NotificationFactory.h"

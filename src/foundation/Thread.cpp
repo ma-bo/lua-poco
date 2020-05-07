@@ -432,12 +432,7 @@ int ThreadUserdata::start(lua_State* L)
     // and it will not be assigned to the mState member variable.
     LuaStateHolder holder(luaL_newstate());
     luaL_openlibs(holder.state);
-    if (!loadMetatables(holder.state))
-    {
-        lua_pushnil(L);
-        lua_pushstring(L, "could not load poco library into thread's state.");
-        return 2;
-    }
+    setupPrivateUserdata(holder.state);
     
     for (int i = 2; i <= top; ++i)
     {

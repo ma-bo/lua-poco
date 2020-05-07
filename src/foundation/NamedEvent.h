@@ -2,7 +2,6 @@
 #define LUA_POCO_NAMEDEVENT_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/NamedEvent.h"
 #include <string>

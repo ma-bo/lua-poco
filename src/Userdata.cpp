@@ -91,16 +91,43 @@ void setupPocoUserdata(lua_State* L, Userdata* ud, const char* metatableName)
 
 void setupPrivateUserdata(lua_State* L)
 {
-    // start private table with 20 slots hash table slots for userdata.
-    lua_createtable(L, 0, 20);
-    // set weak key mode on table.
-    lua_pushstring(L, "__mode");
-    lua_pushstring(L, "k");
-    lua_settable(L, -3);
-    // set the table to be its own metatable
+    int top = lua_gettop(L);
+    
+    lua_getfield(L, LUA_REGISTRYINDEX, USERDATA_PRIVATE_TABLE);
+    if (lua_isnil(L, -1))
+    {
+        // start private table with 20 slots hash table slots for userdata.
+        lua_createtable(L, 0, 20);
+        // set weak key mode on table.
+        lua_pushstring(L, "__mode");
+        lua_pushstring(L, "k");
+        lua_settable(L, -3);
+        // set the table to be its own metatable
+        lua_pushvalue(L, -1);
+        lua_setmetatable(L, -2);
+        lua_setfield(L, LUA_REGISTRYINDEX, USERDATA_PRIVATE_TABLE);
+    }
+
+    lua_settop(L, top);
+}
+
+int loadConstructor(lua_State*L, lua_CFunction cons)
+{
+    int rv = 0;
+
+    setupPrivateUserdata(L);
+    // create module table
+    lua_createtable(L, 0, 3);
+    // store constructor function for new, and __call.
+    lua_pushcfunction(L, cons);
     lua_pushvalue(L, -1);
+    lua_setfield(L, -3, "new");
+    lua_setfield(L, -2, "__call");
+    lua_pushvalue(L, -1);
+    // set metatable on itself for __call lookups.
     lua_setmetatable(L, -2);
-    lua_setfield(L, LUA_REGISTRYINDEX, USERDATA_PRIVATE_TABLE);
+    
+    return 1;
 }
 
 // stores Userdata pointer in a private table with the derived userdata as a weak key.

@@ -2,7 +2,6 @@
 #define LUA_POCO_TIMESTAMP_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Timestamp.h"
 

@@ -1,8 +1,6 @@
 #ifndef LUA_POCO_CHECKSUM_H
 #define LUA_POCO_CHECKSUM_H
 
-#include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Checksum.h"
 

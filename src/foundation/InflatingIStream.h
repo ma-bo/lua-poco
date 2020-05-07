@@ -2,7 +2,6 @@
 #define LUA_POCO_INFLATINGISTREAM_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "IStream.h"
 #include <Poco/InflatingStream.h>

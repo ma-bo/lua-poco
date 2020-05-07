@@ -2,7 +2,6 @@
 #define LUA_POCO_TEEOSTREAM_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "OStream.h"
 #include <Poco/TeeStream.h>

@@ -1,5 +1,4 @@
 set(LUAPOCO_SRC
-    Loader.cpp
     Userdata.cpp
     StateTransfer.cpp)
     

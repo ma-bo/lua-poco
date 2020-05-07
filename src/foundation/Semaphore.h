@@ -2,7 +2,6 @@
 #define LUA_POCO_SEMAPHORE_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Semaphore.h"
 #include "Poco/SharedPtr.h"

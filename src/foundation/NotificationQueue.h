@@ -2,7 +2,6 @@
 #define LUA_POCO_NOTIFICATION_QUEUE_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/SharedPtr.h"
 #include "Poco/NotificationQueue.h"

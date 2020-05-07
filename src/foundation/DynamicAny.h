@@ -2,7 +2,6 @@
 #define LUA_POCO_DYNAMICANY_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/DynamicAny.h"
 

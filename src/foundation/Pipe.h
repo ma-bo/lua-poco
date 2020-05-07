@@ -2,7 +2,6 @@
 #define LUA_POCO_PIPE_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Pipe.h"
 #include "Poco/PipeStream.h"

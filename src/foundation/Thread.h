@@ -2,7 +2,6 @@
 #define LUA_POCO_THREAD_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Thread.h"
 #include "Poco/Runnable.h"

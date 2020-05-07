@@ -2,7 +2,6 @@
 #define LUA_POCO_EVENT_H
 
 #include "LuaPoco.h"
-#include "Loader.h"
 #include "Userdata.h"
 #include "Poco/Event.h"
 #include "Poco/SharedPtr.h"

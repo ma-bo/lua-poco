@@ -1,7 +1,7 @@
 /// Functions for working with processes.
 // @module process
 
-#include "Loader.h"
+#include "Userdata.h"
 #include "Process.h"
 #include "ProcessHandle.h"
 #include "Pipe.h"
@@ -23,11 +23,9 @@ int luaopen_poco_process(lua_State* L)
         { NULL, NULL}
     };
     
-    if (LuaPoco::loadMetatables(L))
-    {
-        lua_createtable(L, 0, 5);
-        setCFunctions(L, methods);
-    }
+    LuaPoco::setupPrivateUserdata(L);
+    lua_createtable(L, 0, 5);
+    setCFunctions(L, methods);
     
     return 1;
 }

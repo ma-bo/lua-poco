@@ -1,4 +1,4 @@
-#include "Loader.h"
+#include "Userdata.h"
 #include "Notification.h"
 
 namespace LuaPoco
@@ -34,7 +34,8 @@ Notification::~Notification()
 
 bool Notification::setupState()
 {
-    return loadMetatables(state);
+    setupPrivateUserdata(state);
+    return true;
 }
 
 } // LuaPoco

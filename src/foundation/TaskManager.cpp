@@ -139,13 +139,7 @@ bool Task::prepTask(
     LuaStateHolder holder(luaL_newstate());
     // initialize the state and load poco metatables.
     luaL_openlibs(holder.state);
-
-    if (!loadMetatables(holder.state))
-    {
-        lua_pushnil(L);
-        lua_pushstring(L, "could not load poco library into thread's state.");
-        return false;
-    }
+    setupPrivateUserdata(holder.state);
 
     // transfer function
     lua_pushvalue(L, functionIndex);
@@ -508,12 +502,7 @@ bool TaskObserver::prepObserver(lua_State* L, int observerIndex, int taskManager
 
     // prepare the observer's state with default libs and load poco.
     luaL_openlibs(mState);
-    if (!loadMetatables(mState))
-    {
-        lua_pushnil(L);
-        lua_pushstring(L, "could not load poco library into thread's state.");
-        return false;
-    }
+    setupPrivateUserdata(mState);
 
     // transfer observer table to observer's internal state.
     lua_pushvalue(L, observerIndex);
