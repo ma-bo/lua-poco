@@ -188,9 +188,15 @@ bool transferValueInternal(lua_State* toL, lua_State* fromL)
         result = true;
         break;
     case LUA_TNUMBER:
-        lua_pushnumber(toL, lua_tonumber(fromL, -1));
+    {
+#if LUA_VERSION_NUM > 502
+        if (lua_isinteger(fromL, -1)) { lua_pushinteger(toL, lua_tointeger(fromL, -1)); }
+        else
+#endif
+        { lua_pushnumber(toL, lua_tonumber(fromL, -1)); }
         result = true;
         break;
+    }
     case LUA_TBOOLEAN:
         lua_pushboolean(toL, lua_toboolean(fromL, -1));
         result = true;
