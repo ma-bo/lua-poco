@@ -104,7 +104,7 @@ int MemoryOStreamUserdata::metamethod__tostring(lua_State* L)
 int MemoryOStreamUserdata::bytesWritten(lua_State* L)
 {
     MemoryOStreamUserdata* mosud = checkPrivateUserdata<MemoryOStreamUserdata>(L, 1);
-    lua_pushnumber(L, static_cast<lua_Number>(mosud->mMemoryOutputStream.charsWritten()));
+    lua_pushinteger(L, static_cast<lua_Number>(mosud->mMemoryOutputStream.charsWritten()));
     
     return 1;
 }

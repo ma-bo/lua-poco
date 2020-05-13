@@ -277,8 +277,8 @@ int Environment::osVersion(lua_State* L)
 // @processorCount
 int Environment::processorCount(lua_State* L)
 {
-    lua_Number count = Poco::Environment::processorCount();
-    lua_pushnumber(L, count);
+    lua_Integer count = Poco::Environment::processorCount();
+    lua_pushinteger(L, count);
     return 1;
 }
 

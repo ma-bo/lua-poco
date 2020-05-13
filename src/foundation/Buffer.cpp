@@ -122,7 +122,7 @@ int BufferUserdata::clear(lua_State* L)
 int BufferUserdata::size(lua_State* L)
 {
     BufferUserdata* bud = checkPrivateUserdata<BufferUserdata>(L, 1);
-    lua_pushnumber(L, bud->mCapacity);
+    lua_pushinteger(L, bud->mCapacity);
     return 1;
 }
 /// Gets the entire buffer as a string.

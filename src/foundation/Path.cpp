@@ -373,7 +373,7 @@ int PathUserdata::clear(lua_State* L)
 int PathUserdata::depth(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
-    lua_pushnumber(L, pud->mPath.depth());
+    lua_pushinteger(L, pud->mPath.depth());
     
     return 1;
 }

@@ -139,7 +139,7 @@ int OStream::seek(lua_State* L)
         os.seekp(offset, whence);
         if (os.good())
         {
-            lua_pushnumber(L, static_cast<lua_Number>(os.tellp()));
+            lua_pushinteger(L, static_cast<lua_Integer>(os.tellp()));
             rv = 1;
         }
         else if (os.eof())

@@ -204,8 +204,8 @@ int RegularExpressionUserdata::find(lua_State* L)
             for (size_t i = 0; matchCount > 0 && i < matches.size(); ++i)
             {
                 // overwrite values from 1 to matchCount
-                lua_pushnumber(L, matches[i].offset + 1);
-                lua_pushnumber(L, matches[i].offset + matches[i].length);
+                lua_pushinteger(L, matches[i].offset + 1);
+                lua_pushinteger(L, matches[i].offset + matches[i].length);
             }
             rv = matchCount * 2;
         }
@@ -432,7 +432,7 @@ int RegularExpressionUserdata::gsub(lua_State* L)
                 // force RE_GLOBAL to replace all.
                 replaced = reud->mRegularExpression.subst(subjectMutable, replacement, options | Poco::RegularExpression::RE_GLOBAL);
                 lua_pushlstring(L, subjectMutable.c_str(), subjectMutable.size());
-                lua_pushnumber(L, replaced);
+                lua_pushinteger(L, replaced);
                 rv = 2;
             }
             else
@@ -457,7 +457,7 @@ int RegularExpressionUserdata::gsub(lua_State* L)
                 }
     
                 lua_pushlstring(L, subjectMutable.c_str(), subjectMutable.size());
-                lua_pushnumber(L, replaced);
+                lua_pushinteger(L, replaced);
                 rv = 2;
             }
         }
@@ -501,7 +501,7 @@ int RegularExpressionUserdata::gsub(lua_State* L)
             }
 
             lua_pushlstring(L, subjectMutable.c_str(), subjectMutable.size());
-            lua_pushnumber(L, replaced);
+            lua_pushinteger(L, replaced);
             rv = 2;
         }
         else if (replaceType == LUA_TFUNCTION)
@@ -556,7 +556,7 @@ int RegularExpressionUserdata::gsub(lua_State* L)
             }
 
             lua_pushlstring(L, subjectMutable.c_str(), subjectMutable.size());
-            lua_pushnumber(L, replaced);
+            lua_pushinteger(L, replaced);
             rv = 2;
         }
     }

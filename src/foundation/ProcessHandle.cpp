@@ -74,7 +74,7 @@ int ProcessHandleUserdata::id(lua_State* L)
     
     try
     {
-        lua_pushnumber(L, phud->mProcessHandle.id());
+        lua_pushinteger(L, phud->mProcessHandle.id());
         rv = 1;
     }
     catch (const Poco::Exception& e)

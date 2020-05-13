@@ -625,8 +625,8 @@ int FileUserdata::getSize(lua_State* L)
     
     try
     {
-        lua_Number num = fud->mFile.getSize();
-        lua_pushnumber(L, num);
+        lua_Integer num = fud->mFile.getSize();
+        lua_pushinteger(L, num);
         rv = 1;
     }
     catch (const Poco::Exception& e)

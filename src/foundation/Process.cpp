@@ -67,8 +67,8 @@ int Process::id(lua_State* L)
     int rv = 0;
     try
     {
-        lua_Number id = Poco::Process::id();
-        lua_pushnumber(L, id);
+        lua_Integer id = Poco::Process::id();
+        lua_pushinteger(L, id);
         rv = 1;
     }
     catch (const Poco::Exception& e)
