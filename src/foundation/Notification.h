@@ -3,7 +3,7 @@
 
 #include "LuaPoco.h"
 #include "StateTransfer.h"
-#include "Poco/Notification.h"
+#include <Poco/Notification.h>
 
 namespace LuaPoco
 {

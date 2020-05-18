@@ -3,7 +3,7 @@
 // @module namedmutex
 
 #include "NamedMutex.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_namedmutex(lua_State* L)
 {

@@ -3,8 +3,8 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/Pipe.h"
-#include "Poco/PipeStream.h"
+#include <Poco/Pipe.h>
+#include <Poco/PipeStream.h>
 
 extern "C"
 {

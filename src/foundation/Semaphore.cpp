@@ -10,7 +10,7 @@
 // @module semaphore
 
 #include "Semaphore.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_semaphore(lua_State* L)
 {

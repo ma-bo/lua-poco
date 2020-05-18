@@ -5,7 +5,7 @@
 // @module namedevent
 
 #include "NamedEvent.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include <cstring>
 
 int luaopen_poco_namedevent(lua_State* L)

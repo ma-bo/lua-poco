@@ -11,7 +11,7 @@
 
 #include "Thread.h"
 #include "StateTransfer.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include <cstring>
 
 int luaopen_poco_thread(lua_State* L)

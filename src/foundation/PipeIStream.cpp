@@ -3,7 +3,7 @@
 // @module pipeistream
 #include "PipeIStream.h"
 #include "Pipe.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include <cstring>
 
 int luaopen_poco_pipeistream(lua_State* L)

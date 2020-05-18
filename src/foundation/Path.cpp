@@ -13,7 +13,7 @@
 
 #include "Userdata.h"
 #include "Path.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include <cstring>
 
 int luaopen_poco_path(lua_State* L)

@@ -2,8 +2,8 @@
 #define LUA_POCO_NOTIFICATION_FACTORY_H
 
 #include "LuaPoco.h"
-#include "Poco/Notification.h"
-#include "Poco/AutoPtr.h"
+#include <Poco/Notification.h>
+#include <Poco/AutoPtr.h>
 #include "Notification.h"
 
 namespace LuaPoco

@@ -2,7 +2,7 @@
 // An ostream filter for deflating data.
 // @module deflatingostream
 #include "DeflatingOStream.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include <cstring>
 
 int luaopen_poco_deflatingostream(lua_State* L)

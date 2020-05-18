@@ -2,7 +2,7 @@
 // An ostream interface for reading files.
 // @module fileostream
 #include "FileOStream.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_fileostream(lua_State* L)
 {

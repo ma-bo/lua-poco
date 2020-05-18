@@ -2,7 +2,7 @@
 // @module ostream
 
 #include "OStream.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include <cstring>
 
 namespace LuaPoco

@@ -2,7 +2,7 @@
 // An ostream filter for inflating data.
 // @module inflatingostream
 #include "InflatingOStream.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include <cstring>
 
 int luaopen_poco_inflatingostream(lua_State* L)

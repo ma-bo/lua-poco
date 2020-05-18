@@ -3,8 +3,8 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/Mutex.h"
-#include "Poco/SharedPtr.h"
+#include <Poco/Mutex.h>
+#include <Poco/SharedPtr.h>
 
 extern "C"
 {

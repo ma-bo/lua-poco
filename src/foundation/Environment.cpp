@@ -4,7 +4,7 @@
 
 #include "Userdata.h"
 #include "Environment.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_environment(lua_State* L)
 {

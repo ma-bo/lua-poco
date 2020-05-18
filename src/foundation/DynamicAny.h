@@ -3,7 +3,7 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/DynamicAny.h"
+#include <Poco/DynamicAny.h>
 
 extern "C"
 {

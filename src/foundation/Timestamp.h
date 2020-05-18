@@ -3,7 +3,7 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/Timestamp.h"
+#include <Poco/Timestamp.h>
 
 extern "C"
 {

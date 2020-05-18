@@ -2,7 +2,7 @@
 // An istream interface for reading files.
 // @module fileistream
 #include "FileIStream.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_fileistream(lua_State* L)
 {

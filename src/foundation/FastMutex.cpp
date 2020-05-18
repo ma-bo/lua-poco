@@ -4,7 +4,7 @@
 // @module fastmutex
 
 #include "FastMutex.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_fastmutex(lua_State* L)
 {

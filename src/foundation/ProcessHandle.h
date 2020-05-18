@@ -3,7 +3,7 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/Process.h"
+#include <Poco/Process.h>
 
 namespace LuaPoco
 {

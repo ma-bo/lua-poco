@@ -40,10 +40,10 @@
 // @field progress number value specifying the progress as a percentage from 0.0 to 100.0.
 
 #include "TaskManager.h"
-#include "Poco/Exception.h"
-#include "Poco/TaskNotification.h"
-#include "Poco/Observer.h"
-#include "Poco/ScopedLock.h"
+#include <Poco/Exception.h>
+#include <Poco/TaskNotification.h>
+#include <Poco/Observer.h>
+#include <Poco/ScopedLock.h>
 
 int luaopen_poco_taskmanager(lua_State* L)
 {

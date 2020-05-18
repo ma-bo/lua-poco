@@ -6,7 +6,7 @@
 // @module checksum
 
 #include "Checksum.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include <cstring>
 
 int luaopen_poco_checksum(lua_State* L)

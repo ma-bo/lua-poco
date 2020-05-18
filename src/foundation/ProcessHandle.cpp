@@ -3,7 +3,7 @@
 // @module processhandle
 
 #include "ProcessHandle.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 namespace LuaPoco
 {

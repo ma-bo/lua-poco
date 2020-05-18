@@ -2,7 +2,7 @@
 #define LUA_POCO_CHECKSUM_H
 
 #include "Userdata.h"
-#include "Poco/Checksum.h"
+#include <Poco/Checksum.h>
 
 extern "C"
 {

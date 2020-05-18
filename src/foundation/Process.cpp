@@ -5,9 +5,9 @@
 #include "Process.h"
 #include "ProcessHandle.h"
 #include "Pipe.h"
-#include "Poco/Exception.h"
-#include "Poco/Path.h"
-#include "Poco/Version.h"
+#include <Poco/Exception.h>
+#include <Poco/Path.h>
+#include <Poco/Version.h>
 
 int luaopen_poco_process(lua_State* L)
 {

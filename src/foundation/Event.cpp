@@ -4,7 +4,7 @@
 // @module event
 
 #include "Event.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 LUA_API int luaopen_poco_event(lua_State* L)
 {

@@ -13,7 +13,7 @@
 // @module notificationqueue
 
 #include "NotificationQueue.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include "StateTransfer.h"
 
 int luaopen_poco_notificationqueue(lua_State* L)

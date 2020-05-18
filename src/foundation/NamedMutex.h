@@ -3,7 +3,7 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/NamedMutex.h"
+#include <Poco/NamedMutex.h>
 #include <string>
 
 extern "C"

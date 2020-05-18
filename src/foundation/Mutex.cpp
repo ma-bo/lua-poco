@@ -4,7 +4,7 @@
 // @module mutex
 
 #include "Mutex.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_mutex(lua_State* L)
 {

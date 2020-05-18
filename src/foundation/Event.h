@@ -3,8 +3,8 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/Event.h"
-#include "Poco/SharedPtr.h"
+#include <Poco/Event.h>
+#include <Poco/SharedPtr.h>
 
 extern "C"
 {

@@ -5,8 +5,8 @@
 // @module timestamp
 
 #include "Timestamp.h"
-#include "Poco/Format.h"
-#include "Poco/NumberFormatter.h"
+#include <Poco/Format.h>
+#include <Poco/NumberFormatter.h>
 #include <ctime>
 
 int luaopen_poco_timestamp(lua_State* L)

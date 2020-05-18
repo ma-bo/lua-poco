@@ -4,7 +4,7 @@
 // @module pipe
 
 #include "Pipe.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 #include <cstring>
 
 int luaopen_poco_pipe(lua_State* L)

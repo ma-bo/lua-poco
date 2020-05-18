@@ -3,7 +3,7 @@
 // @module memoryostream
 #include "MemoryOStream.h"
 #include "Buffer.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_memoryostream(lua_State* L)
 {

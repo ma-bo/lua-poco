@@ -5,7 +5,7 @@
 #include "TeeIStream.h"
 #include "TeeOStream.h"
 #include "Buffer.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_teeistream(lua_State* L)
 {

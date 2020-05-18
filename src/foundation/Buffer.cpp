@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include "Buffer.h"
-#include "Poco/Exception.h"
+#include <Poco/Exception.h>
 
 int luaopen_poco_buffer(lua_State* L)
 {

@@ -3,7 +3,7 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 extern "C"
 {

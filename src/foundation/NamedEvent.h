@@ -3,7 +3,7 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/NamedEvent.h"
+#include <Poco/NamedEvent.h>
 #include <string>
 
 extern "C"

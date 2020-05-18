@@ -3,9 +3,9 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/SharedPtr.h"
-#include "Poco/NotificationQueue.h"
-#include "Poco/ObjectPool.h"
+#include <Poco/SharedPtr.h>
+#include <Poco/NotificationQueue.h>
+#include <Poco/ObjectPool.h>
 #include "Notification.h"
 #include "NotificationFactory.h"
 

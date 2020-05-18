@@ -3,9 +3,9 @@
 
 #include "LuaPoco.h"
 #include "Userdata.h"
-#include "Poco/Thread.h"
-#include "Poco/Runnable.h"
-#include "Poco/Mutex.h"
+#include <Poco/Thread.h>
+#include <Poco/Runnable.h>
+#include <Poco/Mutex.h>
 
 extern "C"
 {
