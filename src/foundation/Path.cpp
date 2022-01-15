@@ -2,7 +2,7 @@
 // This module represents filesystem paths in a platform-independent manner.
 // Unix, Windows and OpenVMS all use a different syntax for filesystem paths.
 // This class can work with all three formats.
-// A path is made up of an optional node name (only Windows and OpenVMS), 
+// A path is made up of an optional node name (only Windows and OpenVMS),
 // an optional device name (also only Windows and OpenVMS),
 // a list of directory names and an optional filename.
 //
@@ -18,7 +18,7 @@
 
 int luaopen_poco_path(lua_State* L)
 {
-    struct LuaPoco::CFunctions methods[] = 
+    struct LuaPoco::CFunctions methods[] =
     {
         { "current", LuaPoco::PathUserdata::current },
         { "expand", LuaPoco::PathUserdata::expand },
@@ -32,10 +32,12 @@ int luaopen_poco_path(lua_State* L)
         { "transcode", LuaPoco::PathUserdata::transcode },
         { NULL, NULL}
     };
-    
+
     int rv = LuaPoco::loadConstructor(L, LuaPoco::PathUserdata::Path);
     if (rv == 1) { setCFunctions(L, methods); }
-    
+
+    LuaPoco::PathUserdata::registerPath(L);
+
     return rv;
 }
 
@@ -70,7 +72,7 @@ bool PathUserdata::copyToState(lua_State *L)
 // register metatable for this class
 bool PathUserdata::registerPath(lua_State* L)
 {
-    struct CFunctions methods[] = 
+    struct CFunctions methods[] =
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },
@@ -103,7 +105,7 @@ bool PathUserdata::registerPath(lua_State* L)
         { "toString", toString },
         { NULL, NULL}
     };
-    
+
     setupUserdataMetatable(L, POCO_PATH_METATABLE_NAME, methods);
     return true;
 }
@@ -124,7 +126,7 @@ int PathUserdata::Path(lua_State* L)
     const char* pathStr = luaL_checkstring(L, firstArg);
     Poco::Path::Style style = Poco::Path::PATH_NATIVE;
     bool absolute = false;
-    
+
     int top = lua_gettop(L);
     // new(path, style)
     if (top > firstArg)
@@ -139,7 +141,7 @@ int PathUserdata::Path(lua_State* L)
     // new(path, style, absolute)
     if (top > firstArg + 1)
         absolute = lua_toboolean(L, firstArg + 2) != 0;
-    
+
     try
     {
         PathUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PathUserdata(pathStr, style, absolute);
@@ -161,7 +163,7 @@ int PathUserdata::Path(lua_State* L)
 int PathUserdata::metamethod__tostring(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
-    
+
     lua_pushfstring(L, "Poco.Path (%p)", static_cast<void*>(pud));
     return 1;
 }
@@ -175,7 +177,7 @@ int PathUserdata::current(lua_State* L)
 {
     std::string currentdir = Poco::Path::current();
     lua_pushlstring(L, currentdir.c_str(), currentdir.size());
-    
+
     return 1;
 }
 
@@ -189,7 +191,7 @@ int PathUserdata::expand(lua_State* L)
     const char* path = luaL_checkstring(L, 1);
     std::string expanded = Poco::Path::expand(path);
     lua_pushlstring(L, expanded.c_str(), expanded.size());
-    
+
     return 1;
 }
 
@@ -203,7 +205,7 @@ int PathUserdata::find(lua_State* L)
     luaL_checktype(L, 1, LUA_TTABLE);
     const char* pathStr = luaL_checkstring(L, 2);
     Poco::Path::StringVec paths;
-    
+
     for (size_t i = 1; ; ++i)
     {
         lua_rawgeti(L, 1, i);
@@ -218,7 +220,7 @@ int PathUserdata::find(lua_State* L)
             break;
         }
     }
-    
+
     Poco::Path path;
     if (Poco::Path::find(paths.begin(), paths.end(), pathStr, path))
     {
@@ -240,7 +242,7 @@ int PathUserdata::home(lua_State* L)
 {
     std::string homedir = Poco::Path::home();
     lua_pushlstring(L, homedir.c_str(), homedir.size());
-    
+
     return 1;
 }
 
@@ -255,14 +257,14 @@ int PathUserdata::listRoots(lua_State* L)
 {
     std::vector<std::string> roots;
     Poco::Path::listRoots(roots);
-    
+
     lua_createtable(L, 0, roots.size());
     for (size_t i = 0; i < roots.size(); ++i)
     {
         lua_pushlstring(L, roots[i].c_str(), roots[i].size());
         lua_rawseti(L, -2, i + 1);
     }
-    
+
     return 1;
 }
 
@@ -273,7 +275,7 @@ int PathUserdata::nullDevice(lua_State* L)
 {
     std::string nulldev = Poco::Path::null();
     lua_pushlstring(L, nulldev.c_str(), nulldev.size());
-    
+
     return 1;
 }
 
@@ -284,7 +286,7 @@ int PathUserdata::pathSeparator(lua_State* L)
 {
     const char pathsep = Poco::Path::pathSeparator();
     lua_pushlstring(L, &pathsep, 1);
-    
+
     return 1;
 }
 
@@ -295,7 +297,7 @@ int PathUserdata::separator(lua_State* L)
 {
     const char separator = Poco::Path::separator();
     lua_pushlstring(L, &separator, 1);
-    
+
     return 1;
 }
 
@@ -306,13 +308,13 @@ int PathUserdata::temp(lua_State* L)
 {
     std::string tempdir = Poco::Path::temp();
     lua_pushlstring(L, tempdir.c_str(), tempdir.size());
-    
+
     return 1;
 }
 
 /// Converts a UTF-8 encoded path to the current Windows code page.
-// On Windows, if POCO has been compiled with Windows UTF-8 support (POCO_WIN32_UTF8), 
-// this function converts a string (usually containing a path) encoded in UTF-8 
+// On Windows, if POCO has been compiled with Windows UTF-8 support (POCO_WIN32_UTF8),
+// this function converts a string (usually containing a path) encoded in UTF-8
 // into a string encoded in the current Windows code page.
 // @return string containing the translated path.
 // @function transcode
@@ -321,7 +323,7 @@ int PathUserdata::transcode(lua_State* L)
     const char* path = luaL_checkstring(L, 1);
     std::string transcoded = Poco::Path::transcode(path);
     lua_pushlstring(L, transcoded.c_str(), transcoded.size());
-    
+
     return 1;
 }
 
@@ -350,9 +352,9 @@ int PathUserdata::append(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     PathUserdata* toappend = checkPrivateUserdata<PathUserdata>(L, 2);
-    
+
     pud->mPath.append(toappend->mPath);
-    
+
     return 0;
 }
 
@@ -363,7 +365,7 @@ int PathUserdata::clear(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     pud->mPath.clear();
-    
+
     return 0;
 }
 
@@ -374,7 +376,7 @@ int PathUserdata::depth(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     lua_pushinteger(L, pud->mPath.depth());
-    
+
     return 1;
 }
 
@@ -388,7 +390,7 @@ int PathUserdata::directory(lua_State* L)
     int rv = 0;
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     int directoryIndex = luaL_checkinteger(L, 2);
-    
+
     if (directoryIndex > 0)
     {
         const std::string& entry = pud->mPath.directory(directoryIndex - 1);
@@ -401,7 +403,7 @@ int PathUserdata::directory(lua_State* L)
         lua_pushfstring(L, "directory index %d is out of bounds.", directoryIndex);
         rv = 2;
     }
-    
+
     return rv;
 }
 
@@ -413,7 +415,7 @@ int PathUserdata::getBaseName(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     std::string basename = pud->mPath.getBaseName();
     lua_pushlstring(L, basename.c_str(), basename.size());
-    
+
     return 1;
 }
 
@@ -426,7 +428,7 @@ int PathUserdata::getDevice(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     std::string device = pud->mPath.getDevice();
     lua_pushlstring(L, device.c_str(), device.size());
-    
+
     return 1;
 }
 
@@ -438,7 +440,7 @@ int PathUserdata::getExtension(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     std::string extension = pud->mPath.getExtension();
     lua_pushlstring(L, extension.c_str(), extension.size());
-    
+
     return 1;
 }
 
@@ -450,7 +452,7 @@ int PathUserdata::getFileName(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     std::string filename = pud->mPath.getFileName();
     lua_pushlstring(L, filename.c_str(), filename.size());
-    
+
     return 1;
 }
 
@@ -462,7 +464,7 @@ int PathUserdata::getNode(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     std::string node = pud->mPath.getNode();
     lua_pushlstring(L, node.c_str(), node.size());
-    
+
     return 1;
 }
 
@@ -473,7 +475,7 @@ int PathUserdata::isAbsolute(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     lua_pushboolean(L, pud->mPath.isAbsolute());
-    
+
     return 1;
 }
 
@@ -486,7 +488,7 @@ int PathUserdata::isDirectory(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     lua_pushboolean(L, pud->mPath.isDirectory());
-    
+
     return 1;
 }
 
@@ -499,7 +501,7 @@ int PathUserdata::isFile(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     lua_pushboolean(L, pud->mPath.isFile());
-    
+
     return 1;
 }
 
@@ -510,7 +512,7 @@ int PathUserdata::isRelative(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     lua_pushboolean(L, pud->mPath.isRelative());
-    
+
     return 1;
 }
 
@@ -520,7 +522,7 @@ int PathUserdata::makeAbsolute(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     pud->mPath.makeAbsolute();
-    
+
     return 0;
 }
 
@@ -530,7 +532,7 @@ int PathUserdata::makeFile(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     pud->mPath.makeFile();
-    
+
     return 0;
 }
 
@@ -540,7 +542,7 @@ int PathUserdata::makeParent(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     pud->mPath.makeParent();
-    
+
     return 0;
 }
 
@@ -560,9 +562,9 @@ int PathUserdata::parent(lua_State* L)
 int PathUserdata::popDirectory(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
-    
+
     pud->mPath.popDirectory();
-    
+
     return 0;
 }
 
@@ -571,9 +573,9 @@ int PathUserdata::popDirectory(lua_State* L)
 int PathUserdata::popFrontDirectory(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
-    
+
     pud->mPath.popFrontDirectory();
-    
+
     return 0;
 }
 
@@ -584,7 +586,7 @@ int PathUserdata::pushDirectory(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     const char* newdir = luaL_checkstring(L, 2);
     pud->mPath.pushDirectory(newdir);
-    
+
     return 0;
 }
 
@@ -596,7 +598,7 @@ int PathUserdata::setBaseName(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     const char* basename = luaL_checkstring(L, 2);
     pud->mPath.setBaseName(basename);
-    
+
     return 0;
 }
 
@@ -608,7 +610,7 @@ int PathUserdata::setDevice(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     const char* device = luaL_checkstring(L, 2);
     pud->mPath.setDevice(device);
-    
+
     return 0;
 }
 
@@ -620,7 +622,7 @@ int PathUserdata::setExtension(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     const char* extension = luaL_checkstring(L, 2);
     pud->mPath.setExtension(extension);
-    
+
     return 0;
 }
 
@@ -632,7 +634,7 @@ int PathUserdata::setFileName(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     const char* filename = luaL_checkstring(L, 2);
     pud->mPath.setFileName(filename);
-    
+
     return 0;
 }
 
@@ -644,7 +646,7 @@ int PathUserdata::setNode(lua_State* L)
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
     const char* node = luaL_checkstring(L, 2);
     pud->mPath.setNode(node);
-    
+
     return 0;
 }
 
