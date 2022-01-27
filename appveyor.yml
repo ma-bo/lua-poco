@@ -13,7 +13,7 @@ install:
   - LuaVM-0.5.4-vs2017-x64.exe /verysilent /dir=C:\luavm
 
 before_build:
-- call "C:\Program Files (x86)\Microsoft Visual Studio 15.0\VC\vcvarsall.bat" x64
+- call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 - cmake -H . -B build -G "Visual Studio 15 2017" -DLUA_LIB_NAME=lua51 -DLUA_LIB_PATH="C:\luavm\luavm\versions\5.1" -DLUA_INCLUDE="C:\luavm\luavm\versions\5.1\include"
 
 build_script:
