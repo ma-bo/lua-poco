@@ -14,7 +14,7 @@ install:
 
 before_build:
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-- cmake -S . -B build -G "Visual Studio 15 2017 x64" -DLUA_LIB_NAME=lua51 -DLUA_LIB_PATH="C:\luavm\luavm\versions\5.1" -DLUA_INCLUDE="C:\luavm\luavm\versions\5.1\include"
+- cmake -S . -B build -G "Visual Studio 15 2017 Win64" -DLUA_LIB_NAME=lua51 -DLUA_LIB_PATH="C:\luavm\luavm\versions\5.1" -DLUA_INCLUDE="C:\luavm\luavm\versions\5.1\include"
 
 build_script:
 - cmake --build build --config Release
