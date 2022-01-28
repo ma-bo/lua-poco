@@ -14,7 +14,7 @@ jobs:
         - name: install dependencies
           run: sudo apt install -y cmake liblua5.3-dev libpoco-dev
         - name: cmake
-          run: cmake -S ./lua-poco -B ./lua-poco/build -DCMAKE_BUILD_TYPE=Release -DUSE_EMBEDDED_POCO=OFF -DLUA_INCLUDE=/usr/include/lua5.3/ -DLUA_LIB_NAME=lua5.3 ..
+          run: cmake -S ./ -B ./build -DCMAKE_BUILD_TYPE=Release -DUSE_EMBEDDED_POCO=OFF -DLUA_INCLUDE=/usr/include/lua5.3/ -DLUA_LIB_NAME=lua5.3
         - name: make
           run: make install
           
@@ -25,7 +25,7 @@ jobs:
         - name: install dependencies
           run: sudo apt install -y cmake liblua5.2-dev libpoco-dev
         - name: cmake
-          run: cmake -S ./lua-poco -B ./lua-poco/build -DCMAKE_BUILD_TYPE=Release -DUSE_EMBEDDED_POCO=OFF -DLUA_INCLUDE=/usr/include/lua5.2/ -DLUA_LIB_NAME=lua5.2 ..
+          run: cmake -S ./ -B ./build -DCMAKE_BUILD_TYPE=Release -DUSE_EMBEDDED_POCO=OFF -DLUA_INCLUDE=/usr/include/lua5.2/ -DLUA_LIB_NAME=lua5.2
         - name: make
           run: make install
           
@@ -36,6 +36,6 @@ jobs:
         - name: install dependencies
           run: sudo apt install -y cmake liblua5.1-dev libpoco-dev
         - name: cmake
-          run: cmake -S ./lua-poco -B ./lua-poco/build -DCMAKE_BUILD_TYPE=Release -DUSE_EMBEDDED_POCO=OFF -DLUA_INCLUDE=/usr/include/lua5.1/ -DLUA_LIB_NAME=lua5.1 ..
+          run: cmake -S ./ -B ./build -DCMAKE_BUILD_TYPE=Release -DUSE_EMBEDDED_POCO=OFF -DLUA_INCLUDE=/usr/include/lua5.1/ -DLUA_LIB_NAME=lua5.1
         - name: make
           run: make install
