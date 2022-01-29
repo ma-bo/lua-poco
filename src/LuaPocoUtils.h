@@ -11,7 +11,7 @@ bool checkUnsignedToLuaInteger(T num, lua_Integer& li)
     static_assert(std::numeric_limits<T>::radix == 2,
                   "checkUnsignedToLuaInteger requires binary representation for source type.");
     
-    if (num <= std::numeric_limits<lua_Integer>::max())
+    if (num <= (std::numeric_limits<lua_Integer>::max)())
     {
         li = static_cast<lua_Integer>(num);
         #if LUA_VERSION_NUM < 503
@@ -39,7 +39,7 @@ bool checkSignedToLuaInteger(T num, lua_Integer& li)
                   "checkSignedToLuaInteger requires binary representation for source type.");
     
     if (num > 0) return checkUnsignedToLuaInteger<T>(num, li);
-    else if (num >= std::numeric_limits<lua_Integer>::min())
+    else if (num >= (std::numeric_limits<lua_Integer>::min)())
     {
         li = static_cast<lua_Integer>(num);
         #if LUA_VERSION_NUM < 503
