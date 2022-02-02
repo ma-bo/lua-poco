@@ -31,7 +31,8 @@ const char* POCO_COMPRESS_METATABLE_NAME = "Poco.Zip.Compress.metatable";
 
 /// Creates a new compress userdata instance.
 // @param ostream userdata for writing zip output
-// @bool[opt] forceZip64 (default false) require the file header be allocated with zip64 extension in case the
+// @bool[opt] seekable (default: true) set to false if the output stream is not seekable, ie: pipe, socket,
+// @bool[opt] forceZip64 (default: false) require the file header be allocated with zip64 extension in case the
 // compressed or uncompressed size exceeds 32 bits.
 // @return table or nil. (error)
 // @return error message.
@@ -40,25 +41,25 @@ int CompressUserdata::Compress(lua_State* L)
 {
     int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
-    
+
     try
     {
-        bool seekable = false;
+        bool seekable = true;
         bool forceZip64 = false;
         OStream* os = checkPrivateUserdata<OStream>(L, firstArg);
-        
-        if (dynamic_cast<FileOStreamUserdata*>(os) ||
-            dynamic_cast<MemoryOStreamUserdata*>(os)) { seekable = true; }
-        
+
         if (lua_isboolean(L, firstArg + 1))
-            { forceZip64 = static_cast<bool>(lua_toboolean(L, firstArg + 1)); }
-        
+            { seekable = static_cast<bool>(lua_toboolean(L, firstArg + 1)); }
+
+        if (lua_isboolean(L, firstArg + 2))
+            { forceZip64 = static_cast<bool>(lua_toboolean(L, firstArg + 2)); }
+
         lua_pushvalue(L, firstArg);
         int ref = luaL_ref(L, LUA_REGISTRYINDEX);
-        
+
         CompressUserdata* cud = new(lua_newuserdata(L, sizeof *cud))
             CompressUserdata(os->ostream(), ref, seekable, forceZip64);
-        
+
         setupPocoUserdata(L, cud, POCO_COMPRESS_METATABLE_NAME);
         rv = 1;
     }
@@ -77,7 +78,7 @@ int CompressUserdata::Compress(lua_State* L)
 // register metatable for this class
 bool CompressUserdata::registerCompress(lua_State* L)
 {
-    struct CFunctions methods[] = 
+    struct CFunctions methods[] =
     {
         { "__gc", metamethod__gc },
         { "__tostring", metamethod__tostring },
@@ -92,7 +93,7 @@ bool CompressUserdata::registerCompress(lua_State* L)
         { "setZipComment", setZipComment},
         { NULL, NULL}
     };
-    
+
     setupUserdataMetatable(L, POCO_COMPRESS_METATABLE_NAME, methods);
     return true;
 }
@@ -117,7 +118,7 @@ int CompressUserdata::metamethod__gc(lua_State* L)
     if (!cud->mClosed) { cud->mCompress.close(); }
     luaL_unref(L, LUA_REGISTRYINDEX, cud->mUdReference);
     cud->~CompressUserdata();
-    
+
     return 0;
 }
 
@@ -126,7 +127,7 @@ int CompressUserdata::metamethod__tostring(lua_State* L)
 {
     CompressUserdata* cud = checkPrivateUserdata<CompressUserdata>(L, 1);
     lua_pushfstring(L, "Poco.CompressUserdata (%p)", static_cast<void*>(cud));
-    
+
     return 1;
 }
 
@@ -145,7 +146,7 @@ Poco::Zip::ZipCommon::CompressionMethod strToCompressionMethod(const char* metho
 Poco::Zip::ZipCommon::CompressionLevel strToCompressionLevel(const char* level)
 {
     Poco::Zip::ZipCommon::CompressionLevel cl = Poco::Zip::ZipCommon::CompressionLevel::CL_MAXIMUM;
-    
+
     if (std::strcmp(level, "normal") == 0) { cl = Poco::Zip::ZipCommon::CompressionLevel::CL_NORMAL; }
     else if (std::strcmp(level, "fast") == 0) { cl = Poco::Zip::ZipCommon::CompressionLevel::CL_FAST; }
     else if (std::strcmp(level, "superfast") == 0) { cl = Poco::Zip::ZipCommon::CompressionLevel::CL_SUPERFAST; }
@@ -176,7 +177,7 @@ int CompressUserdata::addDirectory(lua_State* L)
     time_t dateTimeT = 0;
     PathUserdata* pud = NULL;
     TimestampUserdata* tsud = NULL;
-    
+
     if (lua_isstring(L, 2)) { dirPathStr = lua_tostring(L, 2); }
     else { pud = checkPrivateUserdata<PathUserdata>(L, 2); }
 
@@ -189,7 +190,7 @@ int CompressUserdata::addDirectory(lua_State* L)
         Poco::Path dirPath(pud ? pud->mPath : dirPathStr);
         Poco::DateTime entryDateTime;
         if (lua_gettop(L) > 2) { entryDateTime = tsud ? tsud->mTimestamp : Poco::Timestamp(dateTimeT); }
-        
+
         cud->mCompress.addDirectory(dirPath, entryDateTime);
         rv = 1;
     }
@@ -230,23 +231,23 @@ int CompressUserdata::addFile(lua_State* L)
     PathUserdata* filePathUd = NULL;
     time_t dateTimeT = 0;
     TimestampUserdata *tsud = NULL;
-   
+
     if (lua_isstring(L, 2)) { dirPathStr = lua_tostring(L, 2); }
     else { dirPathUd = checkPrivateUserdata<PathUserdata>(L, 2); }
 
     if (lua_isstring(L, 3)) { filePathStr = lua_tostring(L, 3); }
     else { filePathUd = checkPrivateUserdata<PathUserdata>(L, 3); }
-   
+
     try
     {
         Poco::Path dirPath(dirPathUd ? dirPathUd->mPath : dirPathStr);
         Poco::Path filePath(filePathUd ? filePathUd->mPath : filePathStr);
         Poco::Zip::ZipCommon::CompressionMethod cm = Poco::Zip::ZipCommon::CompressionMethod::CM_DEFLATE;
         Poco::Zip::ZipCommon::CompressionLevel cl = Poco::Zip::ZipCommon::CompressionLevel::CL_MAXIMUM;
-        
+
         if (lua_isstring(L, 4)) { cm = strToCompressionMethod(lua_tostring(L, 4)); }
         if (lua_isstring(L, 5)) { cl = strToCompressionLevel(lua_tostring(L, 5)); }
-        
+
         cud->mCompress.addFile(dirPath, filePath, cm, cl);
         lua_pushboolean(L, 1);
         rv = 1;
@@ -288,7 +289,7 @@ int CompressUserdata::addIStream(lua_State* L)
     const char* pathStr = NULL;
     TimestampUserdata* tsud = NULL;
     PathUserdata* pud = NULL;
-         
+
     if (lua_isstring(L, 3)) { pathStr = lua_tostring(L, 3); }
     else { pud = checkPrivateUserdata<PathUserdata>(L, 3); }
 
@@ -301,11 +302,11 @@ int CompressUserdata::addIStream(lua_State* L)
         Poco::DateTime entryDateTime;
         Poco::Zip::ZipCommon::CompressionMethod cm = Poco::Zip::ZipCommon::CompressionMethod::CM_DEFLATE;
         Poco::Zip::ZipCommon::CompressionLevel cl = Poco::Zip::ZipCommon::CompressionLevel::CL_MAXIMUM;
-        
+
         if (lua_gettop(L) > 3) { entryDateTime =  tsud ? tsud->mTimestamp : entryDateTimeT; }
         if (lua_isstring(L, 5)) { cm = strToCompressionMethod(lua_tostring(L, 5)); }
         if (lua_isstring(L, 6)) { cl = strToCompressionLevel(lua_tostring(L, 6)); }
-      
+
         cud->mCompress.addFile(is->istream(), entryDateTime, dirPath, cm, cl);
         lua_pushboolean(L, 1);
         rv = 1;
@@ -336,6 +337,7 @@ int CompressUserdata::addIStream(lua_State* L)
 // @see path
 int CompressUserdata::addRecursive(lua_State* L)
 {
+
     int rv = 0;
     CompressUserdata* cud = checkPrivateUserdata<CompressUserdata>(L, 1);
 
@@ -343,26 +345,24 @@ int CompressUserdata::addRecursive(lua_State* L)
     PathUserdata* dirPathUd = NULL;
     const char* entryPathStr = NULL;
     PathUserdata* entryPathUd = NULL;
-    
+
     if (lua_isstring(L, 2)) { dirPathStr = lua_tostring(L, 2); }
     else { dirPathUd = checkPrivateUserdata<PathUserdata>(L, 2); }
 
     if (lua_isstring(L, 3)) { entryPathStr = lua_tostring(L, 3); }
     else { entryPathUd = checkPrivateUserdata<PathUserdata>(L, 3); }
-        
+
     try
     {
         Poco::Zip::ZipCommon::CompressionMethod cm = Poco::Zip::ZipCommon::CompressionMethod::CM_DEFLATE;
         Poco::Zip::ZipCommon::CompressionLevel cl = Poco::Zip::ZipCommon::CompressionLevel::CL_MAXIMUM;
-        bool excludeRoot = true;
-        
+
         Poco::Path dirPath(dirPathUd ? dirPathUd->mPath : dirPathStr);
         Poco::Path entryPath(entryPathUd ? entryPathUd->mPath : entryPathStr);
-
         if (lua_isstring(L, 4)) { cm = strToCompressionMethod(lua_tostring(L, 4)); }
         if (lua_isstring(L, 5)) { cl = strToCompressionLevel(lua_tostring(L, 5)); }
-        
-        cud->mCompress.addRecursive(dirPath, cm, cl, excludeRoot, entryPath);
+
+        cud->mCompress.addRecursive(dirPath, cm, cl, true, entryPath);
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -408,7 +408,7 @@ int CompressUserdata::getStoreExtensions(lua_State* L)
         ++idx;
         ++iter;
     }
-    
+
     return 1;
 }
 
@@ -424,7 +424,7 @@ int CompressUserdata::setStoreExtensions(lua_State* L)
 {
     CompressUserdata* cud = checkPrivateUserdata<CompressUserdata>(L, 1);
     luaL_checktype(L, 2, LUA_TTABLE);
-    
+
     std::set<std::string> extensions;
     int idx = 1;
     for (lua_rawgeti(L, 2, idx); lua_isstring(L, -1); lua_rawgeti(L, 2, ++idx))
