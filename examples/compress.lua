@@ -3,7 +3,7 @@
     a compatible ostream.  Files and directories can be added via istreams and filesystem paths.
 --]]
 
--- the ostream 
+-- the ostream could be other types, such as pipeostream, teeostream, memoryostream, etc.
 local fostream = assert(require("poco.fileostream"))
 local compress = assert(require("poco.zip.compress"))
 local path = assert(require("poco.path"))
@@ -39,7 +39,7 @@ assert(c:addRecursive(examples_path, "examples"))
 examples_path:popDirectory()
 examples_path:setFileName("README.md")
 io.write(string.format("\nAdding File: %s\nto: %s\n", examples_path:toString(), output_zip_path:toString()))
--- assert(c:addFile(examples_path, "readme/README.md"))
+assert(c:addFile(examples_path, "readme/README.md"))
 
 --[[ alternatively one could add a file via an poco istream via the addIStream function.
 -- note that this source could be a memoryistream, pipeistream, socketistream, etc.
