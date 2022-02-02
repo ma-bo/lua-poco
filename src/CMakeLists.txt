@@ -41,6 +41,7 @@ set(FOUNDATION_SRC
     foundation/TaskManager.cpp
     foundation/JSON.cpp
     foundation/Compress.cpp
+    foundation/Decompress.cpp
     )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
