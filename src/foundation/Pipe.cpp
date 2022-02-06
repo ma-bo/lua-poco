@@ -5,6 +5,7 @@
 
 #include "Pipe.h"
 #include <Poco/Exception.h>
+#include <Poco/Buffer.h>
 #include <cstring>
 
 int luaopen_poco_pipe(lua_State* L)
@@ -80,33 +81,41 @@ int PipeUserdata::metamethod__tostring(lua_State* L)
 // userdata methods
 
 /// Reads bytes from pipe.
+// Reads and returns the specified number of bytes from the pipe.
+// If no amount is specified, a single default sized read of 1024 bytes is performed.
+// Whatever amount of data is flushed from the other side of the pipe is returned up to the max.
 // @int[opt] amount number of bytes to read as a number.
-// @return string or nil. (error)
-// @return error message.
+// @return number of bytes read or nil. (error)
+// @return string data read or error message.
 // @function readBytes
 int PipeUserdata::readBytes(lua_State* L)
 {
     int rv = 0;
+    lua_Integer bytesToRead = 1024;
+    lua_Integer bytesRead = 0;
+    lua_Integer readIndex = 0;
+    bool oneshot = true;
+    
     PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, 1);
-    
-    char readBuffer[1024];
-    size_t bytesToRead = sizeof readBuffer;
-    size_t bytesRead = 0;
-    
-    if (lua_gettop(L) > 1 && lua_isnumber(L, 2))
-    {
-        size_t requestedAmount = lua_tonumber(L, 2);
-        bytesToRead = requestedAmount <= bytesToRead ? requestedAmount : bytesToRead;
-    }
-    
+    if (lua_gettop(L) > 1) { oneshot = false; bytesToRead = luaL_checkinteger(L, 2); }
+
     try
     {
-        bytesRead = pud->mPipe.readBytes(readBuffer, bytesToRead);
-        luaL_Buffer lb;
-        luaL_buffinit(L, &lb);
-        luaL_addlstring(&lb, readBuffer, bytesRead);
-        luaL_pushresult(&lb);
-        rv = 1;
+        Poco::Buffer<char> buffer(bytesToRead);
+
+        do
+        {
+            bytesRead = pud->mPipe.readBytes(buffer.begin() + readIndex, bytesToRead);
+            readIndex += bytesRead;
+            bytesToRead -= bytesRead;
+            // stop looping if this is a oneshot read, the pipe was closed,
+            // or the requested amount was satisfied.
+        } while (!oneshot && bytesRead > 0 && bytesToRead > 0);
+        
+        lua_pushinteger(L, readIndex);
+        lua_pushlstring(L, buffer.begin(), static_cast<size_t>(readIndex));
+        
+        rv = 2;
     }
     catch (const Poco::Exception& e)
     {
@@ -132,15 +141,18 @@ int PipeUserdata::writeBytes(lua_State* L)
     
     size_t writeIndex = 0;
     size_t strSize = 0;
+    lua_Integer bytesWritten = 0;
     const char* str = luaL_checklstring(L, 2, &strSize);
     
     try
     {
         while (writeIndex != strSize)
         {
-            writeIndex += pud->mPipe.writeBytes(&str[writeIndex], strSize - writeIndex);
+            bytesWritten = pud->mPipe.writeBytes(&str[writeIndex], strSize - writeIndex);
+            writeIndex += bytesWritten;
         }
-        lua_pushboolean(L, 1);
+        
+        lua_pushinteger(L, static_cast<lua_Integer>(writeIndex));
         rv = 1;
     }
     catch (const Poco::Exception& e)
