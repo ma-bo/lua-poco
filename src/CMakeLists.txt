@@ -42,6 +42,7 @@ set(FOUNDATION_SRC
     foundation/JSON.cpp
     foundation/Compress.cpp
     foundation/Decompress.cpp
+    foundation/StreamCopier.cpp
     )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
