@@ -3,6 +3,7 @@
 // @module memoryostream
 #include "MemoryOStream.h"
 #include "Buffer.h"
+#include "SharedMemory.h"
 #include <Poco/Exception.h>
 
 int luaopen_poco_memoryostream(lua_State* L)
@@ -52,34 +53,72 @@ bool MemoryOStreamUserdata::registerMemoryOStream(lua_State* L)
 /// Constructs a new memoryostream userdata.
 // memoryostream holds a reference to a buffer/sharedmemory userdata to prevent the buffer from
 // being garbage collected while the memoryostream is still trying to use it.
-// @param buffer or sharedmemory userdata.
-// @return userdata or nil. (error)
+// @tparam userdata buffer buffer userdata or sharedmemory userdata.
+// @return ostream userdata or nil. (error)
 // @return error message.
 // @function new
-// @see ostream
 // @see buffer
+// @see sharedmemory
+// @see ostream
 int MemoryOStreamUserdata::MemoryOStream(lua_State* L)
 {
+    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
+    
+    const char* errorMsg = "invalid userdata, expected: buffer userdata or sharedmemory userdata.";
     char* buffer = NULL;
     size_t bufferSize = 0;
-    BufferUserdata* bud = dynamic_cast<BufferUserdata*>(getPrivateUserdata(L, firstArg));
+    Userdata* ud = getPrivateUserdata(L, firstArg);
+    
+    BufferUserdata* bud = dynamic_cast<BufferUserdata*>(ud);
+    SharedMemoryUserdata* smud = dynamic_cast<SharedMemoryUserdata*>(ud);
+    
     if (bud)
     {
         buffer = bud->mBuffer.begin();
         bufferSize = bud->mCapacity;
     }
+    else if (smud)
+    {
+        errorMsg = "read only sharedmemory cannot be used with memoryostream.";
+        
+        if (smud->mMode == Poco::SharedMemory::AM_WRITE)
+        {
+            buffer = smud->mSharedMemory.begin();
+            bufferSize = smud->mSize;
+        }
+    }
+    
+    if (buffer && bufferSize)
+    {
+        try
+        {
+            MemoryOStreamUserdata* mosud = new(lua_newuserdata(L, sizeof *mosud))
+                MemoryOStreamUserdata(buffer, bufferSize);
+            setupPocoUserdata(L, mosud, POCO_MEMORYOSTREAM_METATABLE_NAME);
+            // store a reference to the Buffer/SharedMemory to prevent it from being
+            // garbage collected while the memoryostream is using it.
+            lua_pushvalue(L, 1);
+            mosud->mUdReference = luaL_ref(L, LUA_REGISTRYINDEX);
+            rv = 1;
+        }
+        catch (const Poco::Exception& e)
+        {
+            rv = pushPocoException(L, e);
+        }
+        catch (...)
+        {
+            rv = pushUnknownException(L);
+        }
+    }
     else
-        return luaL_error(L, "invalid userdata, expected: Poco.Buffer or Poco.SharedMemory.");
+    {
+        lua_pushnil(L);
+        lua_pushstring(L, errorMsg);
+        rv = 2;
+    }
     
-    MemoryOStreamUserdata* mosud = new(lua_newuserdata(L, sizeof *mosud)) MemoryOStreamUserdata(buffer, bufferSize);
-    setupPocoUserdata(L, mosud, POCO_MEMORYOSTREAM_METATABLE_NAME);
-    // store a reference to the PipeUserdata to prevent it from being
-    // garbage collected while the PipeOutputStream is using it.
-    lua_pushvalue(L, 1);
-    mosud->mUdReference = luaL_ref(L, LUA_REGISTRYINDEX);
-    
-    return 1;
+    return rv;
 }
 
 // metamethod infrastructure
