@@ -69,7 +69,7 @@ int SharedMemoryUserdata::SharedMemory(lua_State* L)
         }
         else
         {
-            smud = new(lua_newuserdata(L, sizeof *smud)) SharedMemoryUserdata(fud->mFile, mode);
+            smud = new(lua_newuserdata(L, sizeof *smud)) SharedMemoryUserdata(fud->getFile(), mode);
         }
 
         setupPocoUserdata(L, smud, POCO_SHAREDMEMORY_METATABLE_NAME);

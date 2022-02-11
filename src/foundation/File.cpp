@@ -40,6 +40,11 @@ bool FileUserdata::copyToState(lua_State* L)
     return true;
 }
 
+Poco::File& FileUserdata::getFile()
+{
+    return mFile;
+}
+
 bool FileUserdata::registerFile(lua_State* L)
 {
     struct CFunctions methods[] = 
@@ -158,7 +163,7 @@ int FileUserdata::copyTo(lua_State* L)
     
     try
     {
-        fud->mFile.copyTo(path);
+        fud->getFile().copyTo(path);
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -185,7 +190,7 @@ int FileUserdata::createDirectories(lua_State* L)
         
     try
     {
-        fud->mFile.createDirectories();
+        fud->getFile().createDirectories();
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -213,7 +218,7 @@ int FileUserdata::createDirectory(lua_State* L)
     
     try
     {
-        int created = fud->mFile.createDirectory();
+        int created = fud->getFile().createDirectory();
         lua_pushboolean(L, created);
         rv = 1;
     }
@@ -240,7 +245,7 @@ int FileUserdata::createFile(lua_State* L)
     
     try
     {
-        int created = fud->mFile.createFile();
+        int created = fud->getFile().createFile();
         lua_pushboolean(L, created);
         rv = 1;
     }
@@ -268,7 +273,7 @@ int FileUserdata::listNames(lua_State* L)
     try
     {
         std::vector<std::string> fileNames;
-        fud->mFile.list(fileNames);
+        fud->getFile().list(fileNames);
         int tableIndex = 1;
         lua_createtable(L, fileNames.size(), 0);
         std::vector<std::string>::iterator i = fileNames.begin();
@@ -306,7 +311,7 @@ int FileUserdata::listFiles(lua_State* L)
     try
     {
         std::vector<Poco::File> files;
-        fud->mFile.list(files);
+        fud->getFile().list(files);
         int tableIndex = 1;
         lua_createtable(L, files.size(), 0);
         std::vector<Poco::File>::iterator i = files.begin();
@@ -357,7 +362,7 @@ int FileUserdata::moveTo(lua_State* L)
     
     try
     {
-        fud->mFile.moveTo(path);
+        fud->getFile().moveTo(path);
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -390,7 +395,7 @@ int FileUserdata::remove(lua_State* L)
     
     try
     {
-        fud->mFile.remove(recursive);
+        fud->getFile().remove(recursive);
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -428,7 +433,7 @@ int FileUserdata::renameTo(lua_State* L)
     
     try
     {
-        fud->mFile.renameTo(path);
+        fud->getFile().renameTo(path);
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -455,7 +460,7 @@ int FileUserdata::canExecute(lua_State* L)
     
     try
     {
-        int executable = fud->mFile.canExecute();
+        int executable = fud->getFile().canExecute();
         lua_pushboolean(L, executable);
         rv = 1;
     }
@@ -483,7 +488,7 @@ int FileUserdata::canRead(lua_State* L)
     
     try
     {
-        int readable = fud->mFile.canRead();
+        int readable = fud->getFile().canRead();
         lua_pushboolean(L, readable);
         rv = 1;
     }
@@ -511,7 +516,7 @@ int FileUserdata::canWrite(lua_State* L)
     
     try
     {
-        int writable = fud->mFile.canWrite();
+        int writable = fud->getFile().canWrite();
         lua_pushboolean(L, writable);
         rv = 1;
     }
@@ -541,7 +546,7 @@ int FileUserdata::created(lua_State* L)
     
     try
     {
-        Poco::Timestamp ts = fud->mFile.created();
+        Poco::Timestamp ts = fud->getFile().created();
         TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(ts);
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
@@ -568,7 +573,7 @@ int FileUserdata::exists(lua_State* L)
     
     try
     {
-        int exists = fud->mFile.exists();
+        int exists = fud->getFile().exists();
         lua_pushboolean(L, exists);
         rv = 1;
     }
@@ -598,7 +603,7 @@ int FileUserdata::getLastModified(lua_State* L)
     
     try
     {
-        Poco::Timestamp ts = fud->mFile.getLastModified();
+        Poco::Timestamp ts = fud->getFile().getLastModified();
         TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(ts);
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
@@ -625,7 +630,7 @@ int FileUserdata::getSize(lua_State* L)
     
     try
     {
-        lua_Integer num = fud->mFile.getSize();
+        lua_Integer num = fud->getFile().getSize();
         lua_pushinteger(L, num);
         rv = 1;
     }
@@ -653,7 +658,7 @@ int FileUserdata::isDevice(lua_State* L)
     
     try
     {
-        int device = fud->mFile.isDevice();
+        int device = fud->getFile().isDevice();
         lua_pushboolean(L, device);
         rv = 1;
     }
@@ -681,7 +686,7 @@ int FileUserdata::isDirectory(lua_State* L)
     
     try
     {
-        int directory = fud->mFile.isDirectory();
+        int directory = fud->getFile().isDirectory();
         lua_pushboolean(L, directory);
         rv = 1;
     }
@@ -709,7 +714,7 @@ int FileUserdata::isFile(lua_State* L)
     
     try
     {
-        int file = fud->mFile.isFile();
+        int file = fud->getFile().isFile();
         lua_pushboolean(L, file);
         rv = 1;
     }
@@ -739,7 +744,7 @@ int FileUserdata::isHidden(lua_State* L)
     
     try
     {
-        int hidden = fud->mFile.isHidden();
+        int hidden = fud->getFile().isHidden();
         lua_pushboolean(L, hidden);
         rv = 1;
     }
@@ -767,7 +772,7 @@ int FileUserdata::isLink(lua_State* L)
     
     try
     {
-        int link = fud->mFile.isLink();
+        int link = fud->getFile().isLink();
         lua_pushboolean(L, link);
         rv = 1;
     }
@@ -792,7 +797,7 @@ int FileUserdata::path(lua_State* L)
 {
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
-    std::string path = fud->mFile.path();
+    std::string path = fud->getFile().path();
     lua_pushlstring(L, path.c_str(), path.size());
     
     return 1;
@@ -814,7 +819,7 @@ int FileUserdata::setExecutable(lua_State* L)
         executable = lua_toboolean(L, 2);
     try
     {
-        fud->mFile.setExecutable(executable);
+        fud->getFile().setExecutable(executable);
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -844,7 +849,7 @@ int FileUserdata::setLastModified(lua_State* L)
     
     try
     {
-        fud->mFile.setLastModified(tsud->mTimestamp);
+        fud->getFile().setLastModified(tsud->mTimestamp);
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -876,7 +881,7 @@ int FileUserdata::setReadOnly(lua_State* L)
     
     try
     {
-        fud->mFile.setReadOnly(readOnly);
+        fud->getFile().setReadOnly(readOnly);
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -905,7 +910,7 @@ int FileUserdata::setSize(lua_State* L)
     
     try
     {
-        fud->mFile.setSize(size);
+        fud->getFile().setSize(size);
         lua_pushboolean(L, 1);
         rv = 1;
     }
@@ -937,7 +942,7 @@ int FileUserdata::setWritable(lua_State* L)
     
     try
     {
-        fud->mFile.setWriteable(writable);
+        fud->getFile().setWriteable(writable);
         lua_pushboolean(L, 1);
         rv = 1;
     }

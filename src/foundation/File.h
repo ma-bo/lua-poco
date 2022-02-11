@@ -24,13 +24,11 @@ public:
     FileUserdata(const Poco::File& file);
     virtual ~FileUserdata();
     virtual bool copyToState(lua_State* L);
-    
+    virtual Poco::File& getFile();
     // register metatable for this class
     static bool registerFile(lua_State* L);
     // constructor
     static int File(lua_State* L);
-
-    Poco::File mFile;
 private:
     // metamethod infrastructure
     static int metamethod__tostring(lua_State* L);
@@ -63,6 +61,7 @@ private:
     static int setReadOnly(lua_State* L);
     static int setSize(lua_State* L);
     static int setWritable(lua_State* L);
+    Poco::File mFile;
 };
 
 } // LuaPoco
