@@ -19,6 +19,10 @@ namespace LuaPoco
 
 const char* POCO_FILE_METATABLE_NAME = "Poco.File.metatable";
 
+FileUserdata::FileUserdata()
+{
+}
+
 FileUserdata::FileUserdata(const char* path) : mFile(path)
 {
 }

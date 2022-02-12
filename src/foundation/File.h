@@ -20,6 +20,7 @@ extern const char* POCO_FILE_METATABLE_NAME;
 class FileUserdata : public Userdata
 {
 public:
+    FileUserdata();
     FileUserdata(const char *path);
     FileUserdata(const Poco::File& file);
     virtual ~FileUserdata();
@@ -29,10 +30,9 @@ public:
     static bool registerFile(lua_State* L);
     // constructor
     static int File(lua_State* L);
-private:
+protected:
     // metamethod infrastructure
     static int metamethod__tostring(lua_State* L);
-    
     // userdata methods
     static int copyTo(lua_State* L);
     static int createDirectories(lua_State* L);
@@ -61,6 +61,7 @@ private:
     static int setReadOnly(lua_State* L);
     static int setSize(lua_State* L);
     static int setWritable(lua_State* L);
+private:
     Poco::File mFile;
 };
 
