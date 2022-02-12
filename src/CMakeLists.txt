@@ -44,6 +44,7 @@ set(FOUNDATION_SRC
     foundation/Decompress.cpp
     foundation/StreamCopier.cpp
     foundation/SharedMemory.cpp
+    foundation/TemporaryFile.cpp
     )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
