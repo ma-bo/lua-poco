@@ -68,11 +68,7 @@ int EventUserdata::Event(lua_State* L)
     int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     bool autoReset = true;
-    if (lua_gettop(L) > firstArg)
-    {
-        luaL_checktype(L, firstArg, LUA_TBOOLEAN);
-        autoReset = lua_toboolean(L, firstArg);
-    }
+    if (lua_isboolean(L, firstArg)) { autoReset = lua_toboolean(L, firstArg); }
     
     try
     {
