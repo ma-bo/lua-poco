@@ -28,6 +28,7 @@ public:
     // constructor function 
     static int Mutex(lua_State* L);
     
+    Poco::SharedPtr<Poco::Mutex> mMutex;
 private:
     // metamethod infrastructure
     static int metamethod__tostring(lua_State* L);
@@ -36,8 +37,6 @@ private:
     static int lock(lua_State* L);
     static int tryLock(lua_State* L);
     static int unlock(lua_State* L);
-    
-    Poco::SharedPtr<Poco::Mutex> mMutex;
 };
 
 } // LuaPoco
