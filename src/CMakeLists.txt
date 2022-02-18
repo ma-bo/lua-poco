@@ -47,6 +47,7 @@ set(FOUNDATION_SRC
     foundation/TemporaryFile.cpp
     foundation/Condition.cpp
     foundation/Base64Encoder.cpp
+    foundation/Base64Decoder.cpp
     )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
