@@ -50,6 +50,8 @@ set(FOUNDATION_SRC
     foundation/Base64Decoder.cpp
     foundation/Base32Encoder.cpp
     foundation/Base32Decoder.cpp
+    foundation/HexBinaryEncoder.cpp
+    foundation/HexBinaryDecoder.cpp
     )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
