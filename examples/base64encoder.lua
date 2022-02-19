@@ -1,5 +1,5 @@
 --[[ base64encoder.lua
-    This example shows how compress module is used as an ostream to output base64 encoded data.
+    This example shows how base64encoder module is used as an ostream to output base64 encoded data.
 --]]
 
 -- prerequisite modules

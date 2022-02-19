@@ -1,5 +1,5 @@
 --[[ base64decoder.lua
-    This example shows how base64encoder module is used as an ostream to output decoded base64 data.
+    This example shows how base64decoder module is used as an ostream to output decoded data.
 --]]
 
 -- prerequisite modules
