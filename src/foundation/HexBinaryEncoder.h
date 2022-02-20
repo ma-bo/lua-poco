@@ -1,5 +1,5 @@
-#ifndef LUA_POCO_BASE32ENCODER_H
-#define LUA_POCO_BASE32ENCODER_H
+#ifndef LUA_POCO_HEXBINARYENCODER_H
+#define LUA_POCO_HEXBINARYENCODER_H
 
 #include "LuaPoco.h"
 #include "Userdata.h"
