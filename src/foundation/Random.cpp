@@ -56,7 +56,7 @@ int RandomUserdata::Random(lua_State* L)
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     
     lua_Integer stateSize = 256;
-    lua_Integer seed = lua_isinteger(L, firstArg + 1) ? lua_tointeger(L, firstArg + 1) : 0;
+    lua_Integer seed = lua_isnumber(L, firstArg + 1) ? lua_tointeger(L, firstArg + 1) : 0;
     
     if (lua_isnumber(L, firstArg)) { stateSize = lua_tointeger(L, firstArg); }
     if (stateSize != 256 && stateSize != 128 && stateSize != 64 && stateSize != 32 &&
