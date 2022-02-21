@@ -58,7 +58,7 @@ int RandomUserdata::Random(lua_State* L)
     lua_Integer stateSize = 256;
     lua_Integer seed = lua_isinteger(L, firstArg + 1) ? lua_tointeger(L, firstArg + 1) : 0;
     
-    if (lua_isinteger(L, firstArg)) { stateSize = lua_tointeger(L, firstArg); }
+    if (lua_isnumber(L, firstArg)) { stateSize = lua_tointeger(L, firstArg); }
     if (stateSize != 256 && stateSize != 128 && stateSize != 64 && stateSize != 32 &&
         stateSize != 16 && stateSize != 8)
     {
@@ -116,7 +116,7 @@ int RandomUserdata::next(lua_State* L)
     RandomUserdata* rud = checkPrivateUserdata<RandomUserdata>(L, 1);
     lua_Integer rval = 0;
     
-    if (lua_isinteger(L, 2))
+    if (lua_isnumber(L, 2))
         { rval = static_cast<lua_Integer>(rud->mRandom.next(lua_tointeger(L, 2))); }
     else { rval = rud->mRandom.next(); }
     
