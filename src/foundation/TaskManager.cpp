@@ -44,6 +44,7 @@
 #include <Poco/TaskNotification.h>
 #include <Poco/Observer.h>
 #include <Poco/ScopedLock.h>
+#include <cstring>
 
 int luaopen_poco_taskmanager(lua_State* L)
 {
