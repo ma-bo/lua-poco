@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <exception>
+#include <string>
 
 namespace LuaPoco
 {
@@ -11,74 +12,24 @@ const char* STATE_TRANSFER_SOURCE_TABLES = "Poco.StateTransfer.Source.Tables";
 const char* STATE_TRANSFER_SOURCE_TABLES_LASTINDEX = "Poco.StateTransfer.Source.LastIndex";
 const char* STATE_TRANSFER_DESTINATION_TABLES = "Poco.StateTransfer.Destination.Tables";
 
-#define DEFAULT_TRANSFER_BUFF_SIZE 1000
-
-TransferBuffer::TransferBuffer() :
-    mBuffer(NULL), mReadIdx(0), mWriteIdx(0)
+struct StringBuffer
 {
-    mCapacity = DEFAULT_TRANSFER_BUFF_SIZE;
-    mBuffer = static_cast<char*>(std::malloc(mCapacity));
-    if (!mBuffer) throw std::bad_alloc();
-}
-
-TransferBuffer::TransferBuffer(size_t startSize) :
-    mBuffer(NULL), mReadIdx(0), mWriteIdx(0)
-{
-    mCapacity = startSize > 0 ? startSize : DEFAULT_TRANSFER_BUFF_SIZE;
-    mBuffer = static_cast<char*>(std::malloc(mCapacity));
-    if (!mBuffer) throw std::bad_alloc();
-}
-
-TransferBuffer::~TransferBuffer()
-{
-    std::free(mBuffer);
-    mBuffer = NULL;
-}
-
-void TransferBuffer::insert(const char* data, size_t amount)
-{
-    if (amount > mCapacity - mWriteIdx)
-    {
-        mCapacity += amount + 1000;
-        
-        char* tempBuffer = static_cast<char*>(std::realloc(mBuffer, mCapacity));
-        if (tempBuffer) mBuffer = tempBuffer;
-        else throw std::bad_alloc();
-    }
-    
-    std::memcpy(mBuffer + mWriteIdx, data, amount);
-    mWriteIdx += amount;
-}
-
-void TransferBuffer::get(const char*& data, size_t& amount)
-{
-    size_t available = mWriteIdx - mReadIdx;
-    
-    amount = available;
-    if (available == 0) data = NULL;
-    else data = mBuffer + mReadIdx;
-    
-    mReadIdx += amount;
-}
-
-size_t TransferBuffer::contentSize()
-{
-    return mWriteIdx;
-}
+    bool done;
+    std::string buffer;
+};
 
 int functionWriter(lua_State* L, const void* p, size_t sz, void* ud)
 {
     int rv = 0;
     
-    TransferBuffer* tb = static_cast<TransferBuffer*>(ud);
+    StringBuffer* sb = static_cast<StringBuffer*>(ud);
     try
     {
-        tb->insert(static_cast<const char*>(p), sz);
+        sb->buffer.append(static_cast<const char*>(p), sz);
     }
     catch (const std::exception& e)
     {
         (void) e;
-        // only likely scenario is a std::bad_alloc
         rv = -1;
     }
     
@@ -87,9 +38,12 @@ int functionWriter(lua_State* L, const void* p, size_t sz, void* ud)
 
 const char* functionReader(lua_State* L, void* data, size_t* size)
 {
+    StringBuffer* sb = static_cast<StringBuffer*>(data);
     const char* rv = NULL;
-    TransferBuffer* tb = static_cast<TransferBuffer*>(data);
-    tb->get(rv, *size);
+    
+    if (!sb->done) { sb->done = true; rv = sb->buffer.data(); }
+    else { sb->buffer.clear(); }
+    *size = sb->buffer.size();
     
     return rv;
 }
@@ -101,19 +55,19 @@ bool transferFunction(lua_State* toL, lua_State* fromL)
     {
         try
         {
-            TransferBuffer tb;
+            StringBuffer sb = { false, "" };
             
             #if LUA_VERSION_NUM > 502
-            if (lua_dump(fromL, functionWriter, &tb, 0) == 0)
+            if (lua_dump(fromL, functionWriter, &sb, 0) == 0)
             #else
-            if (lua_dump(fromL, functionWriter, &tb) == 0)
+            if (lua_dump(fromL, functionWriter, &sb) == 0)
             #endif
             {
                 #if LUA_VERSION_NUM > 501
-                if (lua_load(toL, functionReader, &tb, "transferFunction", NULL) == 0)
+                if (lua_load(toL, functionReader, &sb, "transferFunction", NULL) == 0)
                     result = true;
                 #else
-                if (lua_load(toL, functionReader, &tb, "transferFunction") == 0)
+                if (lua_load(toL, functionReader, &sb, "transferFunction") == 0)
                     result = true;
                 #endif
             }
