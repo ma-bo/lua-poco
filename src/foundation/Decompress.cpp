@@ -321,9 +321,6 @@ bool DecompressUserdata::zipLocalFileHeaderToTable(lua_State* L, const Poco::Zip
     lua_pushboolean(L, static_cast<int>(zlfh.hasExtraField()));
     lua_setfield(L, -2, "hasExtraField");
 
-    lua_pushboolean(L, static_cast<int>(zlfh.hasSupportedCompressionMethod()));
-    lua_setfield(L, -2, "hasSupportedCompressionMethod");
-
     lua_pushboolean(L, static_cast<int>(zlfh.isDirectory()));
     lua_setfield(L, -2, "isDirectory");
 
