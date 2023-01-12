@@ -81,7 +81,7 @@ if(USE_EMBEDDED_POCO)
     add_dependencies(poco poco_static)
 endif()
 
-target_link_libraries(poco ${LUA_LIB} PocoFoundation${PocoInternalSuffix} PocoJSON${PocoInternalSuffix} PocoZip${PocoInternalSuffix} ${PLATFORM_EXTRAS})
+target_link_libraries(poco ${LUA_LIB} ${POCO_FOUNDATION_LIB} ${POCO_JSON_LIB} ${POCO_ZIP_LIB} ${PLATFORM_EXTRAS})
 set_target_properties(poco PROPERTIES PREFIX "" CXX_STANDARD 14)
 
 install(TARGETS poco RUNTIME DESTINATION ${CMAKE_BINARY_DIR} LIBRARY DESTINATION ${CMAKE_BINARY_DIR})
