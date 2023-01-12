@@ -173,7 +173,7 @@ bool Task::prepTask(
     // setup Task table, metatable, with lightuserdata.
     lua_createtable(holder.state, 0, 1);
     lua_pushstring(holder.state, POCO_TASK_LUD_KEY_NAME);
-    lua_pushlightuserdata(holder.state, reinterpret_cast<void*>(this));
+    lua_pushlightuserdata(holder.state, static_cast<void*>(this));
     lua_rawset(holder.state, -3);
     luaL_getmetatable(holder.state, POCO_TASK_PROTECTED_METATABLE_NAME);
     lua_setmetatable(holder.state, -2);
@@ -230,7 +230,7 @@ int Task::lud_isCancelled(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PUBLIC_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME) ||
         getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
-        Poco::Task* task = reinterpret_cast<Poco::Task*>(lua_touserdata(L, -1));
+        Poco::Task* task = static_cast<Poco::Task*>(lua_touserdata(L, -1));
         isCancelled = task->isCancelled() ? 1 : 0;
         lua_pushboolean(L, isCancelled);
     }
@@ -246,7 +246,7 @@ int Task::lud_cancel(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PUBLIC_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME) ||
         getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
-        Poco::Task* task = reinterpret_cast<Poco::Task*>(lua_touserdata(L, -1));
+        Poco::Task* task = static_cast<Poco::Task*>(lua_touserdata(L, -1));
         task->cancel();
     }
 
@@ -262,7 +262,7 @@ int Task::lud_name(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PUBLIC_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME) ||
         getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
-        Poco::Task* task = reinterpret_cast<Poco::Task*>(lua_touserdata(L, -1));
+        Poco::Task* task = static_cast<Poco::Task*>(lua_touserdata(L, -1));
         const std::string taskName = task->name();
         lua_pushlstring(L, taskName.c_str(), taskName.size());
         rv = 1;
@@ -280,7 +280,7 @@ int Task::lud_progress(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PUBLIC_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME) ||
         getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
-        Poco::Task* task = reinterpret_cast<Poco::Task*>(lua_touserdata(L, -1));
+        Poco::Task* task = static_cast<Poco::Task*>(lua_touserdata(L, -1));
         lua_Number taskProgress = task->progress();
         lua_pushnumber(L, taskProgress);
         rv = 1;
@@ -297,7 +297,7 @@ int Task::lud_reset(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PUBLIC_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME) ||
         getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
-        Poco::Task* task = reinterpret_cast<Poco::Task*>(lua_touserdata(L, -1));
+        Poco::Task* task = static_cast<Poco::Task*>(lua_touserdata(L, -1));
         task->reset();
     }
 
@@ -313,7 +313,7 @@ int Task::lud_state(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PUBLIC_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME) ||
         getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
-        Poco::Task* task = reinterpret_cast<Poco::Task*>(lua_touserdata(L, -1));
+        Poco::Task* task = static_cast<Poco::Task*>(lua_touserdata(L, -1));
         Poco::Task::TaskState taskProgress = task->state();
 
         switch (taskProgress)
@@ -353,7 +353,7 @@ int Task::lud_setState(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
         Poco::Task::TaskState taskState = Poco::Task::TASK_IDLE;
-        Task* task = reinterpret_cast<Task*>(lua_touserdata(L, -1));
+        Task* task = static_cast<Task*>(lua_touserdata(L, -1));
 
         if (std::strcmp(stateString, "idle") == 0)
             { taskState = Poco::Task::TASK_IDLE; }
@@ -382,7 +382,7 @@ int Task::lud_setProgress(lua_State* L)
 
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
-        Task* task = reinterpret_cast<Task*>(lua_touserdata(L, -1));
+        Task* task = static_cast<Task*>(lua_touserdata(L, -1));
         task->setProgress(static_cast<float>(progress));
     }
 
@@ -397,7 +397,7 @@ int Task::lud_sleep(lua_State* L)
 
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
-        Task* task = reinterpret_cast<Task*>(lua_touserdata(L, -1));
+        Task* task = static_cast<Task*>(lua_touserdata(L, -1));
         lua_pushboolean(L, task->sleep(milliseconds) ? 1 : 0);
         rv = 1;
     }
@@ -414,11 +414,11 @@ int Task::lud_postNotification(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_PROTECTED_METATABLE_NAME, POCO_TASK_LUD_KEY_NAME))
     {
         // get Task*
-        Task* task = reinterpret_cast<Task*>(lua_touserdata(L, -1));
+        Task* task = static_cast<Task*>(lua_touserdata(L, -1));
         lua_pop(L, 1);
         // get TaskManagerContainer* from registry
         lua_getfield(L, LUA_REGISTRYINDEX, POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME);
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
         lua_pop(L, 1);
 
         Poco::AutoPtr<Notification> notification;
@@ -531,7 +531,7 @@ bool TaskObserver::prepObserver(lua_State* L, int observerIndex, int taskManager
     // setup Task table, metatable, with lightuserdata.
     lua_createtable(mState, 0, 1);
     lua_pushstring(mState, POCO_TASK_LUD_KEY_NAME);
-    lua_pushlightuserdata(mState, reinterpret_cast<void*>(NULL));
+    lua_pushlightuserdata(mState, static_cast<void*>(NULL));
     lua_rawset(mState, -3);
     luaL_getmetatable(mState, POCO_TASK_PUBLIC_METATABLE_NAME);
     lua_setmetatable(mState, -2);
@@ -693,7 +693,7 @@ int TaskManagerContainer::waitDequeueNotification(lua_State* L, long millisecond
         Poco::TaskNotification* taskNotification = dynamic_cast<Poco::TaskNotification*>(n.get());
         if (taskNotification != NULL)
         {
-            lua_pushlightuserdata(L, reinterpret_cast<void*>(taskNotification->task()));
+            lua_pushlightuserdata(L, static_cast<void*>(taskNotification->task()));
             lua_setfield(L, top, "task");
         }
         
@@ -766,7 +766,7 @@ int TaskManagerContainer::lud_count(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
         POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
     {
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
         lua_pushinteger(L, tmc->mTaskManager.count());
         rv = 1;
     }
@@ -781,7 +781,7 @@ int TaskManagerContainer::lud_taskList(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
         POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
     {
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
 
         Poco::TaskManager::TaskList tl = tmc->mTaskManager.taskList();
         lua_createtable(L, static_cast<int>(tl.size()), 0);
@@ -789,7 +789,7 @@ int TaskManagerContainer::lud_taskList(lua_State* L)
         int tableIndex = 1;
         for (Poco::TaskManager::TaskList::iterator i = tl.begin(); i != tl.end(); ++i)
         {
-            lua_pushlightuserdata(L, reinterpret_cast<void*>(i->get()));
+            lua_pushlightuserdata(L, static_cast<void*>(i->get()));
             lua_rawseti(L, -2, tableIndex++);
         }
 
@@ -806,7 +806,7 @@ int TaskManagerContainer::lud_cancelAll(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
         POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
     {
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
         tmc->mTaskManager.cancelAll();
     }
 
@@ -823,7 +823,7 @@ int TaskManagerContainer::lud_start(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
         POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
     {
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
 
         if (tmc->mDestruct > 0)
         {
@@ -872,7 +872,7 @@ int TaskManagerContainer::lud_addObserver(lua_State* L)
         POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
     {
         luaL_checktype(L, 2, LUA_TTABLE);
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
         
         try
         {
@@ -909,8 +909,8 @@ int TaskManagerContainer::lud_removeObserver(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
         POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
     {
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
-        TaskObserver* observer = reinterpret_cast<TaskObserver*>(lua_touserdata(L, 2));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskObserver* observer = static_cast<TaskObserver*>(lua_touserdata(L, 2));
         
         tmc->removeObserver(observer);
     }
@@ -923,7 +923,7 @@ int TaskManagerContainer::lud_enableTaskQueue(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
         POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
     {
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
         tmc->enableTaskQueue();
     }
 
@@ -935,7 +935,7 @@ int TaskManagerContainer::lud_disableTaskQueue(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
         POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
     {
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
         tmc->disableTaskQueue();
     }
 
@@ -952,7 +952,7 @@ int TaskManagerContainer::lud_dequeueNotification(lua_State* L)
     if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
         POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
     {
-        TaskManagerContainer* tmc = reinterpret_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
+        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
         lua_Integer waitMs = (top > 2) && lua_isnumber(L, 3) ? lua_tointeger(L, 3) : 0;
         lua_pushvalue(L, 2);
         rv = tmc->waitDequeueNotification(L, static_cast<long>(waitMs));
@@ -990,7 +990,7 @@ bool TaskManagerContainer::notifyObserver(
     int top = lua_gettop(observer->mState);
 
     // replace the light userdata value in the Task table.
-    lua_pushlightuserdata(observer->mState, reinterpret_cast<void*>(task));
+    lua_pushlightuserdata(observer->mState, static_cast<void*>(task));
     lua_setfield(observer->mState, 3, POCO_TASK_LUD_KEY_NAME);
 
     // fetch the desired callback.
@@ -1375,7 +1375,7 @@ int TaskManagerUserdata::taskList(lua_State* L)
     int tableIndex = 1;
     for (Poco::TaskManager::TaskList::iterator i = tl.begin(); i != tl.end(); ++i)
     {
-        lua_pushlightuserdata(L, reinterpret_cast<void*>(i->get()));
+        lua_pushlightuserdata(L, static_cast<void*>(i->get()));
         lua_rawseti(L, -2, tableIndex++);
     }
 
@@ -1435,7 +1435,7 @@ int TaskManagerUserdata::start(lua_State* L)
 
     try
     {
-        lua_pushlightuserdata(L, reinterpret_cast<void*>(tmud->mContainer.get()));
+        lua_pushlightuserdata(L, static_cast<void*>(tmud->mContainer.get()));
         if (newTask->prepTask(L, lua_gettop(L), 3, 4, lastParamIndex))
         {
             tmud->mContainer->mTaskManager.start(newTask);
@@ -1470,7 +1470,7 @@ int TaskManagerUserdata::addObserver(lua_State* L)
     int rv = 0;
     TaskManagerUserdata* tmud = checkPrivateUserdata<TaskManagerUserdata>(L, 1);
     luaL_checktype(L, 2, LUA_TTABLE);
-    lua_pushlightuserdata(L, reinterpret_cast<void*>(tmud->mContainer.get()));
+    lua_pushlightuserdata(L, static_cast<void*>(tmud->mContainer.get()));
     
     try
     {
