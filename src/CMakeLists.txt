@@ -79,6 +79,9 @@ add_library(poco SHARED ${LUAPOCO_SRC} ${FOUNDATION_SRC})
 
 if(USE_EMBEDDED_POCO)
     add_dependencies(poco poco_static)
+    target_link_libraries(poco ${LUA_LIB} PocoFoundation${PocoInternalSuffix} PocoJSON${PocoInternalSuffix} PocoZip${PocoInternalSuffix} ${PLATFORM_EXTRAS})
+else()
+    target_link_libraries(poco ${LUA_LIB} ${POCO_FOUNDATION_LIB} ${POCO_JSON_LIB} ${POCO_ZIP_LIB} ${PLATFORM_EXTRAS})
 endif()
 
 target_link_libraries(poco ${LUA_LIB} ${POCO_FOUNDATION_LIB} ${POCO_JSON_LIB} ${POCO_ZIP_LIB} ${PLATFORM_EXTRAS})
