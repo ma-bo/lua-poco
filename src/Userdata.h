@@ -7,8 +7,12 @@
 
 #define USERDATA_PRIVATE_TABLE "poco_userdata_private"
 
+#include <functional>
+
 namespace LuaPoco
 {
+
+int protectedCall(lua_State* L, const std::function<int(lua_State *L)>& f);
 
 // a utility class for doing RAII style cleanup of a Lua state due to early returns.
 class LuaStateHolder

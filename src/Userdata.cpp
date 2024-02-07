@@ -3,6 +3,26 @@
 namespace LuaPoco
 {
 
+int protectedCall(lua_State* L, const std::function<int(lua_State *L)>& f)
+{
+    int rv = 0;
+    
+    try
+    {
+        rv = f(L);
+    }
+    catch (const Poco::Exception& e)
+    {
+        rv = pushPocoException(L, e);
+    }
+    catch (...)
+    {
+        rv = pushUnknownException(L);
+    }
+    
+    return rv;
+}
+
 // LuaStateHolder implementation.
 LuaStateHolder::LuaStateHolder(lua_State* L)
 {
