@@ -72,13 +72,9 @@ int Base32DecoderUserdata::Base32Decoder(lua_State* L)
         setupPocoUserdata(L, b32dud, POCO_BASE32DECODER_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;

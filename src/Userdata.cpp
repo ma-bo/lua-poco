@@ -52,6 +52,15 @@ int pushPocoException(lua_State* L, const Poco::Exception& e)
     return 2;
 }
 
+int pushException(lua_State* L, const std::exception& e)
+{
+    lua_pushnil(L);
+    const Poco::Exception* pe = dynamic_cast<const Poco::Exception*>(&e);
+    lua_pushstring(L, pe != NULL ? pe->displayText().c_str() : e.what());
+    
+    return 2;
+}
+
 int pushUnknownException(lua_State* L)
 {
     lua_pushnil(L);

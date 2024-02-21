@@ -71,14 +71,11 @@ int ConditionUserdata::Condition(lua_State* L)
         setupPocoUserdata(L, cud, POCO_CONDITION_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
+    
     return rv;
 }
 
@@ -107,14 +104,9 @@ int ConditionUserdata::broadcast(lua_State* L)
     {
         cud->mCondition->broadcast();
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
-        lua_error(L);
-    }
-    catch (...)
-    {
-        pushUnknownException(L);
+        rv = pushException(L, e);
         lua_error(L);
     }
     

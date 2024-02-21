@@ -71,15 +71,11 @@ int MutexUserdata::Mutex(lua_State* L)
         setupPocoUserdata(L, mud, POCO_MUTEX_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    return rv;
+        return rv;
 }
 
 ///
@@ -107,17 +103,12 @@ int MutexUserdata::lock(lua_State* L)
     {
         mud->mMutex->lock();
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -147,15 +138,11 @@ int MutexUserdata::tryLock(lua_State* L)
         lua_pushboolean(L, result);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -172,15 +159,11 @@ int MutexUserdata::unlock(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 

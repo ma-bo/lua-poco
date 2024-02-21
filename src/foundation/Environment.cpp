@@ -48,15 +48,11 @@ int Environment::get(lua_State* L)
         lua_pushlstring(L, value.c_str(), value.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -75,15 +71,11 @@ int Environment::has(lua_State* L)
         lua_pushboolean(L, result);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -103,15 +95,11 @@ int Environment::set(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -140,15 +128,11 @@ int Environment::nodeId(lua_State* L)
         lua_pushlstring(L, value.c_str(), value.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -164,15 +148,11 @@ int Environment::nodeName(lua_State* L)
         lua_pushlstring(L, value.c_str(), value.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -188,15 +168,11 @@ int Environment::osArchitecture(lua_State* L)
         lua_pushlstring(L, value.c_str(), value.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -212,15 +188,11 @@ int Environment::osDisplayName(lua_State* L)
         lua_pushlstring(L, value.c_str(), value.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -236,15 +208,11 @@ int Environment::osName(lua_State* L)
         lua_pushlstring(L, value.c_str(), value.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -260,15 +228,11 @@ int Environment::osVersion(lua_State* L)
         lua_pushlstring(L, value.c_str(), value.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 

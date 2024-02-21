@@ -65,15 +65,11 @@ int FileIStreamUserdata::FileIStream(lua_State* L)
         setupPocoUserdata(L, fisud, POCO_FILEISTREAM_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 

@@ -90,15 +90,11 @@ int NotificationQueueUserdata::NotificationQueue(lua_State* L)
         setupPocoUserdata(L, nqud, POCO_NOTIFICATIONQUEUE_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    return rv;
+        return rv;
 }
 
 ///

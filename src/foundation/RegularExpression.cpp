@@ -134,15 +134,11 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
         setupPocoUserdata(L, reud, POCO_REGULAREXPRESSION_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -215,15 +211,11 @@ int RegularExpressionUserdata::find(lua_State* L)
             rv = 1;
         }
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 /// Looks for the first match of the regex in the subject string.
@@ -268,15 +260,11 @@ int RegularExpressionUserdata::match(lua_State* L)
             ++rv;
         }
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -312,15 +300,11 @@ int RegularExpressionUserdata::gmatch_iter(lua_State* L)
             rv = 1;
         }
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -560,15 +544,11 @@ int RegularExpressionUserdata::gsub(lua_State* L)
             rv = 2;
         }
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 

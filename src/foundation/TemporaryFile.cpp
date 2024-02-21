@@ -124,15 +124,11 @@ int TemporaryFileUserdata::TemporaryFile(lua_State* L)
         setupPocoUserdata(L, tfud, POCO_TEMPORARYFILE_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-
+    
     return rv;
 }
 
@@ -200,15 +196,11 @@ int TemporaryFileUserdata::tempName(lua_State* L)
         lua_pushlstring(L, name.c_str(), static_cast<lua_Integer>(name.size()));
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 

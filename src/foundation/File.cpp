@@ -119,15 +119,11 @@ int FileUserdata::File(lua_State* L)
         setupPocoUserdata(L, fud, POCO_FILE_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-
+    
     return rv;
 }
 
@@ -171,15 +167,11 @@ int FileUserdata::copyTo(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -198,15 +190,11 @@ int FileUserdata::createDirectories(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -226,15 +214,11 @@ int FileUserdata::createDirectory(lua_State* L)
         lua_pushboolean(L, created);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -253,15 +237,11 @@ int FileUserdata::createFile(lua_State* L)
         lua_pushboolean(L, created);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -291,15 +271,11 @@ int FileUserdata::listNames(lua_State* L)
         }
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -331,15 +307,11 @@ int FileUserdata::listFiles(lua_State* L)
         
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -370,15 +342,11 @@ int FileUserdata::moveTo(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -403,15 +371,11 @@ int FileUserdata::remove(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -441,15 +405,11 @@ int FileUserdata::renameTo(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -468,17 +428,12 @@ int FileUserdata::canExecute(lua_State* L)
         lua_pushboolean(L, executable);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -496,17 +451,12 @@ int FileUserdata::canRead(lua_State* L)
         lua_pushboolean(L, readable);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -524,17 +474,12 @@ int FileUserdata::canWrite(lua_State* L)
         lua_pushboolean(L, writable);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -555,15 +500,11 @@ int FileUserdata::created(lua_State* L)
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -581,17 +522,12 @@ int FileUserdata::exists(lua_State* L)
         lua_pushboolean(L, exists);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -612,15 +548,11 @@ int FileUserdata::getLastModified(lua_State* L)
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -638,17 +570,12 @@ int FileUserdata::getSize(lua_State* L)
         lua_pushinteger(L, num);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -666,17 +593,12 @@ int FileUserdata::isDevice(lua_State* L)
         lua_pushboolean(L, device);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -694,17 +616,12 @@ int FileUserdata::isDirectory(lua_State* L)
         lua_pushboolean(L, directory);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -722,17 +639,12 @@ int FileUserdata::isFile(lua_State* L)
         lua_pushboolean(L, file);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -752,17 +664,12 @@ int FileUserdata::isHidden(lua_State* L)
         lua_pushboolean(L, hidden);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -780,17 +687,12 @@ int FileUserdata::isLink(lua_State* L)
         lua_pushboolean(L, link);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -827,15 +729,11 @@ int FileUserdata::setExecutable(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -857,15 +755,11 @@ int FileUserdata::setLastModified(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -889,15 +783,11 @@ int FileUserdata::setReadOnly(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -918,15 +808,11 @@ int FileUserdata::setSize(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -950,15 +836,11 @@ int FileUserdata::setWritable(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 

@@ -37,6 +37,7 @@ private:
 
 // generic functions to reduce the amount of copy and paste code.
 int pushPocoException(lua_State* L, const Poco::Exception& e);
+int pushException(lua_State* L, const std::exception& e);
 int pushUnknownException(lua_State* L);
 
 struct CFunctions

@@ -115,13 +115,9 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
             rv = 2;
         }
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -191,13 +187,9 @@ int DynamicAnyUserdata::convert(lua_State* L)
         setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -268,13 +260,9 @@ int DynamicAnyUserdata::toNumber(lua_State* L)
         lua_pushnumber(L, result);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -296,13 +284,9 @@ int DynamicAnyUserdata::toString(lua_State* L)
         lua_pushlstring(L, result.c_str(), result.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -324,13 +308,9 @@ int DynamicAnyUserdata::toBoolean(lua_State* L)
         lua_pushboolean(L, result);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -388,13 +368,9 @@ int DynamicAnyUserdata::metamethod__add(lua_State* L)
         else
             luaL_error(L, "invalid type supplied to __add: %s", lua_typename(L, lua_type(L, valIndex)));
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -453,13 +429,9 @@ int DynamicAnyUserdata::metamethod__sub(lua_State* L)
         else
             luaL_error(L, "invalid type supplied to __sub: %s", lua_typename(L, lua_type(L, valIndex)));
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -510,13 +482,9 @@ int DynamicAnyUserdata::metamethod__mul(lua_State* L)
         else
             luaL_error(L, "invalid type supplied to __mul: %s", lua_typename(L, lua_type(L, valIndex)));
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -574,13 +542,9 @@ int DynamicAnyUserdata::metamethod__div(lua_State* L)
         else
             luaL_error(L, "invalid type supplied to __div: %s", lua_typename(L, lua_type(L, valIndex)));
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -622,13 +586,9 @@ int DynamicAnyUserdata::metamethod__eq(lua_State* L)
         else
             luaL_error(L, "invalid type supplied to __eq: %s", lua_typename(L, lua_type(L, valIndex)));
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -676,13 +636,9 @@ int DynamicAnyUserdata::metamethod__lt(lua_State* L)
         else
             luaL_error(L, "invalid type supplied to __lt: %s", lua_typename(L, lua_type(L, valIndex)));
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
@@ -730,13 +686,9 @@ int DynamicAnyUserdata::metamethod__le(lua_State* L)
         else
             luaL_error(L, "invalid type supplied to __le: %s", lua_typename(L, lua_type(L, valIndex)));
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;

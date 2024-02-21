@@ -96,15 +96,11 @@ int SemaphoreUserdata::Semaphore(lua_State* L)
         setupPocoUserdata(L, sud, POCO_SEMAPHORE_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    return rv;
+        return rv;
 }
 
 ///
@@ -131,17 +127,12 @@ int SemaphoreUserdata::set(lua_State* L)
     {
         sud->mSemaphore->set();
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -163,17 +154,12 @@ int SemaphoreUserdata::tryWait(lua_State* L)
         lua_pushboolean(L, result);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 /// Waits for the semaphore to become signaled.
@@ -188,17 +174,12 @@ int SemaphoreUserdata::wait(lua_State* L)
     {
         sud->mSemaphore->wait();
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 

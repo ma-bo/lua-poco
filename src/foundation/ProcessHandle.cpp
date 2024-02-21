@@ -50,15 +50,11 @@ int ProcessHandleUserdata::metamethod__tostring(lua_State* L)
         lua_pushfstring(L, "Poco.ProcessHandle (%p)", static_cast<void*>(phud));
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -77,15 +73,11 @@ int ProcessHandleUserdata::id(lua_State* L)
         lua_pushinteger(L, phud->mProcessHandle.id());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 

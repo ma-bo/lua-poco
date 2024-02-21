@@ -76,13 +76,9 @@ int Base32EncoderUserdata::Base32Encoder(lua_State* L)
         setupPocoUserdata(L, b32eud, POCO_BASE32ENCODER_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;

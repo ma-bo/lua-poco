@@ -851,15 +851,11 @@ int TaskManagerContainer::lud_start(lua_State* L)
             else // prep task on failure returns 2 values:  nil, "errmsg"
                 rv = 2;
         }
-        catch (const Poco::Exception& e)
+        catch (const std::exception& e)
         {
-            rv = pushPocoException(L, e);
+            rv = pushException(L, e);
         }
-        catch (...)
-        {
-            rv = pushUnknownException(L);
-        }
-    }
+            }
     else
         rv = luaL_error(L, "invalid argument #2, expected lightuserdata.");
 
@@ -887,15 +883,11 @@ int TaskManagerContainer::lud_addObserver(lua_State* L)
                 rv = 2;
     
         }
-        catch (const Poco::Exception& e)
+        catch (const std::exception& e)
         {
-            rv = pushPocoException(L, e);
+            rv = pushException(L, e);
         }
-        catch (...)
-        {
-            rv = pushUnknownException(L);
-        }
-    }
+            }
 
     return rv;
 }
@@ -1319,15 +1311,11 @@ int TaskManagerUserdata::TaskManager(lua_State* L)
         setupPocoUserdata(L, tmud, POCO_TASK_MANAGER_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    return rv;
+        return rv;
 }
 
 // metamethod infrastructure
@@ -1447,15 +1435,11 @@ int TaskManagerUserdata::start(lua_State* L)
             rv = 2;
 
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-
+    
     return rv;
 }
 
@@ -1485,15 +1469,11 @@ int TaskManagerUserdata::addObserver(lua_State* L)
             rv = 2;
 
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-
+    
     return rv;
 }
 

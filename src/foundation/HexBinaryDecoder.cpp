@@ -3,7 +3,6 @@
 // @module hexbinarydecoder
 #include "HexBinaryDecoder.h"
 #include <Poco/HexBinaryEncoder.h>
-#include <Poco/Exception.h>
 
 int luaopen_poco_hexbinarydecoder(lua_State* L)
 {
@@ -70,13 +69,9 @@ int HexBinaryDecoderUserdata::HexBinaryDecoder(lua_State* L)
         setupPocoUserdata(L, hbdud, POCO_HEXBINARYDECODER_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;

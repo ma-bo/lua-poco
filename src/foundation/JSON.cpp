@@ -379,15 +379,11 @@ int JSON::encode(lua_State* L)
         if (te.encode()) { rv = 1; }
         else { rv = 2; }
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-
+    
     return rv;
 }
 
@@ -409,15 +405,11 @@ int JSON::decode(lua_State* L)
 
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-
+    
     return rv;
 }
 

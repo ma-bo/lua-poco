@@ -72,15 +72,11 @@ int FastMutexUserdata::FastMutex(lua_State* L)
         setupPocoUserdata(L, fmud, POCO_FASTMUTEX_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    return rv;
+        return rv;
 }
 
 ///
@@ -107,17 +103,12 @@ int FastMutexUserdata::lock(lua_State* L)
     {
         fmud->mFastMutex->lock();
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -146,15 +137,11 @@ int FastMutexUserdata::tryLock(lua_State* L)
         lua_pushboolean(L, result);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -169,17 +156,12 @@ int FastMutexUserdata::unlock(lua_State* L)
     {
         fmud->mFastMutex->unlock();
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 

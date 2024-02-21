@@ -96,15 +96,11 @@ int MemoryIStreamUserdata::MemoryIStream(lua_State* L)
             mosud->mUdReference = luaL_ref(L, LUA_REGISTRYINDEX);
             rv = 1;
         }
-        catch (const Poco::Exception& e)
+        catch (const std::exception& e)
         {
-            rv = pushPocoException(L, e);
+            rv = pushException(L, e);
         }
-        catch (...)
-        {
-            rv = pushUnknownException(L);
-        }
-    }
+            }
     else
     {
         lua_pushnil(L);

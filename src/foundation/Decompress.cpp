@@ -103,13 +103,9 @@ int DecompressUserdata::Decompress(lua_State* L)
         setupPocoUserdata(L, dcud, POCO_DECOMPRESS_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
 
     return rv;
@@ -197,13 +193,9 @@ int DecompressUserdata::decompressAll(lua_State* L)
         lua_pushinteger(L, static_cast<lua_Integer>(dcud->mFail.size()));
         rv = 4;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
 
     return rv;
@@ -363,13 +355,9 @@ int DecompressUserdata::good_iter(lua_State* L)
             dcud->zipLocalFileHeaderToTable(L, entry.first);
             rv = 2;
         }
-        catch (const Poco::Exception& e)
+        catch (const std::exception& e)
         {
-            rv = pushPocoException(L, e);
-        }
-        catch (...)
-        {
-            rv = pushUnknownException(L);
+            rv = pushException(L, e);
         }
 
         // if an exception is caught, call lua_error as a nil return ends the generic for loop
@@ -399,13 +387,9 @@ int DecompressUserdata::fail_iter(lua_State* L)
             dcud->zipLocalFileHeaderToTable(L, entry.first);
             rv = 2;
         }
-        catch (const Poco::Exception& e)
+        catch (const std::exception& e)
         {
-            rv = pushPocoException(L, e);
-        }
-        catch (...)
-        {
-            rv = pushUnknownException(L);
+            rv = pushException(L, e);
         }
 
         // if an exception is caught, call lua_error as a nil return ends the generic for loop

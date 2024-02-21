@@ -104,11 +104,7 @@ int MemoryOStreamUserdata::MemoryOStream(lua_State* L)
         }
         catch (const Poco::Exception& e)
         {
-            rv = pushPocoException(L, e);
-        }
-        catch (...)
-        {
-            rv = pushUnknownException(L);
+            rv = pushException(L, e);
         }
     }
     else

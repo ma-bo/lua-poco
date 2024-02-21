@@ -119,13 +119,9 @@ int PipeUserdata::readBytes(lua_State* L)
     }
     catch (const Poco::Exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -157,13 +153,9 @@ int PipeUserdata::writeBytes(lua_State* L)
     }
     catch (const Poco::Exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 

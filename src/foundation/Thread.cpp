@@ -116,15 +116,11 @@ int ThreadUserdata::Thread(lua_State* L)
         if (top > 2 && stackSize)
             thud->mThread.setStackSize(stackSize);
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    return rv;
+        return rv;
 }
 
 ///
@@ -169,17 +165,12 @@ int ThreadUserdata::name(lua_State* L)
             rv = 1;
         }
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -247,17 +238,12 @@ int ThreadUserdata::priority(lua_State* L)
             rv = 1;
         }
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -275,15 +261,11 @@ int ThreadUserdata::id(lua_State* L)
         lua_pushinteger(L, id);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -300,17 +282,12 @@ int ThreadUserdata::isRunning(lua_State* L)
         lua_pushboolean(L, running);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        pushPocoException(L, e);
+        pushException(L, e);
         lua_error(L);
     }
-    catch (...)
-    {
-        pushUnknownException(L);
-        lua_error(L);
-    }
-    
+        
     return rv;
 }
 
@@ -350,15 +327,11 @@ int ThreadUserdata::join(lua_State* L)
             rv = 2;
         }
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -393,15 +366,11 @@ int ThreadUserdata::stackSize(lua_State* L)
         
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -454,15 +423,11 @@ int ThreadUserdata::start(lua_State* L)
         lua_pushboolean(L, 1);
         thud->mStarted = true;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     // extract the state from the holder, which prevents it from being closed.
     thud->mThreadState = holder.extract();
     return rv;

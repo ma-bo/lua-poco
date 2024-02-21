@@ -63,13 +63,9 @@ int CompressUserdata::Compress(lua_State* L)
         setupPocoUserdata(L, cud, POCO_COMPRESS_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
 
     return rv;
@@ -194,13 +190,9 @@ int CompressUserdata::addDirectory(lua_State* L)
         cud->mCompress.addDirectory(dirPath, entryDateTime);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
 
     return rv;
@@ -252,13 +244,9 @@ int CompressUserdata::addFile(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
 
     return rv;
@@ -311,13 +299,9 @@ int CompressUserdata::addIStream(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
 
     return rv;
@@ -366,13 +350,9 @@ int CompressUserdata::addRecursive(lua_State* L)
         lua_pushboolean(L, 1);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
 
     return rv;

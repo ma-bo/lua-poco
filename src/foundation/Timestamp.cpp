@@ -101,15 +101,11 @@ int TimestampUserdata::TimestampFromEpoch(lua_State* L)
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -130,15 +126,11 @@ int TimestampUserdata::TimestampFromUtc(lua_State* L)
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -158,15 +150,11 @@ int TimestampUserdata::Timestamp(lua_State* L)
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -202,15 +190,11 @@ int TimestampUserdata::metamethod__add(lua_State* L)
         
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -248,15 +232,11 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
         setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -314,15 +294,11 @@ int TimestampUserdata::elapsed(lua_State* L)
         lua_pushlstring(L, elapsedStr.c_str(), elapsedStr.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -344,15 +320,11 @@ int TimestampUserdata::epochMicroseconds(lua_State* L)
         lua_pushlstring(L, epochStr.c_str(), epochStr.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 
@@ -389,17 +361,12 @@ int TimestampUserdata::isElapsed(lua_State* L)
         {
             Poco::strToInt(intervalStr, interval, 10);
         }
-        catch (const Poco::Exception& e)
+        catch (const std::exception& e)
         {
-            pushPocoException(L, e);
+            pushException(L, e);
             return lua_error(L);
         }
-        catch (...)
-        {
-            pushUnknownException(L);
-            return lua_error(L);
-        }
-    }
+            }
     
     int elapsed = tsud->mTimestamp.isElapsed(interval);
     lua_pushboolean(L, elapsed);
@@ -447,15 +414,11 @@ int TimestampUserdata::utcTime(lua_State* L)
         lua_pushlstring(L, utcStr.c_str(), utcStr.size());
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-    
+        
     return rv;
 }
 

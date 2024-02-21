@@ -75,15 +75,11 @@ int SharedMemoryUserdata::SharedMemory(lua_State* L)
         setupPocoUserdata(L, smud, POCO_SHAREDMEMORY_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
+        rv = pushException(L, e);
     }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
-    }
-
+    
     return rv;
 }
 

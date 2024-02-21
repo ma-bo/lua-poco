@@ -80,13 +80,9 @@ int Base64EncoderUserdata::Base64Encoder(lua_State* L)
         setupPocoUserdata(L, b64eud, POCO_BASE64ENCODER_METATABLE_NAME);
         rv = 1;
     }
-    catch (const Poco::Exception& e)
+    catch (const std::exception& e)
     {
-        rv = pushPocoException(L, e);
-    }
-    catch (...)
-    {
-        rv = pushUnknownException(L);
+        rv = pushException(L, e);
     }
     
     return rv;
