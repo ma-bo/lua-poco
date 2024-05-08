@@ -59,7 +59,18 @@ int TeeOStreamUserdata::TeeOStream(lua_State* L)
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     int top = lua_gettop(L);
     
-    TeeOStreamUserdata* tosud = new(lua_newuserdata(L, sizeof *tosud)) TeeOStreamUserdata();
+    TeeOStreamUserdata* tosud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tosud);
+    
+    try
+    {
+        tosud = new(p) TeeOStreamUserdata();
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
     setupPocoUserdata(L, tosud, POCO_TEEOSTREAM_METATABLE_NAME);
 
     for (int i = firstArg; i <= top; ++i)

@@ -39,36 +39,36 @@ const char* POCO_COMPRESS_METATABLE_NAME = "Poco.Zip.Compress.metatable";
 // @function new
 int CompressUserdata::Compress(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
+    
+    bool seekable = true;
+    bool forceZip64 = false;
+    OStream* os = checkPrivateUserdata<OStream>(L, firstArg);
+    
+    if (lua_isboolean(L, firstArg + 1))
+        { seekable = static_cast<bool>(lua_toboolean(L, firstArg + 1)); }
+    
+    if (lua_isboolean(L, firstArg + 2))
+        { forceZip64 = static_cast<bool>(lua_toboolean(L, firstArg + 2)); }
+    
+    lua_pushvalue(L, firstArg);
+    int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    
+    CompressUserdata* cud = NULL;
+    void* p = lua_newuserdata(L, sizeof *cud);
 
     try
     {
-        bool seekable = true;
-        bool forceZip64 = false;
-        OStream* os = checkPrivateUserdata<OStream>(L, firstArg);
-
-        if (lua_isboolean(L, firstArg + 1))
-            { seekable = static_cast<bool>(lua_toboolean(L, firstArg + 1)); }
-
-        if (lua_isboolean(L, firstArg + 2))
-            { forceZip64 = static_cast<bool>(lua_toboolean(L, firstArg + 2)); }
-
-        lua_pushvalue(L, firstArg);
-        int ref = luaL_ref(L, LUA_REGISTRYINDEX);
-
-        CompressUserdata* cud = new(lua_newuserdata(L, sizeof *cud))
-            CompressUserdata(os->ostream(), ref, seekable, forceZip64);
-
-        setupPocoUserdata(L, cud, POCO_COMPRESS_METATABLE_NAME);
-        rv = 1;
+        cud = new(p) CompressUserdata(os->ostream(), ref, seekable, forceZip64);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        luaL_unref(L, LUA_REGISTRYINDEX, ref);
+        return pushException(L, e);
     }
 
-    return rv;
+    setupPocoUserdata(L, cud, POCO_COMPRESS_METATABLE_NAME);
+    return 1;
 }
 
 // register metatable for this class
@@ -166,7 +166,6 @@ Poco::Zip::ZipCommon::CompressionLevel strToCompressionLevel(const char* level)
 // @see timestamp
 int CompressUserdata::addDirectory(lua_State* L)
 {
-    int rv = 0;
     CompressUserdata* cud = checkPrivateUserdata<CompressUserdata>(L, 1);
 
     const char* dirPathStr = NULL;
@@ -188,14 +187,14 @@ int CompressUserdata::addDirectory(lua_State* L)
         if (lua_gettop(L) > 2) { entryDateTime = tsud ? tsud->mTimestamp : Poco::Timestamp(dateTimeT); }
 
         cud->mCompress.addDirectory(dirPath, entryDateTime);
-        rv = 1;
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
 
-    return rv;
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 /// Adds a file to the zip file.
@@ -241,15 +240,15 @@ int CompressUserdata::addFile(lua_State* L)
         if (lua_isstring(L, 5)) { cl = strToCompressionLevel(lua_tostring(L, 5)); }
 
         cud->mCompress.addFile(dirPath, filePath, cm, cl);
-        lua_pushboolean(L, 1);
         rv = 1;
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
 
-    return rv;
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 /// Adds istream data to the zip file.
@@ -296,15 +295,14 @@ int CompressUserdata::addIStream(lua_State* L)
         if (lua_isstring(L, 6)) { cl = strToCompressionLevel(lua_tostring(L, 6)); }
 
         cud->mCompress.addFile(is->istream(), entryDateTime, dirPath, cm, cl);
-        lua_pushboolean(L, 1);
-        rv = 1;
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
 
-    return rv;
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 /// Recursively adds all children file and directories to the zip file.
@@ -347,15 +345,14 @@ int CompressUserdata::addRecursive(lua_State* L)
         if (lua_isstring(L, 5)) { cl = strToCompressionLevel(lua_tostring(L, 5)); }
 
         cud->mCompress.addRecursive(dirPath, cm, cl, true, entryPath);
-        lua_pushboolean(L, 1);
-        rv = 1;
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
 
-    return rv;
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 /// Finalizes and writes the zip file to the supplied ostream.

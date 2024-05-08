@@ -52,7 +52,6 @@ bool RandomUserdata::registerRandom(lua_State* L)
 // @function new
 int RandomUserdata::Random(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     
     lua_Integer stateSize = 256;
@@ -66,23 +65,23 @@ int RandomUserdata::Random(lua_State* L)
         return 2;
     }
     
+    RandomUserdata* rud = NULL;
+    void* p = lua_newuserdata(L, sizeof *rud);
+    
     try
     {
-        RandomUserdata* rud = new(lua_newuserdata(L, sizeof *rud))
-            RandomUserdata(stateSize);
-        setupPocoUserdata(L, rud, POCO_RANDOM_METATABLE_NAME);
-
-        if (seed) { rud->mRandom.seed(seed); }
-        else { rud->mRandom.seed(); }
-        
-        rv = 1;
+        rud = new(p) RandomUserdata(stateSize);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
+
+    if (seed) { rud->mRandom.seed(seed); }
+    else { rud->mRandom.seed(); }
         
-    return rv;
+    setupPocoUserdata(L, rud, POCO_RANDOM_METATABLE_NAME);
+    return 1;
 }
 
 // metamethod infrastructure

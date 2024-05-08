@@ -49,7 +49,19 @@ NotificationQueueUserdata::~NotificationQueueUserdata()
 bool NotificationQueueUserdata::copyToState(lua_State *L)
 {
     LuaPoco::NotificationQueueUserdata::registerNotificationQueue(L);
-    NotificationQueueUserdata* nqud = new(lua_newuserdata(L, sizeof *nqud)) NotificationQueueUserdata(mQueue, mPool);
+    NotificationQueueUserdata* nqud = NULL;
+    void* p = lua_newuserdata(L, sizeof *nqud);
+    
+    try
+    {
+        nqud = new(p) NotificationQueueUserdata(mQueue, mPool);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, nqud, POCO_NOTIFICATIONQUEUE_METATABLE_NAME);
     return true;
 }
@@ -82,19 +94,20 @@ bool NotificationQueueUserdata::registerNotificationQueue(lua_State* L)
 // @function new
 int NotificationQueueUserdata::NotificationQueue(lua_State* L)
 {
-    int rv = 0;
+    NotificationQueueUserdata* nqud = NULL;
+    void* p = lua_newuserdata(L, sizeof *nqud);
 
     try
     {
-        NotificationQueueUserdata* nqud = new(lua_newuserdata(L, sizeof *nqud)) NotificationQueueUserdata();
-        setupPocoUserdata(L, nqud, POCO_NOTIFICATIONQUEUE_METATABLE_NAME);
-        rv = 1;
+        nqud = new(p) NotificationQueueUserdata();
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        return rv;
+    
+    setupPocoUserdata(L, nqud, POCO_NOTIFICATIONQUEUE_METATABLE_NAME);
+    return 1;
 }
 
 ///

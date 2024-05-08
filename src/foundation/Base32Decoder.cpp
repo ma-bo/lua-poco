@@ -58,26 +58,27 @@ bool Base32DecoderUserdata::registerBase32Decoder(lua_State* L)
 // @see istream
 int Base32DecoderUserdata::Base32Decoder(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     IStream* is = checkPrivateUserdata<IStream>(L, firstArg);
 
     lua_pushvalue(L, firstArg);
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
     
+    Base32DecoderUserdata* b32dud = NULL;
+    void* p = lua_newuserdata(L, sizeof *b32dud);
+    
     try
     {
-        Base32DecoderUserdata* b32dud = new(lua_newuserdata(L, sizeof *b32dud))
-            Base32DecoderUserdata(is->istream(), ref);
-        setupPocoUserdata(L, b32dud, POCO_BASE32DECODER_METATABLE_NAME);
-        rv = 1;
+        b32dud = new(p) Base32DecoderUserdata(is->istream(), ref);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        luaL_unref(L, LUA_REGISTRYINDEX, ref);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, b32dud, POCO_BASE32DECODER_METATABLE_NAME);
+    return 1;
 }
 
 // metamethod infrastructure

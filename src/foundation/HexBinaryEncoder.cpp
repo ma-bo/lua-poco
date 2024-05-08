@@ -56,26 +56,27 @@ bool HexBinaryEncoderUserdata::registerHexBinaryEncoder(lua_State* L)
 // @see ostream
 int HexBinaryEncoderUserdata::HexBinaryEncoder(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     OStream* os = checkPrivateUserdata<OStream>(L, firstArg);
 
     lua_pushvalue(L, firstArg);
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    HexBinaryEncoderUserdata* hbeud = NULL;
+    void* p = lua_newuserdata(L, sizeof *hbeud);
     
     try
     {
-        HexBinaryEncoderUserdata* hbeud = new(lua_newuserdata(L, sizeof *hbeud))
-            HexBinaryEncoderUserdata(os->ostream(), ref);
-        setupPocoUserdata(L, hbeud, POCO_HEXBINARYENCODER_METATABLE_NAME);
-        rv = 1;
+        hbeud = new(p) HexBinaryEncoderUserdata(os->ostream(), ref);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        luaL_unref(L, LUA_REGISTRYINDEX, ref);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, hbeud, POCO_HEXBINARYENCODER_METATABLE_NAME);
+    return 1;
 }
 
 // metamethod infrastructure

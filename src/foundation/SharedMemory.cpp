@@ -39,48 +39,43 @@ const char* POCO_SHAREDMEMORY_METATABLE_NAME = "Poco.SharedMemory.metatable";
 // @function new
 int SharedMemoryUserdata::SharedMemory(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
 
+    const char *sharedMemoryName = NULL;
+    FileUserdata* fud = NULL;
+    Poco::SharedMemory::AccessMode mode = Poco::SharedMemory::AM_READ;
+    lua_Integer mappingSize = 0;
+    bool serverMapping = false;
+    int top = lua_gettop(L);
+    
+    if (lua_isstring(L, firstArg)) { sharedMemoryName = lua_tostring(L, firstArg); }
+    else { fud = checkPrivateUserdata<FileUserdata>(L, firstArg); }
+    
+    if (top > firstArg && std::strcmp("write", luaL_checkstring(L, firstArg + 1)) == 0)
+        { mode = Poco::SharedMemory::AM_WRITE; }
+    if (top > firstArg + 1) { mappingSize = luaL_checkinteger(L, firstArg + 2); }
+    if (top > 2) { serverMapping = static_cast<bool>(lua_toboolean(L, firstArg + 3)); }
+    
+    SharedMemoryUserdata* smud = NULL;
+    void* p = lua_newuserdata(L, sizeof *smud);
     try
     {
-        const char *sharedMemoryName = NULL;
-        FileUserdata* fud = NULL;
-        Poco::SharedMemory::AccessMode mode = Poco::SharedMemory::AM_READ;
-        lua_Integer mappingSize = 0;
-        bool serverMapping = false;
-        int top = lua_gettop(L);
-        
-        if (lua_isstring(L, firstArg)) { sharedMemoryName = lua_tostring(L, firstArg); }
-        else { fud = checkPrivateUserdata<FileUserdata>(L, firstArg); }
-        
-        if (top > firstArg && std::strcmp("write", luaL_checkstring(L, firstArg + 1)) == 0)
-            { mode = Poco::SharedMemory::AM_WRITE; }
-            
-        if (top > firstArg + 1) { mappingSize = luaL_checkinteger(L, firstArg + 2); }
-        
-        if (top > 2) { serverMapping = static_cast<bool>(lua_toboolean(L, firstArg + 3)); }
-
-        SharedMemoryUserdata* smud = NULL;
         if (sharedMemoryName)
         {
-            smud = new(lua_newuserdata(L, sizeof *smud))
-                SharedMemoryUserdata(sharedMemoryName, mappingSize, mode, serverMapping);
+            smud = new(p) SharedMemoryUserdata(sharedMemoryName, mappingSize, mode, serverMapping);
         }
         else
         {
-            smud = new(lua_newuserdata(L, sizeof *smud)) SharedMemoryUserdata(fud->getFile(), mode);
+            smud = new(p) SharedMemoryUserdata(fud->getFile(), mode);
         }
-
-        setupPocoUserdata(L, smud, POCO_SHAREDMEMORY_METATABLE_NAME);
-        rv = 1;
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-    
-    return rv;
+
+    setupPocoUserdata(L, smud, POCO_SHAREDMEMORY_METATABLE_NAME);
+    return 1;
 }
 
 // register metatable for this class

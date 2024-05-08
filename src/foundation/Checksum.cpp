@@ -32,10 +32,22 @@ ChecksumUserdata::~ChecksumUserdata()
 bool ChecksumUserdata::copyToState(lua_State *L)
 {
     registerChecksum(L);
-    ChecksumUserdata* csud = new(lua_newuserdata(L, sizeof *csud)) ChecksumUserdata(csud->mChecksum.type());
-    setupPocoUserdata(L, csud, POCO_CHECKSUM_METATABLE_NAME);
+    ChecksumUserdata* csud = NULL;
+    void* p = lua_newuserdata(L, sizeof *csud);
+    
+    try
+    {
+        csud = new(p) ChecksumUserdata(mChecksum.type());
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     csud->mChecksum = mChecksum;
     
+    setupPocoUserdata(L, csud, POCO_CHECKSUM_METATABLE_NAME);   
     return true;
 }
 
@@ -74,9 +86,19 @@ int ChecksumUserdata::Checksum(lua_State* L)
             type = Poco::Checksum::TYPE_CRC32;
     }
     
-    ChecksumUserdata* csud = new(lua_newuserdata(L, sizeof *csud)) ChecksumUserdata(type);
-    setupPocoUserdata(L, csud, POCO_CHECKSUM_METATABLE_NAME);
+    ChecksumUserdata* csud = NULL;
+    void* p = lua_newuserdata(L, sizeof *csud);
     
+    try
+    {
+        csud = new(p) ChecksumUserdata(type);
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
+    setupPocoUserdata(L, csud, POCO_CHECKSUM_METATABLE_NAME);
     return 1;
 }
 

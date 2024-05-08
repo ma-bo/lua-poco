@@ -35,7 +35,19 @@ MutexUserdata::~MutexUserdata()
 bool MutexUserdata::copyToState(lua_State *L)
 {
     registerMutex(L);
-    MutexUserdata* mud = new(lua_newuserdata(L, sizeof *mud)) MutexUserdata(mMutex);
+    MutexUserdata* mud = NULL;
+    void* p = lua_newuserdata(L, sizeof *mud);
+    
+    try
+    {
+        mud = new(p) MutexUserdata(mMutex);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, mud, POCO_MUTEX_METATABLE_NAME);
     return true;
 }
@@ -63,19 +75,20 @@ bool MutexUserdata::registerMutex(lua_State* L)
 // @function new
 int MutexUserdata::Mutex(lua_State* L)
 {
-    int rv = 0;
-
+    MutexUserdata* mud = NULL;
+    void* p = lua_newuserdata(L, sizeof *mud);
+    
     try
     {
-        MutexUserdata* mud = new(lua_newuserdata(L, sizeof *mud)) MutexUserdata();
-        setupPocoUserdata(L, mud, POCO_MUTEX_METATABLE_NAME);
-        rv = 1;
+        mud = new(p) MutexUserdata();
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        return rv;
+
+    setupPocoUserdata(L, mud, POCO_MUTEX_METATABLE_NAME);
+    return 1;
 }
 
 ///

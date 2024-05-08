@@ -36,7 +36,19 @@ PipeUserdata::~PipeUserdata()
 bool PipeUserdata::copyToState(lua_State *L)
 {
     registerPipe(L);
-    PipeUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PipeUserdata(mPipe);
+    PipeUserdata* pud = NULL;
+    void* p = lua_newuserdata(L, sizeof *pud);
+    
+    try
+    {
+        pud = new(p) PipeUserdata(mPipe);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, pud, POCO_PIPE_METATABLE_NAME);
     return true;
 }
@@ -64,7 +76,18 @@ bool PipeUserdata::registerPipe(lua_State* L)
 // @function new
 int PipeUserdata::Pipe(lua_State* L)
 {
-    PipeUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PipeUserdata();
+    PipeUserdata* pud = NULL;
+    void* p = lua_newuserdata(L, sizeof *pud);
+    
+    try
+    {
+        pud = new(p) PipeUserdata();
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
     setupPocoUserdata(L, pud, POCO_PIPE_METATABLE_NAME);
     return 1;
 }

@@ -64,7 +64,19 @@ PathUserdata::~PathUserdata()
 bool PathUserdata::copyToState(lua_State *L)
 {
     registerPath(L);
-    PathUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PathUserdata(mPath);
+    PathUserdata* pud = NULL;
+    void* p = lua_newuserdata(L, sizeof *pud);
+    
+    try 
+    {
+        pud = new(p) PathUserdata(mPath);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, pud, POCO_PATH_METATABLE_NAME);
     return true;
 }
@@ -121,7 +133,6 @@ bool PathUserdata::registerPath(lua_State* L)
 // @function new
 int PathUserdata::Path(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     const char* pathStr = luaL_checkstring(L, firstArg);
     Poco::Path::Style style = Poco::Path::PATH_NATIVE;
@@ -142,17 +153,20 @@ int PathUserdata::Path(lua_State* L)
     if (top > firstArg + 1)
         absolute = lua_toboolean(L, firstArg + 2) != 0;
 
+    PathUserdata* pud = NULL;
+    void* p = lua_newuserdata(L, sizeof *pud);
+    
     try
     {
-        PathUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PathUserdata(pathStr, style, absolute);
-        setupPocoUserdata(L, pud, POCO_PATH_METATABLE_NAME);
-        rv = 1;
+        pud = new(p) PathUserdata(pathStr, style, absolute);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        return rv;
+    
+    setupPocoUserdata(L, pud, POCO_PATH_METATABLE_NAME);
+    return 1;
 }
 
 // metamethod infrastructure
@@ -217,17 +231,27 @@ int PathUserdata::find(lua_State* L)
         }
     }
 
-    Poco::Path path;
+    Poco::Path path;    
     if (Poco::Path::find(paths.begin(), paths.end(), pathStr, path))
     {
-        PathUserdata* newpud = new(lua_newuserdata(L, sizeof *newpud)) PathUserdata(path);
+        PathUserdata* newpud = NULL;
+        void* p = lua_newuserdata(L, sizeof *newpud);
+        
+        try
+        {
+            newpud = new(p) PathUserdata(path);
+        }
+        catch (const std::exception& e)
+        {
+            return pushException(L, e);
+        }
         setupPocoUserdata(L, newpud, POCO_PATH_METATABLE_NAME);
     }
     else
     {
         lua_pushnil(L);
     }
-
+    
     return 1;
 }
 
@@ -334,9 +358,19 @@ int PathUserdata::transcode(lua_State* L)
 int PathUserdata::absolute(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
-    PathUserdata* newpud = new(lua_newuserdata(L, sizeof *newpud)) PathUserdata(pud->mPath.absolute());
+    PathUserdata* newpud = NULL;
+    void* p = lua_newuserdata(L, sizeof *newpud);
+    
+    try
+    {
+        newpud = new(p) PathUserdata(pud->mPath.absolute());
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
     setupPocoUserdata(L, newpud, POCO_PATH_METATABLE_NAME);
-
     return 1;
 }
 
@@ -548,7 +582,18 @@ int PathUserdata::makeParent(lua_State* L)
 int PathUserdata::parent(lua_State* L)
 {
     PathUserdata* pud = checkPrivateUserdata<PathUserdata>(L, 1);
-    PathUserdata* newpud = new(lua_newuserdata(L, sizeof *newpud)) PathUserdata(pud->mPath.parent());
+    PathUserdata* newpud = NULL;
+    void* p = lua_newuserdata(L, sizeof *newpud);
+    
+    try
+    {
+        newpud = new(p) PathUserdata(pud->mPath.parent());
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
     setupPocoUserdata(L, newpud, POCO_PATH_METATABLE_NAME);
     return 1;
 }

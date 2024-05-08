@@ -33,7 +33,19 @@ DynamicAnyUserdata::~DynamicAnyUserdata()
 bool DynamicAnyUserdata::copyToState(lua_State* L)
 {
     registerDynamicAny(L);
-    DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(mDynamicAny);
+    DynamicAnyUserdata* daud = NULL;
+    void* p = lua_newuserdata(L, sizeof *daud);
+    
+    try
+    {
+        daud = new(p) DynamicAnyUserdata(mDynamicAny);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
     return true;
 }
@@ -78,49 +90,46 @@ int DynamicAnyUserdata::DynamicAny(lua_State* L)
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     luaL_checkany(L, firstArg);
     int type = lua_type(L, firstArg);
+    
+    DynamicAnyUserdata* daud = NULL;
+    void* p = lua_newuserdata(L, sizeof *daud);
+    
     try
     {
         if (type == LUA_TNUMBER)
         {
             lua_Number val = lua_tonumber(L, firstArg);
-            DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(val);
-            setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
-            rv = 1;
+            daud = new(p) DynamicAnyUserdata(val);
         }
         else if (type == LUA_TSTRING)
         {
             const char* val = lua_tostring(L, firstArg);
-            DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(val);
-            setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
-            rv = 1;
+            daud = new(p) DynamicAnyUserdata(val);
         }
         else if (type == LUA_TBOOLEAN)
         {
             bool val = lua_toboolean(L, firstArg);
-            DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(val);
-            setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
-            rv = 1;
+            daud = new(p) DynamicAnyUserdata(val);
         }
         else if (type == LUA_TUSERDATA)
         {
             DynamicAnyUserdata* daudFrom = checkPrivateUserdata<DynamicAnyUserdata>(L, firstArg);
-            DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(daudFrom->mDynamicAny);
-            setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
-            rv = 1;
+            daud = new(p) DynamicAnyUserdata(daudFrom->mDynamicAny);
         }
         else
         {
             lua_pushnil(L);
             lua_pushstring(L,"DynamicAny requires a number, string, boolean, or a Poco.DynamicAny");
-            rv = 2;
+            return 2;
         }
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
+    return 1;
 }
 
 ///
@@ -147,6 +156,9 @@ int DynamicAnyUserdata::convert(lua_State* L)
     DynamicAnyUserdata* daud = checkPrivateUserdata<DynamicAnyUserdata>(L, 1);
     const char* toTypeStr = luaL_checkstring(L, 2);
     std::string toType(toTypeStr);
+
+    DynamicAnyUserdata* daud2 = NULL;
+    void* p = lua_newuserdata(L, sizeof *daud2);
     
     try
     {
@@ -183,16 +195,15 @@ int DynamicAnyUserdata::convert(lua_State* L)
             return 2;
         }
         
-        DynamicAnyUserdata* daud = new(lua_newuserdata(L, sizeof *daud)) DynamicAnyUserdata(newValue);
-        setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
-        rv = 1;
+        daud2 = new(p) DynamicAnyUserdata(newValue);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, daud, POCO_DYNAMICANY_METATABLE_NAME);
+    return 1;
 }
 
 /// checks if value is a numeric type.

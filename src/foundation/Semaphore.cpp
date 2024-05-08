@@ -46,7 +46,19 @@ SemaphoreUserdata::~SemaphoreUserdata()
 bool SemaphoreUserdata::copyToState(lua_State *L)
 {
     LuaPoco::SemaphoreUserdata::registerSemaphore(L);
-    SemaphoreUserdata* sud = new(lua_newuserdata(L, sizeof *sud)) SemaphoreUserdata(mSemaphore);
+    SemaphoreUserdata* sud = NULL;
+    void* p = lua_newuserdata(L, sizeof *sud); 
+    
+    try
+    {
+        sud = new(p) SemaphoreUserdata(mSemaphore);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, sud, POCO_SEMAPHORE_METATABLE_NAME);
     return true;
 }
@@ -77,30 +89,27 @@ bool SemaphoreUserdata::registerSemaphore(lua_State* L)
 int SemaphoreUserdata::Semaphore(lua_State* L)
 {
     int firstArg = lua_istable(L, 1) ? 2 : 1;
-    int rv = 0;
     int top = lua_gettop(L);
     int max = 0;
     int n = luaL_checkinteger(L, firstArg);
     if (top > firstArg)
         max = luaL_checkinteger(L, firstArg + 1);
     
+    SemaphoreUserdata* sud = NULL;
+    void* p = lua_newuserdata(L, sizeof *sud);
+    
     try
     {
-        SemaphoreUserdata* sud = NULL;
-        
-        if (top > firstArg)
-            SemaphoreUserdata* sud = new(lua_newuserdata(L, sizeof *sud)) SemaphoreUserdata(n, max);
-        else
-            SemaphoreUserdata* sud = new(lua_newuserdata(L, sizeof *sud)) SemaphoreUserdata(n);
-        
-        setupPocoUserdata(L, sud, POCO_SEMAPHORE_METATABLE_NAME);
-        rv = 1;
+        if (top > firstArg) { sud = new(p) SemaphoreUserdata(n, max); }
+        else { sud = new(p) SemaphoreUserdata(n); }
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        return rv;
+    
+    setupPocoUserdata(L, sud, POCO_SEMAPHORE_METATABLE_NAME);
+    return 1;
 }
 
 ///

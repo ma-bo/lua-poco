@@ -54,7 +54,19 @@ int NamedEventUserdata::NamedEvent(lua_State* L)
 {
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     const char* name = luaL_checkstring(L, firstArg);
-    NamedEventUserdata* neud = new(lua_newuserdata(L, sizeof *neud)) NamedEventUserdata(name);
+    
+    NamedEventUserdata* neud = NULL;
+    void* p = lua_newuserdata(L, sizeof *neud);
+    
+    try
+    {
+        neud = new(p) NamedEventUserdata(name);
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
     setupPocoUserdata(L, neud, POCO_NAMEDEVENT_METATABLE_NAME);
     return 1;
 }

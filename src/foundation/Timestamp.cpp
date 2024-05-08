@@ -52,7 +52,19 @@ TimestampUserdata::~TimestampUserdata()
 bool TimestampUserdata::copyToState(lua_State* L)
 {
     registerTimestamp(L);
-    TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(mTimestamp);
+    TimestampUserdata* tsud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tsud);
+    
+    try
+    {
+        tsud = new(p) TimestampUserdata(mTimestamp);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
     return true;
 }
@@ -91,22 +103,21 @@ bool TimestampUserdata::registerTimestamp(lua_State* L)
 // @function fromEpoch
 int TimestampUserdata::TimestampFromEpoch(lua_State* L)
 {
-    int rv = 0;
     std::time_t val = luaL_checkinteger(L, 1);
+    TimestampUserdata* tsud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tsud);
+    
     try
     {
-        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) 
-            TimestampUserdata(Poco::Timestamp::fromEpochTime(val));
-        
-        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
-        rv = 1;
+        tsud = new(p) TimestampUserdata(Poco::Timestamp::fromEpochTime(val));
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+    
+    setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
+    return 1;
 }
 
 /// Constructs a new timestamp userdata from 64-bit UTC value encoded as a string.
@@ -117,21 +128,22 @@ int TimestampUserdata::TimestampFromEpoch(lua_State* L)
 // @function fromUTC
 int TimestampUserdata::TimestampFromUtc(lua_State* L)
 {
-    int rv = 0;
     Poco::Int64 val = static_cast<Poco::Int64>(luaL_checkinteger(L, 1));
+    
+    TimestampUserdata* tsud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tsud);
     
     try
     {
-        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(val);
-        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
-        rv = 1;
+        tsud = new(p) TimestampUserdata(val);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+    
+    setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
+    return 1;
 }
 
 // Lua constructor
@@ -142,20 +154,20 @@ int TimestampUserdata::TimestampFromUtc(lua_State* L)
 // @function new
 int TimestampUserdata::Timestamp(lua_State* L)
 {
-    int rv = 0;
+    TimestampUserdata* tsud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tsud);
     
     try
     {
-        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata();
-        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
-        rv = 1;
+        tsud = new(p) TimestampUserdata();
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+    
+    setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
+    return 1;
 }
 
 ///
@@ -180,27 +192,27 @@ int TimestampUserdata::metamethod__add(lua_State* L)
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, tsIndex);
     const char* toAddStr = luaL_checkstring(L, stringIndex);
     
+    TimestampUserdata* ntsud = NULL;
+    void* p = lua_newuserdata(L, sizeof *ntsud);
+    
     try
     {
         Poco::Int64 val;
         Poco::strToInt(toAddStr, val, 10);
-        Poco::Timestamp newTs= tsud->mTimestamp + val;
-        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(newTs);
-        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
-        
-        rv = 1;
+
+        ntsud = new(p) TimestampUserdata(tsud->mTimestamp + val);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+    
+    setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
+    return 1;
 }
 
 int TimestampUserdata::metamethod__sub(lua_State* L)
 {
-    int rv = 0;
     int tsIndex = 1;
     int otherIndex = 2;
     int stringIndex = 0;
@@ -210,6 +222,8 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
     
     
     TimestampUserdata* tsud = checkPrivateUserdata<TimestampUserdata>(L, tsIndex);
+    TimestampUserdata* ntsud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tsud);
     
     try
     {
@@ -228,16 +242,15 @@ int TimestampUserdata::metamethod__sub(lua_State* L)
             newTs = tsud->mTimestamp - tsudOther->mTimestamp;
         }
 
-        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(newTs);
-        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
-        rv = 1;
+        ntsud = new(p) TimestampUserdata(newTs);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+    
+    setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
+    return 1;
 }
 
 int TimestampUserdata::metamethod__lt(lua_State* L)

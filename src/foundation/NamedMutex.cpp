@@ -50,9 +50,19 @@ int NamedMutexUserdata::NamedMutex(lua_State* L)
 {
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     const char* name = luaL_checkstring(L, firstArg);
-    NamedMutexUserdata* nmud = new(lua_newuserdata(L, sizeof *nmud)) NamedMutexUserdata(name);
-    setupPocoUserdata(L, nmud, POCO_NAMEDMUTEX_METATABLE_NAME);
     
+    NamedMutexUserdata* nmud = NULL;
+    void* p = lua_newuserdata(L, sizeof *nmud);
+    try
+    {
+        nmud = new(p) NamedMutexUserdata(name);
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
+    setupPocoUserdata(L, nmud, POCO_NAMEDMUTEX_METATABLE_NAME);
     return 1;
 }
 

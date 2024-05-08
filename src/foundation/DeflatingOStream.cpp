@@ -75,7 +75,6 @@ bool DeflatingOStreamUserdata::registerDeflatingOStream(lua_State* L)
 // @see ostream
 int DeflatingOStreamUserdata::DeflatingOStream(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     OStream* os = checkPrivateUserdata<OStream>(L, firstArg);
     
@@ -91,10 +90,21 @@ int DeflatingOStreamUserdata::DeflatingOStream(lua_State* L)
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
     
     DeflatingOStreamUserdata* dosud = NULL;
+    void* p = lua_newuserdata(L, sizeof *dosud);
+    
     if (lua_isnumber(L, firstArg + 1))
     {
         int num = static_cast<int>(luaL_checkinteger(L, firstArg + 1));
-        dosud = new(lua_newuserdata(L, sizeof *dosud)) DeflatingOStreamUserdata(os->ostream(), num, level, ref);
+        
+        try
+        {
+            dosud = new(p) DeflatingOStreamUserdata(os->ostream(), num, level, ref);
+        }
+        catch (const std::exception& e)
+        {
+            luaL_unref(L, LUA_REGISTRYINDEX, ref);
+            return pushException(L, e);
+        }
     }
     else
     {
@@ -104,10 +114,18 @@ int DeflatingOStreamUserdata::DeflatingOStream(lua_State* L)
         if (std::strcmp(mode, "STREAM_ZLIB") == 0) type = Poco::DeflatingStreamBuf::STREAM_ZLIB;
         else if (std::strcmp(mode, "STREAM_GZIP") == 0) type = Poco::DeflatingStreamBuf::STREAM_GZIP;
         
-        dosud = new(lua_newuserdata(L, sizeof *dosud)) DeflatingOStreamUserdata(os->ostream(), type, level, ref);
+        try
+        {
+            dosud = new(p) DeflatingOStreamUserdata(os->ostream(), type, level, ref);
+        }
+        catch (const std::exception& e)
+        {
+            luaL_unref(L, LUA_REGISTRYINDEX, ref);
+            return pushException(L, e);
+        }
     }
-    setupPocoUserdata(L, dosud, POCO_DEFLATINGOSTREAM_METATABLE_NAME);
     
+    setupPocoUserdata(L, dosud, POCO_DEFLATINGOSTREAM_METATABLE_NAME);
     return 1;
 }
 

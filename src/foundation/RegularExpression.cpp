@@ -111,7 +111,6 @@ bool RegularExpressionUserdata::registerRegularExpression(lua_State* L)
 // @function new
 int RegularExpressionUserdata::RegularExpression(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     int top = lua_gettop(L);
     
@@ -128,18 +127,20 @@ int RegularExpressionUserdata::RegularExpression(lua_State* L)
     if (top > firstArg + 1 && lua_isboolean(L, firstArg + 2))
         study = lua_toboolean(L, firstArg + 2);
     
+    RegularExpressionUserdata *reud = NULL;
+    void* p = lua_newuserdata(L, sizeof *reud);
+    
     try
     {
-        RegularExpressionUserdata *reud = new(lua_newuserdata(L, sizeof *reud)) RegularExpressionUserdata(pattern, options, study);
-        setupPocoUserdata(L, reud, POCO_REGULAREXPRESSION_METATABLE_NAME);
-        rv = 1;
+        reud = new(p) RegularExpressionUserdata(pattern, options, study);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+    
+    setupPocoUserdata(L, reud, POCO_REGULAREXPRESSION_METATABLE_NAME);
+    return 1;
 }
 
 ///

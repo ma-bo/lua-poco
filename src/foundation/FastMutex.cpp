@@ -35,7 +35,19 @@ FastMutexUserdata::~FastMutexUserdata()
 bool FastMutexUserdata::copyToState(lua_State *L)
 {
     registerFastMutex(L);
-    FastMutexUserdata* fmud = new(lua_newuserdata(L, sizeof *fmud)) FastMutexUserdata(mFastMutex);
+    FastMutexUserdata* fmud = NULL;
+    void *p = lua_newuserdata(L, sizeof *fmud);
+    
+    try
+    {
+        fmud = new(p) FastMutexUserdata(mFastMutex);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, fmud, POCO_FASTMUTEX_METATABLE_NAME);
     return true;
 }
@@ -64,19 +76,21 @@ bool FastMutexUserdata::registerFastMutex(lua_State* L)
 // @function new
 int FastMutexUserdata::FastMutex(lua_State* L)
 {
-    int rv = 0;
 
+    FastMutexUserdata* fmud = NULL;
+    void* p = lua_newuserdata(L, sizeof *fmud);
+    
     try
     {
-        FastMutexUserdata* fmud = new(lua_newuserdata(L, sizeof *fmud)) FastMutexUserdata();
-        setupPocoUserdata(L, fmud, POCO_FASTMUTEX_METATABLE_NAME);
-        rv = 1;
+        fmud = new(p) FastMutexUserdata();
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        return rv;
+    
+    setupPocoUserdata(L, fmud, POCO_FASTMUTEX_METATABLE_NAME);
+    return 1;
 }
 
 ///
@@ -96,7 +110,6 @@ int FastMutexUserdata::metamethod__tostring(lua_State* L)
 // userdata methods
 int FastMutexUserdata::lock(lua_State* L)
 {
-    int rv = 0;
     FastMutexUserdata* fmud = checkPrivateUserdata<FastMutexUserdata>(L, 1);
     
     try
@@ -109,7 +122,7 @@ int FastMutexUserdata::lock(lua_State* L)
         lua_error(L);
     }
         
-    return rv;
+    return 0;
 }
 
 /// Attempts to lock the mutex.
@@ -118,38 +131,35 @@ int FastMutexUserdata::lock(lua_State* L)
 // @function tryLock
 int FastMutexUserdata::tryLock(lua_State* L)
 {
-    int rv = 0;
     FastMutexUserdata* fmud = checkPrivateUserdata<FastMutexUserdata>(L, 1);
     int top = lua_gettop(L);
+    long ms = 0;
     
-    long ms;
     if (top > 1)
         ms = luaL_checkinteger(L, 2);
     
+    bool result = false;
+    
     try
     {
-        bool result = false;
-        if (top > 1)
+        if (ms > 0)
             result = fmud->mFastMutex->tryLock(ms);
         else
             result = fmud->mFastMutex->tryLock();
-        
-        lua_pushboolean(L, result);
-        rv = 1;
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+    
+    lua_pushboolean(L, result);
+    return 1;
 }
 
 /// Unlocks the mutex so that it can be acquired by other threads. 
 // @function unlock
 int FastMutexUserdata::unlock(lua_State* L)
 {
-    int rv = 0;
     FastMutexUserdata* fmud = checkPrivateUserdata<FastMutexUserdata>(L, 1);
     
     try
@@ -162,7 +172,7 @@ int FastMutexUserdata::unlock(lua_State* L)
         lua_error(L);
     }
         
-    return rv;
+    return 0;
 }
 
 } // LuaPoco

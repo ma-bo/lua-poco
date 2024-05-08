@@ -34,7 +34,19 @@ ConditionUserdata::~ConditionUserdata()
 bool ConditionUserdata::copyToState(lua_State *L)
 {
     registerCondition(L);
-    ConditionUserdata* cud = new(lua_newuserdata(L, sizeof *cud)) ConditionUserdata(mCondition);
+    ConditionUserdata* cud = NULL;
+    void* p = lua_newuserdata(L, sizeof *cud);
+
+    try
+    {
+        cud = new(p) ConditionUserdata(mCondition);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, cud, POCO_CONDITION_METATABLE_NAME);
     return true;
 }
@@ -63,20 +75,20 @@ bool ConditionUserdata::registerCondition(lua_State* L)
 // @function new
 int ConditionUserdata::Condition(lua_State* L)
 {
-    int rv = 0;
-
+    ConditionUserdata* cud = NULL;
+    void* p = lua_newuserdata(L, sizeof *cud);
+    
     try
     {
-        ConditionUserdata* cud = new(lua_newuserdata(L, sizeof *cud)) ConditionUserdata();
-        setupPocoUserdata(L, cud, POCO_CONDITION_METATABLE_NAME);
-        rv = 1;
+        cud = new(p) ConditionUserdata();
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-    
-    return rv;
+
+    setupPocoUserdata(L, cud, POCO_CONDITION_METATABLE_NAME);
+    return 1;
 }
 
 ///

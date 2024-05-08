@@ -39,7 +39,19 @@ bool FileUserdata::copyToState(lua_State* L)
 {
     TimestampUserdata::registerTimestamp(L);
     registerFile(L);
-    FileUserdata* fud = new(lua_newuserdata(L, sizeof *fud)) FileUserdata(mFile);
+    FileUserdata* fud = NULL;
+    void* p = lua_newuserdata(L, sizeof *fud);
+    
+    try
+    {
+        new(p) FileUserdata(mFile);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, fud, POCO_FILE_METATABLE_NAME);
     return true;
 }
@@ -101,7 +113,6 @@ bool FileUserdata::registerFile(lua_State* L)
 
 int FileUserdata::File(lua_State* L)
 {
-    int rv = 0;
     size_t pathLen = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     const char* path = luaL_checklstring(L, firstArg, &pathLen);
@@ -113,18 +124,20 @@ int FileUserdata::File(lua_State* L)
         return 2;
     }
     
+    FileUserdata *fud = NULL;
+    void* p = lua_newuserdata(L, sizeof *fud);
+    
     try
     {
-        FileUserdata *fud = new(lua_newuserdata(L, sizeof *fud)) FileUserdata(path);
-        setupPocoUserdata(L, fud, POCO_FILE_METATABLE_NAME);
-        rv = 1;
+        fud = new(p) FileUserdata(path);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, fud, POCO_FILE_METATABLE_NAME);
+    return 1;
 }
 
 ///
@@ -493,19 +506,20 @@ int FileUserdata::created(lua_State* L)
     int rv = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
+    TimestampUserdata* tsud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tsud);
+    
     try
     {
-        Poco::Timestamp ts = fud->getFile().created();
-        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(ts);
-        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
-        rv = 1;
+        tsud = new(p) TimestampUserdata(fud->getFile().created());
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+
+    setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
+    return 1;
 }
 
 /// Checks if the file path exists.
@@ -541,19 +555,20 @@ int FileUserdata::getLastModified(lua_State* L)
     int rv = 0;
     FileUserdata* fud = checkPrivateUserdata<FileUserdata>(L, 1);
     
+    TimestampUserdata* tsud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tsud);
+    
     try
     {
-        Poco::Timestamp ts = fud->getFile().getLastModified();
-        TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud)) TimestampUserdata(ts);
-        setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
-        rv = 1;
+        tsud = new(p) TimestampUserdata(fud->getFile().getLastModified());
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+    
+    setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
+    return 1;
 }
 
 /// Gets the size of the file path entry as a number.

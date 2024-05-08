@@ -49,7 +49,19 @@ bool TemporaryFileUserdata::copyToState(lua_State* L)
     FileUserdata::registerFile(L);
     TemporaryFileUserdata::registerTemporaryFile(L);
     
-    TemporaryFileUserdata* tfud = new(lua_newuserdata(L, sizeof *tfud)) TemporaryFileUserdata(mTemporaryFile);
+    TemporaryFileUserdata* tfud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tfud);
+    
+    try
+    {
+        tfud = new(p) TemporaryFileUserdata(mTemporaryFile);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, tfud, POCO_TEMPORARYFILE_METATABLE_NAME);
     return true;
 }
@@ -112,24 +124,25 @@ bool TemporaryFileUserdata::registerTemporaryFile(lua_State* L)
 // @function new
 int TemporaryFileUserdata::TemporaryFile(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     const char* inPath = "";
     
     if (lua_isstring(L, firstArg)) { inPath = lua_tostring(L, firstArg); }
     
+    TemporaryFileUserdata *tfud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tfud);
+    
     try
     {
-        TemporaryFileUserdata *tfud = new(lua_newuserdata(L, sizeof *tfud)) TemporaryFileUserdata(inPath);
-        setupPocoUserdata(L, tfud, POCO_TEMPORARYFILE_METATABLE_NAME);
-        rv = 1;
+        tfud = new(p) TemporaryFileUserdata(inPath);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, tfud, POCO_TEMPORARYFILE_METATABLE_NAME);
+    return 1;
 }
 
 ///

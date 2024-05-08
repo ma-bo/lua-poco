@@ -63,13 +63,24 @@ int PipeOStreamUserdata::PipeOStream(lua_State* L)
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     PipeUserdata* pud = checkPrivateUserdata<PipeUserdata>(L, firstArg);
     
-    PipeOStreamUserdata* posud = new(lua_newuserdata(L, sizeof *posud)) PipeOStreamUserdata(pud->mPipe);
-    setupPocoUserdata(L, posud, POCO_PIPEOSTREAM_METATABLE_NAME);
+    PipeOStreamUserdata* posud = NULL;
+    void* p = lua_newuserdata(L, sizeof *posud);
+    
+    try
+    {
+        posud = new(p) PipeOStreamUserdata(pud->mPipe);
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
     // store a reference to the PipeUserdata to prevent it from being
     // garbage collected while the PipeOutputStream is using it.
-    lua_pushvalue(L, 1);
+    lua_pushvalue(L, firstArg);
     posud->mPipeReference = luaL_ref(L, LUA_REGISTRYINDEX);
-    
+
+    setupPocoUserdata(L, posud, POCO_PIPEOSTREAM_METATABLE_NAME);    
     return 1;
 }
 

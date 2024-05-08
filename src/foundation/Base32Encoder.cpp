@@ -59,7 +59,6 @@ bool Base32EncoderUserdata::registerBase32Encoder(lua_State* L)
 // @see ostream
 int Base32EncoderUserdata::Base32Encoder(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     OStream* os = checkPrivateUserdata<OStream>(L, firstArg);
     int options = 0;
@@ -69,19 +68,21 @@ int Base32EncoderUserdata::Base32Encoder(lua_State* L)
     lua_pushvalue(L, firstArg);
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
     
+    Base32EncoderUserdata* b32eud = NULL;
+    void* p = lua_newuserdata(L, sizeof *b32eud);
+    
     try
     {
-        Base32EncoderUserdata* b32eud = new(lua_newuserdata(L, sizeof *b32eud))
-            Base32EncoderUserdata(os->ostream(), padding, ref);
-        setupPocoUserdata(L, b32eud, POCO_BASE32ENCODER_METATABLE_NAME);
-        rv = 1;
+        b32eud = new(p) Base32EncoderUserdata(os->ostream(), padding, ref);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        luaL_unref(L, LUA_REGISTRYINDEX, ref);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, b32eud, POCO_BASE32ENCODER_METATABLE_NAME);
+    return 1;
 }
 
 // metamethod infrastructure

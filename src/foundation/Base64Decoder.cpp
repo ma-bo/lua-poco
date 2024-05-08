@@ -59,7 +59,6 @@ bool Base64DecoderUserdata::registerBase64Decoder(lua_State* L)
 // @see istream
 int Base64DecoderUserdata::Base64Decoder(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     IStream* is = checkPrivateUserdata<IStream>(L, firstArg);
     int options = 0;
@@ -73,19 +72,21 @@ int Base64DecoderUserdata::Base64Decoder(lua_State* L)
     lua_pushvalue(L, firstArg);
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
     
+    Base64DecoderUserdata* b64dud = NULL;
+    void* p = lua_newuserdata(L, sizeof *b64dud);
+    
     try
     {
-        Base64DecoderUserdata* b64dud = new(lua_newuserdata(L, sizeof *b64dud))
-            Base64DecoderUserdata(is->istream(), options, ref);
-        setupPocoUserdata(L, b64dud, POCO_BASE64DECODER_METATABLE_NAME);
-        rv = 1;
+        b64dud = new(p) Base64DecoderUserdata(is->istream(), options, ref);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        luaL_unref(L, LUA_REGISTRYINDEX, ref);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, b64dud, POCO_BASE64DECODER_METATABLE_NAME);
+    return 1;
 }
 
 // metamethod infrastructure

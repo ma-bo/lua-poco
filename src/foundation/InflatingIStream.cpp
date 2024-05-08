@@ -72,7 +72,6 @@ bool InflatingIStreamUserdata::registerInflatingIStream(lua_State* L)
 // @see istream
 int InflatingIStreamUserdata::InflatingIStream(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     IStream* is = checkPrivateUserdata<IStream>(L, firstArg);
     
@@ -80,10 +79,21 @@ int InflatingIStreamUserdata::InflatingIStream(lua_State* L)
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
     
     InflatingIStreamUserdata* iisud = NULL;
+    void* p = lua_newuserdata(L, sizeof *iisud);
+    
     if (lua_isnumber(L, firstArg + 1))
     {
         int num = static_cast<int>(luaL_checkinteger(L, firstArg + 1));
-        iisud = new(lua_newuserdata(L, sizeof *iisud)) InflatingIStreamUserdata(is->istream(), num, ref);
+        
+        try
+        {
+            iisud = new(p) InflatingIStreamUserdata(is->istream(), num, ref);
+        }
+        catch (const std::exception& e)
+        {
+            luaL_unref(L, LUA_REGISTRYINDEX, ref);
+            return pushException(L, e);
+        }
     }
     else
     {
@@ -94,10 +104,18 @@ int InflatingIStreamUserdata::InflatingIStream(lua_State* L)
         else if (std::strcmp(mode, "STREAM_GZIP") == 0) type = Poco::InflatingStreamBuf::STREAM_GZIP;
         else if (std::strcmp(mode, "STREAM_GZIP") == 0) type = Poco::InflatingStreamBuf::STREAM_ZIP;
         
-        iisud = new(lua_newuserdata(L, sizeof *iisud)) InflatingIStreamUserdata(is->istream(), type, ref);
+        try
+        {
+            iisud = new(p) InflatingIStreamUserdata(is->istream(), type, ref);
+        }
+        catch (const std::exception& e)
+        {
+            luaL_unref(L, LUA_REGISTRYINDEX, ref);
+            return pushException(L, e);
+        }
     }
-    setupPocoUserdata(L, iisud, POCO_INFLATINGISTREAM_METATABLE_NAME);
     
+    setupPocoUserdata(L, iisud, POCO_INFLATINGISTREAM_METATABLE_NAME);
     return 1;
 }
 

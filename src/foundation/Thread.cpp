@@ -67,7 +67,6 @@ bool ThreadUserdata::registerThread(lua_State* L)
 // @function new
 int ThreadUserdata::Thread(lua_State* L)
 {
-    int rv = 0;
     int top = lua_gettop(L);
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     
@@ -81,46 +80,49 @@ int ThreadUserdata::Thread(lua_State* L)
         name = luaL_checkstring(L, firstArg + 1);
     if (top > firstArg + 1)
         stackSize = luaL_checkinteger(L, firstArg + 2);
+        
+    Poco::Thread::Priority tp = Poco::Thread::PRIO_NORMAL;
+    if (top > 0 && priority)
+    {
+        if (strcmp(priority, "lowest") == 0)
+            tp = Poco::Thread::PRIO_LOWEST;
+        else if (strcmp(priority, "low") == 0)
+            tp = Poco::Thread::PRIO_LOW;
+        else if (strcmp(priority, "normal") == 0)
+            tp = Poco::Thread::PRIO_NORMAL;
+        else if (strcmp(priority, "high") == 0)
+            tp = Poco::Thread::PRIO_HIGH;
+        else if (strcmp(priority, "highest") == 0)
+            tp = Poco::Thread::PRIO_HIGH;
+        else
+        {
+            lua_pushnil(L);
+            lua_pushfstring(L, "invalid priority value: %s", priority);
+            return 2;
+        }
+    }
 
+    ThreadUserdata* thud = NULL;
+    void* p = lua_newuserdata(L, sizeof *thud);
+    
     try
     {
-        ThreadUserdata* thud = new(lua_newuserdata(L, sizeof *thud)) ThreadUserdata();
-        setupPocoUserdata(L, thud, POCO_THREAD_METATABLE_NAME);
-        rv = 1;
-        
-        Poco::Thread::Priority p = Poco::Thread::PRIO_NORMAL;
-        if (top > 0 && priority)
-        {
-            if (strcmp(priority, "lowest") == 0)
-                p = Poco::Thread::PRIO_LOWEST;
-            else if (strcmp(priority, "low") == 0)
-                p = Poco::Thread::PRIO_LOW;
-            else if (strcmp(priority, "normal") == 0)
-                p = Poco::Thread::PRIO_NORMAL;
-            else if (strcmp(priority, "high") == 0)
-                p = Poco::Thread::PRIO_HIGH;
-            else if (strcmp(priority, "highest") == 0)
-                p = Poco::Thread::PRIO_HIGH;
-            else
-            {
-                lua_pushnil(L);
-                lua_pushfstring(L, "invalid priority value: %s", priority);
-                return 2;
-            }
-        }
-        if (top > 0)
-            thud->mThread.setPriority(p);
-        if (top > 1 && name)
-            thud->mThread.setName(name);
-        
-        if (top > 2 && stackSize)
-            thud->mThread.setStackSize(stackSize);
+        thud = new(p) ThreadUserdata();
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        return rv;
+
+    if (top > 0)
+        thud->mThread.setPriority(tp);
+    if (top > 1 && name)
+        thud->mThread.setName(name);
+    if (top > 2 && stackSize)
+        thud->mThread.setStackSize(stackSize);
+    
+    setupPocoUserdata(L, thud, POCO_THREAD_METATABLE_NAME);
+    return 1;
 }
 
 ///

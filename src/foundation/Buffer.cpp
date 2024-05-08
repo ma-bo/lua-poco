@@ -31,10 +31,23 @@ BufferUserdata::~BufferUserdata()
 bool BufferUserdata::copyToState(lua_State *L)
 {
     registerBuffer(L);
-    BufferUserdata* bud = new(lua_newuserdata(L, sizeof *bud)) BufferUserdata(mCapacity);
-    setupPocoUserdata(L, bud, POCO_BUFFER_METATABLE_NAME);
+    BufferUserdata* bud = NULL;
+    void* p = lua_newuserdata(L, sizeof *bud);
+    
+    try
+    {
+        bud = new(p) BufferUserdata(mCapacity);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     bud->mCapacity = mCapacity;
     std::memcpy(bud->mBuffer.begin(), mBuffer.begin(), mCapacity);
+    
+    setupPocoUserdata(L, bud, POCO_BUFFER_METATABLE_NAME);
     return true;
 }
 
@@ -64,7 +77,6 @@ bool BufferUserdata::registerBuffer(lua_State* L)
 // @function new
 int BufferUserdata::Buffer(lua_State* L)
 {
-    int rv = 0;
     int top = lua_gettop(L);
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     
@@ -74,21 +86,23 @@ int BufferUserdata::Buffer(lua_State* L)
     
     if (lua_type(L, firstArg) == LUA_TSTRING) dataInit = luaL_checklstring(L, firstArg, &dataSize);
     else dataSize = static_cast<size_t>(luaL_checknumber(L, firstArg));
+    
+    BufferUserdata* bud = NULL;
+    void* p = lua_newuserdata(L, sizeof *bud);
 
     try
     {
-        BufferUserdata* bud = new(lua_newuserdata(L, sizeof *bud)) BufferUserdata(dataSize);
-        setupPocoUserdata(L, bud, POCO_BUFFER_METATABLE_NAME);
-        
-        if (dataInit) std::memcpy(bud->mBuffer.begin(), dataInit, dataSize);
-        rv = 1;
+        bud = new(p) BufferUserdata(dataSize);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, bud, POCO_BUFFER_METATABLE_NAME);
+    if (dataInit) std::memcpy(bud->mBuffer.begin(), dataInit, dataSize);
+    
+    return 1;
 }
 
 ///

@@ -55,22 +55,23 @@ bool FileOStreamUserdata::registerFileOStream(lua_State* L)
 // @see ostream
 int FileOStreamUserdata::FileOStream(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     const char* path = luaL_checkstring(L, firstArg);
     
+    FileOStreamUserdata* fosud = NULL;
+    void* p = lua_newuserdata(L, sizeof *fosud);
+    
     try
     {
-        FileOStreamUserdata* fosud = new(lua_newuserdata(L, sizeof *fosud)) FileOStreamUserdata(path);
-        setupPocoUserdata(L, fosud, POCO_FILEOSTREAM_METATABLE_NAME);
-        rv = 1;
+        fosud = new(p) FileOStreamUserdata(path);
     }
     catch (const Poco::Exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
     
-    return rv;
+    setupPocoUserdata(L, fosud, POCO_FILEOSTREAM_METATABLE_NAME);
+    return 1;
 }
 
 // metamethod infrastructure

@@ -59,12 +59,23 @@ int TeeIStreamUserdata::TeeIStream(lua_State* L)
     int top = lua_gettop(L);
 
     IStream* isud = checkPrivateUserdata<IStream>(L, firstArg);
-    TeeIStreamUserdata* tisud = new(lua_newuserdata(L, sizeof *tisud)) TeeIStreamUserdata(isud->istream());
-    setupPocoUserdata(L, tisud, POCO_TEEISTREAM_METATABLE_NAME);
+    TeeIStreamUserdata* tisud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tisud);
+    
+    try
+    {
+        tisud = new(p) TeeIStreamUserdata(isud->istream());
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
     // copy the value to the top of the stack, such that luaL_ref can pop it back off.
     lua_pushvalue(L, firstArg);
     tisud->mUdReference.push_back(luaL_ref(L, LUA_REGISTRYINDEX));
     
+    setupPocoUserdata(L, tisud, POCO_TEEISTREAM_METATABLE_NAME);
     return 1;
 }
 

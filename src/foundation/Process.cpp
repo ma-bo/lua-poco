@@ -245,7 +245,6 @@ void getArgs(lua_State* L, Poco::Process::Args& args)
 // @see launchParam
 int Process::launch(lua_State* L)
 {
-    int rv = 0;
     luaL_checktype(L, 1, LUA_TTABLE);
     
     // required parameters
@@ -277,6 +276,9 @@ int Process::launch(lua_State* L)
     haveEnv = getEnv(L, env);
     
     
+    ProcessHandleUserdata* phud = NULL;
+    void* p = lua_newuserdata(L, sizeof *phud);
+    
     try
     {
         if (haveEnv)
@@ -284,9 +286,7 @@ int Process::launch(lua_State* L)
             Poco::ProcessHandle ph = Poco::Process::launch(command, args, 
                 workingDir ? workingDir : Poco::Path::current(),
                 inPipe, outPipe, errPipe, env);
-            ProcessHandleUserdata* phud = new(lua_newuserdata(L, sizeof *phud)) ProcessHandleUserdata(ph);
-            setupPocoUserdata(L, phud, POCO_PROCESSHANDLE_METATABLE_NAME);
-            rv = 1;
+            phud = new(p) ProcessHandleUserdata(ph);
         }
         else
         {
@@ -294,17 +294,16 @@ int Process::launch(lua_State* L)
                 workingDir ? workingDir : Poco::Path::current(),
                 inPipe, outPipe, errPipe);
 
-            ProcessHandleUserdata* phud = new(lua_newuserdata(L, sizeof *phud)) ProcessHandleUserdata(ph);
-            setupPocoUserdata(L, phud, POCO_PROCESSHANDLE_METATABLE_NAME);
-            rv = 1;
+            phud = new(p) ProcessHandleUserdata(ph);
         }
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+
+    setupPocoUserdata(L, phud, POCO_PROCESSHANDLE_METATABLE_NAME);
+    return 1;
 }
 
 } // LuaPoco

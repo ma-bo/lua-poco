@@ -1179,7 +1179,20 @@ TaskManagerUserdata::~TaskManagerUserdata()
 bool TaskManagerUserdata::copyToState(lua_State *L)
 {
     registerTaskManager(L);
-    TaskManagerUserdata* tmud = new(lua_newuserdata(L, sizeof *tmud)) TaskManagerUserdata(mContainer);
+    
+    TaskManagerUserdata* tmud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tmud);
+    
+    try
+    {
+        tmud = new(p) TaskManagerUserdata(mContainer);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, tmud, POCO_TASK_MANAGER_METATABLE_NAME);
     return true;
 }
@@ -1273,7 +1286,6 @@ bool TaskManagerUserdata::registerTaskManager(lua_State* L)
 // @see TaskManagerSettings
 int TaskManagerUserdata::TaskManager(lua_State* L)
 {
-    int rv = 0;
     // defaults
     int minThreads = 1;
     int maxThreads = 16;
@@ -1303,19 +1315,25 @@ int TaskManagerUserdata::TaskManager(lua_State* L)
         if (!lua_isnil(L, -1)) { maxNotificationPool = static_cast<int>(lua_tointeger(L, -1)); }
     }
 
+    TaskManagerUserdata* tmud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tmud);
+    
     try
     {
-        TaskManagerUserdata* tmud = new(lua_newuserdata(L, sizeof *tmud))
-            TaskManagerUserdata(minThreads, maxThreads, idleTime, stackSize,
-                                minNotificationPool, maxNotificationPool);
-        setupPocoUserdata(L, tmud, POCO_TASK_MANAGER_METATABLE_NAME);
-        rv = 1;
+        tmud = new(p) TaskManagerUserdata(minThreads
+                                        , maxThreads
+                                        , idleTime
+                                        , stackSize
+                                        , minNotificationPool
+                                        , maxNotificationPool);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        return rv;
+    
+    setupPocoUserdata(L, tmud, POCO_TASK_MANAGER_METATABLE_NAME);
+    return 1;
 }
 
 // metamethod infrastructure

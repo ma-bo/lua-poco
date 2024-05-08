@@ -34,7 +34,19 @@ EventUserdata::~EventUserdata()
 bool EventUserdata::copyToState(lua_State *L)
 {
     registerEvent(L);
-    EventUserdata* eud = new(lua_newuserdata(L, sizeof *eud)) EventUserdata(mEvent);
+    EventUserdata* eud = NULL;
+    void* p = lua_newuserdata(L, sizeof *eud);
+    
+    try
+    {
+        eud = new(p) EventUserdata(mEvent);
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    
     setupPocoUserdata(L, eud, POCO_EVENT_METATABLE_NAME);
     return true;
 }
@@ -65,22 +77,24 @@ bool EventUserdata::registerEvent(lua_State* L)
 // @function new
 int EventUserdata::Event(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
     bool autoReset = true;
     if (lua_isboolean(L, firstArg)) { autoReset = lua_toboolean(L, firstArg); }
     
+    EventUserdata* eud = NULL;
+    void* p = lua_newuserdata(L, sizeof *eud);
+    
     try
     {
-        EventUserdata* eud = new(lua_newuserdata(L, sizeof *eud)) EventUserdata(autoReset);
-        setupPocoUserdata(L, eud, POCO_EVENT_METATABLE_NAME);
-        rv = 1;
+        eud = new(p) EventUserdata(autoReset);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        return rv;
+
+    setupPocoUserdata(L, eud, POCO_EVENT_METATABLE_NAME);
+    return 1;
 }
 
 ///
@@ -102,7 +116,6 @@ int EventUserdata::metamethod__tostring(lua_State* L)
 // @function set
 int EventUserdata::set(lua_State* L)
 {
-    int rv = 0;
     EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1);
     
     try
@@ -115,7 +128,7 @@ int EventUserdata::set(lua_State* L)
         lua_error(L);
     }
         
-    return rv;
+    return 0;
 }
 
 /// Attempts to wait for the event.
@@ -124,55 +137,48 @@ int EventUserdata::set(lua_State* L)
 // @function tryWait
 int EventUserdata::tryWait(lua_State* L)
 {
-    int rv = 0;
-    EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1);
-    
+    EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1); 
     long ms = luaL_checkinteger(L, 2);
+    bool result = false;
     
     try
     {
-        bool result = false;
         result = eud->mEvent->tryWait(ms);
-        
-        lua_pushboolean(L, result);
-        rv = 1;
     }
     catch (const std::exception& e)
     {
         pushException(L, e);
         lua_error(L);
     }
-        
-    return rv;
+    
+    lua_pushboolean(L, result);
+    return 1;
 }
 
 /// Waits for the event to become signaled.
 // @function wait
 int EventUserdata::wait(lua_State* L)
 {
-    int rv = 0;
     EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1);
     
     try
     {
         eud->mEvent->wait();
-        lua_pushboolean(L, 1);
-        rv = 1;
     }
     catch (const std::exception& e)
     {
         pushException(L, e);
         lua_error(L);
     }
-        
-    return rv;
+    
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 /// Resets the event to unsignaled state. 
 // @function reset
 int EventUserdata::reset(lua_State* L)
 {
-    int rv = 0;
     EventUserdata* eud = checkPrivateUserdata<EventUserdata>(L, 1);
     
     try
@@ -184,8 +190,8 @@ int EventUserdata::reset(lua_State* L)
         pushException(L, e);
         lua_error(L);
     }
-        
-    return rv;
+    
+    return 0;
 }
 
 } // LuaPoco

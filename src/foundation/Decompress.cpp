@@ -72,43 +72,42 @@ const char* POCO_DECOMPRESS_METATABLE_NAME = "Poco.Zip.Decompress.metatable";
 // @function new
 int DecompressUserdata::Decompress(lua_State* L)
 {
-    int rv = 0;
     int firstArg = lua_istable(L, 1) ? 2 : 1;
+    
+    bool flattenDirs = false;
+    bool keepIncompleteFiles = false;
+    IStream* is = checkPrivateUserdata<IStream>(L, firstArg);
+    const char* dirPathStr = NULL;
+    PathUserdata* pud = NULL;
+
+    if (lua_isstring(L, firstArg + 1)) { dirPathStr = lua_tostring(L, firstArg + 1); }
+    else { pud = checkPrivateUserdata<PathUserdata>(L, firstArg + 1); }
+    
+    if (lua_isboolean(L, firstArg + 2))
+        { flattenDirs = static_cast<bool>(lua_toboolean(L, firstArg + 2)); }
+
+    if (lua_isboolean(L, firstArg + 3))
+        { keepIncompleteFiles = static_cast<bool>(lua_toboolean(L, firstArg + 3)); }
+    
+    lua_pushvalue(L, firstArg);
+    int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    
+    DecompressUserdata* dcud = NULL;
+    void* p = lua_newuserdata(L, sizeof *dcud);
 
     try
     {
-        bool flattenDirs = false;
-        bool keepIncompleteFiles = false;
-        IStream* is = checkPrivateUserdata<IStream>(L, firstArg);
-        const char* dirPathStr = NULL;
-        PathUserdata* pud = NULL;
-
-        if (lua_isstring(L, firstArg + 1)) { dirPathStr = lua_tostring(L, firstArg + 1); }
-        else { pud = checkPrivateUserdata<PathUserdata>(L, firstArg + 1); }
-
         const Poco::Path dirPath(pud ? pud->mPath : dirPathStr);
-
-        if (lua_isboolean(L, firstArg + 2))
-            { flattenDirs = static_cast<bool>(lua_toboolean(L, firstArg + 2)); }
-
-        if (lua_isboolean(L, firstArg + 3))
-            { keepIncompleteFiles = static_cast<bool>(lua_toboolean(L, firstArg + 3)); }
-
-        lua_pushvalue(L, firstArg);
-        int ref = luaL_ref(L, LUA_REGISTRYINDEX);
-
-        DecompressUserdata* dcud = new(lua_newuserdata(L, sizeof *dcud))
-            DecompressUserdata(is->istream(), ref, dirPath, flattenDirs, keepIncompleteFiles);
-
-        setupPocoUserdata(L, dcud, POCO_DECOMPRESS_METATABLE_NAME);
-        rv = 1;
+        dcud = new(p) DecompressUserdata(is->istream(), ref, dirPath, flattenDirs, keepIncompleteFiles);
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        luaL_unref(L, LUA_REGISTRYINDEX, ref);
+        return pushException(L, e);
     }
 
-    return rv;
+    setupPocoUserdata(L, dcud, POCO_DECOMPRESS_METATABLE_NAME);
+    return 1;
 }
 
 // register metatable for this class
@@ -174,7 +173,6 @@ int DecompressUserdata::metamethod__tostring(lua_State* L)
 // @function decompressAll
 int DecompressUserdata::decompressAll(lua_State* L)
 {
-    int rv = 0;
     DecompressUserdata* dcud = checkPrivateUserdata<DecompressUserdata>(L, 1);
 
     try
@@ -186,19 +184,18 @@ int DecompressUserdata::decompressAll(lua_State* L)
 
         dcud->mDecompress.EError -= Poco::delegate(dcud, &DecompressUserdata::onError);
         dcud->mDecompress.EOk -= Poco::delegate(dcud, &DecompressUserdata::onDecompress);
-
-        lua_pushboolean(L, 1);
-        lua_pushstring(L, "success");
-        lua_pushinteger(L, static_cast<lua_Integer>(dcud->mGood.size()));
-        lua_pushinteger(L, static_cast<lua_Integer>(dcud->mFail.size()));
-        rv = 4;
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
+    
+    lua_pushboolean(L, 1);
+    lua_pushstring(L, "success");
+    lua_pushinteger(L, static_cast<lua_Integer>(dcud->mGood.size()));
+    lua_pushinteger(L, static_cast<lua_Integer>(dcud->mFail.size()));
 
-    return rv;
+    return 4;
 }
 
 bool DecompressUserdata::zipLocalFileHeaderToTable(lua_State* L, const Poco::Zip::ZipLocalFileHeader& zlfh)
@@ -328,8 +325,17 @@ bool DecompressUserdata::zipLocalFileHeaderToTable(lua_State* L, const Poco::Zip
     lua_pushboolean(L, static_cast<int>(zlfh.searchCRCAndSizesAfterData()));
     lua_setfield(L, -2, "searchCRCAndSizesAfterData");
 
-    TimestampUserdata* tsud = new(lua_newuserdata(L, sizeof *tsud))
-        TimestampUserdata(zlfh.lastModifiedAt().timestamp());
+    TimestampUserdata* tsud = NULL;
+    void* p = lua_newuserdata(L, sizeof *tsud);
+    try
+    {
+        tsud = new(p) TimestampUserdata(zlfh.lastModifiedAt().timestamp());
+    }
+    catch (const std::exception& e)
+    {
+        lua_pop(L, 1);
+        return false;
+    }    
     setupPocoUserdata(L, tsud, POCO_TIMESTAMP_METATABLE_NAME);
     lua_setfield(L, -2, "lastModifiedAt");
 
@@ -344,25 +350,27 @@ int DecompressUserdata::good_iter(lua_State* L)
 
     if (dcud->mGoodIdx < dcud->mGood.size())
     {
+        PathUserdata* pud = NULL;
+        void* p = lua_newuserdata(L, sizeof *pud);
+        
+        const std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& entry = dcud->mGood[dcud->mGoodIdx];
+        ++dcud->mGoodIdx;
+        
         try
         {
-            const std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& entry = dcud->mGood[dcud->mGoodIdx];
-            ++dcud->mGoodIdx;
-            PathUserdata* pud = new(lua_newuserdata(L, sizeof *pud)) PathUserdata(entry.second);
-            setupPocoUserdata(L, pud, POCO_PATH_METATABLE_NAME);
-            lua_createtable(L, 0, 25);
-
-            dcud->zipLocalFileHeaderToTable(L, entry.first);
-            rv = 2;
+            pud = new(p) PathUserdata(entry.second);
         }
         catch (const std::exception& e)
         {
             rv = pushException(L, e);
+            lua_error(L);
         }
+        
+        setupPocoUserdata(L, pud, POCO_PATH_METATABLE_NAME);
+        lua_createtable(L, 0, 25);
 
-        // if an exception is caught, call lua_error as a nil return ends the generic for loop
-        // without signaling the user that anything went wrong.
-        if (lua_isnil(L, -2)) { rv = lua_error(L); }
+        dcud->zipLocalFileHeaderToTable(L, entry.first);
+        rv = 2;
     }
 
     return rv;
@@ -376,25 +384,14 @@ int DecompressUserdata::fail_iter(lua_State* L)
 
     if (dcud->mFailIdx < dcud->mFail.size())
     {
-        try
-        {
-            const std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& entry = dcud->mFail[dcud->mFailIdx];
+        const std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& entry = dcud->mFail[dcud->mFailIdx];
+        
+        ++dcud->mFailIdx;
+        lua_pushstring(L, entry.second.c_str());
+        lua_createtable(L, 0, 25);
 
-            ++dcud->mFailIdx;
-            lua_pushstring(L, entry.second.c_str());
-            lua_createtable(L, 0, 25);
-
-            dcud->zipLocalFileHeaderToTable(L, entry.first);
-            rv = 2;
-        }
-        catch (const std::exception& e)
-        {
-            rv = pushException(L, e);
-        }
-
-        // if an exception is caught, call lua_error as a nil return ends the generic for loop
-        // without signaling the user that anything went wrong.
-        if (lua_isnil(L, -2)) { rv = lua_error(L); }
+        dcud->zipLocalFileHeaderToTable(L, entry.first);
+        rv = 2;
     }
 
     return rv;
