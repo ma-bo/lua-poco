@@ -37,4 +37,4 @@ assert(wt:start(worker_thread, worker_output_file))
 print("waiting for thread to finish.")
 assert(wt:join())
 
-print("thread finished.")
+print("thread finished with status: ", wt:result())

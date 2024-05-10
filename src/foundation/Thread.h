@@ -38,14 +38,14 @@ private:
     static int id(lua_State* L);
     static int isRunning(lua_State* L);
     static int join(lua_State* L);
+    static int tryJoin(lua_State* L);
     static int stackSize(lua_State* L);
     static int start(lua_State* L);
+    static int result(lua_State* L);
     
     Poco::FastMutex mThreadMutex;
     Poco::Thread mThread;
     lua_State* mThreadState;
-    bool mJoined;
-    bool mStarted;
     int mParamCount;
     int mThreadResult;
     std::string mErrorMsg;

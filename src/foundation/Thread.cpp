@@ -26,17 +26,20 @@ namespace LuaPoco
 const char* POCO_THREAD_METATABLE_NAME = "Poco.Thread.metatable";
 
 ThreadUserdata::ThreadUserdata() :
-    mThread(), mJoined(false), mStarted(false), mThreadState(NULL), mParamCount(0),
+    mThread(), mThreadState(NULL), mParamCount(0),
     mThreadResult(0)
 {
 }
 
 ThreadUserdata::~ThreadUserdata()
 {
-    if (mStarted && !mJoined)
-        mThread.join();
-    if (mThreadState)
-        lua_close(mThreadState);
+    try
+    {
+        mThread.tryJoin(0);
+    }
+    catch (const std::exception& e) {}
+    
+    if (mThreadState) { lua_close(mThreadState); }
 }
 
 // register metatable for this class
@@ -50,9 +53,11 @@ bool ThreadUserdata::registerThread(lua_State* L)
         { "id", id },
         { "isRunning", isRunning },
         { "join", join },
+        { "tryJoin", tryJoin },
         { "stackSize", stackSize },
         { "start", start },
         { "priority", priority },
+        { "result", result },
         { NULL, NULL}
     };
     
@@ -278,19 +283,20 @@ int ThreadUserdata::isRunning(lua_State* L)
     int rv = 0;
     ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
     
+    bool running = false;
+    
     try
     {
-        int running = thud->mThread.isRunning();
-        lua_pushboolean(L, running);
-        rv = 1;
+        running = thud->mThread.isRunning();
     }
     catch (const std::exception& e)
     {
         pushException(L, e);
-        lua_error(L);
+        return lua_error(L);
     }
-        
-    return rv;
+    
+    lua_pushboolean(L, running);
+    return 1;
 }
 
 /// Waits until the thread completes execution.
@@ -302,39 +308,87 @@ int ThreadUserdata::join(lua_State* L)
     
     try
     {
-        if (thud->mStarted && !thud->mJoined)
-        {
-            thud->mThread.join();
-            
-            thud->mJoined = true;
-            
-            if (thud->mThreadResult != 0)
-            {
-                Poco::ScopedLock<Poco::FastMutex> lock(thud->mThreadMutex);
-                lua_pushnil(L);
-                lua_pushstring(L, thud->mErrorMsg.c_str());
-                rv = 2;
-            }
-            else
-            {
-                lua_pushboolean(L, 1);
-                lua_pushstring(L, "success");
-                rv = 2;
-            }
-        }
-        else
-        {
-            lua_pushnil(L);
-            lua_pushstring(L, "trying to join an unstarted or already joined thread");
-            rv = 2;
-        }
+        thud->mThread.join();
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
-        
-    return rv;
+    
+    lua_pushboolean(L, 1);
+    return 1;
+}
+
+/// Waits until the thread completes execution.
+// @int[opt] miliseconds number of ms to wait for join.
+// @return boolean indicating if thread was joined or not.
+// @function tryJoin
+int ThreadUserdata::tryJoin(lua_State* L)
+{
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
+    lua_Integer ms = lua_gettop(L) > 1 ? luaL_checkinteger(L, 2) : 0;
+    bool joined = false;
+    
+    try
+    {
+        joined = thud->mThread.tryJoin(ms);
+    }
+    catch (const std::exception& e)
+    {
+        return pushException(L, e);
+    }
+    
+    lua_pushboolean(L, joined);
+    return 1;
+}
+
+/// Gets the result of the Lua code run on the thread.
+// The data is returned from lua_pcall in the form of boolean, status code, error message.
+// @return boolean true indicates successful, false indicates error occured.
+// @return status "OK", "ERRRUN", "ERRMEM", "ERRERR"
+// @return error message
+// @function result
+int ThreadUserdata::result(lua_State* L)
+{
+    ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
+    
+    int result = 0;
+    std::string error;
+    
+    {
+        Poco::ScopedLock<Poco::FastMutex> lock(thud->mThreadMutex);
+        result = thud->mThreadResult;
+        error = thud->mErrorMsg;
+    }
+    
+    lua_pushboolean(L, result == 0);
+    switch (result)
+    {
+        case 0:
+        {
+            lua_pushstring(L, "OK");
+            break;
+        }
+        case LUA_ERRRUN:
+        {
+            lua_pushstring(L, "ERRRUN");
+            break;
+        }
+        case LUA_ERRMEM:
+        {
+            lua_pushstring(L, "ERRMEM");
+            break;
+        }
+        case LUA_ERRERR:
+        {
+            lua_pushstring(L, "ERRERR");
+            break;
+        }
+    }
+    
+    lua_pushlstring(L, error.c_str(), error.size());
+    
+    return 3;
 }
 
 /// Get or set the thread's stack size.
@@ -384,20 +438,10 @@ int ThreadUserdata::stackSize(lua_State* L)
 // @function start
 int ThreadUserdata::start(lua_State* L)
 {
-    int rv = 0;
     int top = lua_gettop(L);
     ThreadUserdata* thud = checkPrivateUserdata<ThreadUserdata>(L, 1);
         
-    luaL_checktype(L, 2, LUA_TFUNCTION);
-    
-    if (thud->mStarted)
-    {
-        lua_pushnil(L);
-        lua_pushstring(L, "thread already started.");
-        return 2;
-    }
-    
-    Poco::ScopedLock<Poco::FastMutex> lock(thud->mThreadMutex);
+    luaL_checktype(L, 2, LUA_TFUNCTION);  
     
     // any code that returns due to a failure will clean up the allocated state 
     // and it will not be assigned to the mState member variable.
@@ -420,28 +464,29 @@ int ThreadUserdata::start(lua_State* L)
     try
     {
         thud->mParamCount = top - 2;
-        rv = 1;
         thud->mThread.start(*thud);
-        lua_pushboolean(L, 1);
-        thud->mStarted = true;
     }
     catch (const std::exception& e)
     {
-        rv = pushException(L, e);
+        return pushException(L, e);
     }
         
     // extract the state from the holder, which prevents it from being closed.
     thud->mThreadState = holder.extract();
-    return rv;
+    
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 // ThreadUserdata is a Poco::Runnable, so this is executed as part of Poco::Thread::start().
 void ThreadUserdata::run()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(mThreadMutex);
     int top = lua_gettop(mThreadState);
-    mThreadResult = lua_pcall(mThreadState, mParamCount, 0, 0);
-    if (mThreadResult != 0) mErrorMsg = lua_tostring(mThreadState, -1);
+    int result = lua_pcall(mThreadState, mParamCount, 0, 0);
+    
+    Poco::ScopedLock<Poco::FastMutex> lock(mThreadMutex);   
+    mThreadResult = result;
+    if (mThreadResult != 0) { mErrorMsg = lua_tostring(mThreadState, -1); }
 }
 
 } // LuaPoco
