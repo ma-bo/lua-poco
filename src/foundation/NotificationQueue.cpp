@@ -169,7 +169,7 @@ int NotificationQueueUserdata::empty(lua_State* L)
 
 /// queues a notification to the notificationqueue.
 // @string notificationtype the identity of notification being sent.
-// @param ... one or more values that can be copied between states.
+// @[opt]param ... zero or more values that can be copied between states.
 // These include any copyable poco userdata, tables, and base Lua types.
 // Function values will lose any upvalues they may have stored.
 // @return nil on failure (invalid parameters) or true.
@@ -180,7 +180,6 @@ int NotificationQueueUserdata::enqueue(lua_State* L)
     int top = lua_gettop(L);
     NotificationQueueUserdata* nqud = checkPrivateUserdata<NotificationQueueUserdata>(L, 1);
     luaL_checkany(L, 2);
-    luaL_checkany(L, 3);
     
     Poco::AutoPtr<Notification> notification(nqud->mPool->borrowObject());
     for (int i = 2; i <= top; ++i)
