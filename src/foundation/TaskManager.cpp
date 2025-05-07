@@ -141,6 +141,7 @@ bool Task::prepTask(
     // initialize the state and load poco metatables.
     luaL_openlibs(holder.state);
     setupPrivateUserdata(holder.state);
+    TaskManagerUserdata::registerTaskManager(holder.state);
 
     // transfer function
     lua_pushvalue(L, functionIndex);
@@ -1350,14 +1351,6 @@ int TaskManagerUserdata::metamethod__tostring(lua_State* L)
 ///
 // @type taskmanager
 
-/// Dequeue a notification from the notificationqueue.
-// This function does not block.
-// @int[opt] timeout timeout value in milliseconds to block waiting for notification.
-// if parameter is not supplied, waitDequeue will block indefinitely waiting for a notification.
-// @return nil or string (notification type)
-// @return ... one or more values that were supplied to enqueue.
-// @function waitDequeue
-
 /// Get the count of tasks currently running on the TaskManager.
 // @return count of currently running tasks.
 // @function count
@@ -1532,9 +1525,13 @@ int TaskManagerUserdata::disableTaskQueue(lua_State* L)
     return 0;
 }
 
-/// Dequeues a notification from the TaskManager
-// @param notification table that receives notification values.
-// @function disableTaskQueue
+/// Dequeue a notification from the notificationqueue.
+// This function does not block.
+// @int[opt] timeout timeout value in milliseconds to block waiting for notification.
+// if parameter is not supplied, waitDequeue will block indefinitely waiting for a notification.
+// @return nil or string (notification type)
+// @return ... one or more values that were supplied to enqueue.
+// @function dequeueNotification
 int TaskManagerUserdata::dequeueNotification(lua_State* L)
 {
     int top = lua_gettop(L);
