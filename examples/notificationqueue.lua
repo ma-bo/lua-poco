@@ -8,6 +8,10 @@
     The additional parameters can be of any type sharable/copyable between threads.
 --]]
 
+-- require modules needed for the main thread.
+local notificationqueue = assert(require("poco.notificationqueue"))
+local thread = assert(require("poco.thread"))
+
 -- function to be run in another thread and separate lua_State.
 function worker(notification_queue)
     -- wait for up to 500ms for a notification.
@@ -18,14 +22,10 @@ function worker(notification_queue)
         if notification_type == "quit" then
             quit = true
         else
-            -- do work on notification of type.
+            -- do work on notifications.
         end
     until quit
 end
-
--- require modules needed for the main thread.
-local notificationqueue = require("poco.notificationqueue")
-local thread = require("poco.thread")
 
 -- create worker thread, and a notification queue.
 local wt = assert(thread())
@@ -47,5 +47,4 @@ assert(q:enqueue("quit"))
 
 -- join the thread
 assert(wt:join())
-print(wt:result())
-print("worker joined, exiting.")
+print("thread complete, result: ", wt:result())
