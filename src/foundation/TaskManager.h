@@ -64,42 +64,24 @@ private:
     lua_State* mState;
 };
 
-class TaskObserver : public Poco::RefCountedObject
-{
-public:
-    TaskObserver();
-    ~TaskObserver();
-    
-    bool prepObserver(lua_State* L, int observerIndex, int taskManagerLudIndex);
-
-    Poco::FastMutex mMutex;
-    Poco::UInt32 mNotificationTypes;
-    lua_State* mState;
-};
-
 class TaskManagerContainer
 {
 public:
     TaskManagerContainer(int minThreads, int maxThreads, int idleTimeout, int stackSize,
                         int minPool, int maxPool);
     ~TaskManagerContainer();
-    void addObserver(Poco::AutoPtr<TaskObserver>& observer);
-    void removeObserver(TaskObserver* observer);
 
     void enableTaskQueue();
     void disableTaskQueue();
     int waitDequeueNotification(lua_State* L, long milliseconds);
 
-    // Tasks and Observers receive a raw pointer to the TaskManagerContainer
-    // which is placed in a table[
+    // Tasks receive a raw pointer to the TaskManagerContainer which is placed in a table.
     static int lud_count(lua_State* L);
     static int lud_taskList(lua_State* L);
     static int lud_cancelAll(lua_State* L);
     // joinAll should not be called from observers, as observers are run from a ThreadPool thread.
     // static int lud_joinAll(lua_State* L);
     static int lud_start(lua_State* L);
-    static int lud_addObserver(lua_State* L);
-    static int lud_removeObserver(lua_State* L);
     static int lud_enableTaskQueue(lua_State* L);
     static int lud_disableTaskQueue(lua_State* L);
     static int lud_dequeueNotification(lua_State* L);
@@ -117,20 +99,8 @@ private:
     void onTaskCustom(Notification* n);
 
     Poco::ThreadPool mThreadPool;
-    
-    void getObserversOfType(
-        std::vector<Poco::AutoPtr<TaskObserver> >& observersToNotify,
-        int taskNotificationType);
-        
-    bool notifyObserver(
-        Poco::AutoPtr<TaskObserver>& observer,
-        Poco::Task* task,
-        const char* callbackName);
-
     Poco::AtomicCounter mQueueEnabled;
     Poco::NotificationQueue mQueue;
-    Poco::FastMutex mObserverMutex;
-    std::vector<Poco::AutoPtr<TaskObserver> > mObservers;
 };
 
 class TaskManagerUserdata : public Userdata
@@ -157,8 +127,6 @@ private:
     static int cancelAll(lua_State* L);
     static int joinAll(lua_State* L);
     static int start(lua_State* L);
-    static int addObserver(lua_State* L);
-    static int removeObserver(lua_State* L);
     static int enableTaskQueue(lua_State* L);
     static int disableTaskQueue(lua_State* L);
     static int dequeueNotification(lua_State* L);

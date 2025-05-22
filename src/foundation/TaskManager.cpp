@@ -2,9 +2,6 @@
 // Lua code is loaded into its own private Lua state, which makes multithreading convenient.
 // Each of these isolated Lua states are called Tasks, which are managed by the TaskManager.
 //
-// Tasks are monitored are monitored by Observers.
-// Observers receive notifications that indicate the status of each Task.
-//
 // Notification types:
 //
 //      "started": The Task has begun running on the TaskManager.
@@ -17,7 +14,7 @@
 //
 //      "progress": The Task is reporting progress towards completion as a percentage.
 //
-//      "custom": The Task is posting a custom data notification that is understood by the Observer.
+//      "custom": The Task is posting a custom data notification that the consumer comprehends.
 //
 // Note: taskmanager userdata are sharable between threads.
 // @module taskmanager
@@ -451,97 +448,6 @@ int Task::lud_postNotification(lua_State* L)
     return rv;
 }
 
-// TaskObserver implementation
-TaskObserver::TaskObserver() : mNotificationTypes(0), mState(NULL)
-{
-    mState = luaL_newstate();
-}
-
-TaskObserver::~TaskObserver()
-{
-    lua_close(mState);
-}
-
-bool TaskObserver::prepObserver(lua_State* L, int observerIndex, int taskManagerLudIndex)
-{
-    int top = lua_gettop(L);
-    // Observer layout on stack is:
-    // 1. Observer table { onStart, onFinish, some_other_data }
-    // 2. TaskManager table (with associated light userdata and metatable)
-    // 3. Task table (with associated light userdata and metatable)
-
-    // check for expected notification callbacks and set flag accordingly.
-    lua_getfield(L, observerIndex, TASK_START_FUNCTION_NAME);
-    if (lua_isfunction(L, -1)) { mNotificationTypes |= TASK_NOTIFICATION_START; }
-    lua_pop(L, 1);
-
-    lua_getfield(L, observerIndex, TASK_CANCEL_FUNCTION_NAME);
-    if (lua_isfunction(L, -1)) { mNotificationTypes |= TASK_NOTIFICATION_CANCELLED; }
-    lua_pop(L, 1);
-
-    lua_getfield(L, observerIndex, TASK_FAILURE_FUNCTION_NAME);
-    if (lua_isfunction(L, -1)) { mNotificationTypes |= TASK_NOTIFICATION_FAILED; }
-    lua_pop(L, 1);
-
-    lua_getfield(L, observerIndex, TASK_FINISH_FUNCTION_NAME);
-    if (lua_isfunction(L, -1)) { mNotificationTypes |= TASK_NOTIFICATION_FINISHED; }
-    lua_pop(L, 1);
-
-    lua_getfield(L, observerIndex, TASK_PROGRESS_FUNCTION_NAME);
-    if (lua_isfunction(L, -1)) { mNotificationTypes |= TASK_NOTIFICATION_PROGRESS; }
-    lua_pop(L, 1);
-
-    lua_getfield(L, observerIndex, TASK_CUSTOM_FUNCTION_NAME);
-    if (lua_isfunction(L, -1)) { mNotificationTypes |= TASK_NOTIFICATION_CUSTOM; }
-    lua_pop(L, 1);
-
-    if (mNotificationTypes == 0)
-    {
-        lua_pushnil(L);
-        lua_pushstring(L, "Observer must contain at least one notification callback.");
-        return false;
-    }
-
-    // prepare the observer's state with default libs and load poco.
-    luaL_openlibs(mState);
-    setupPrivateUserdata(mState);
-
-    // transfer observer table to observer's internal state.
-    lua_pushvalue(L, observerIndex);
-    bool transferred = transferValue(mState, L);
-    lua_pop(L, 1);
-
-    if (!transferred)
-    {
-        lua_pushnil(L);
-        lua_pushfstring(L, "non-copyable function at parameter %d\n", observerIndex);
-        return false;
-    }
-
-    // setup TaskManager table, metatable with lightuserdata.
-    // 0 array slots, 1 hash table slots.
-    lua_createtable(mState, 0, 1);
-    // set lightuserdata to POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME key.
-    lua_pushstring(mState, POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME);
-    lua_pushlightuserdata(mState, lua_touserdata(L, taskManagerLudIndex));
-    lua_rawset(mState, -3);
-    // add metatable to Task table instance.
-    luaL_getmetatable(mState, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME);
-    lua_setmetatable(mState, -2);
-
-    // setup Task table, metatable, with lightuserdata.
-    lua_createtable(mState, 0, 1);
-    lua_pushstring(mState, POCO_TASK_LUD_KEY_NAME);
-    lua_pushlightuserdata(mState, static_cast<void*>(NULL));
-    lua_rawset(mState, -3);
-    luaL_getmetatable(mState, POCO_TASK_PUBLIC_METATABLE_NAME);
-    lua_setmetatable(mState, -2);
-
-    lua_settop(L, top);
-
-    return true;
-}
-
 // TaskManagerContainer implementation
 TaskManagerContainer::TaskManagerContainer(
     int minThreads,
@@ -552,6 +458,7 @@ TaskManagerContainer::TaskManagerContainer(
     int maxPool) :
     mPool(static_cast<size_t>(minPool), static_cast<size_t>(maxPool)),
     mThreadPool(minThreads, maxThreads, idleTimeout, stackSize),
+    mQueueEnabled(1),
     mTaskManager(mThreadPool),
     mDestruct(0)
 {
@@ -601,26 +508,6 @@ TaskManagerContainer::~TaskManagerContainer()
     mTaskManager.removeObserver(taskFailedObserver);
     mTaskManager.removeObserver(taskProgressObserver);
     mTaskManager.removeObserver(taskCustomObserver);
-}
-
-void TaskManagerContainer::addObserver(Poco::AutoPtr<TaskObserver>& observer)
-{
-    Poco::ScopedLock<Poco::FastMutex> lock(mObserverMutex);
-    mObservers.push_back(observer);
-}
-
-void TaskManagerContainer::removeObserver(TaskObserver* observer)
-{
-    Poco::ScopedLock<Poco::FastMutex> lock(mObserverMutex);
-    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator i = mObservers.begin();
-            i != mObservers.end(); ++i)
-    {
-        if ((*i) == observer)
-        {
-            mObservers.erase(i);
-            break;
-        }
-    }
 }
 
 void TaskManagerContainer::enableTaskQueue()
@@ -862,54 +749,6 @@ int TaskManagerContainer::lud_start(lua_State* L)
 
     return rv;
 }
-int TaskManagerContainer::lud_addObserver(lua_State* L)
-{
-    int rv = 0;
-    if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
-        POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
-    {
-        luaL_checktype(L, 2, LUA_TTABLE);
-        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
-        
-        try
-        {
-            Poco::AutoPtr<TaskObserver> observer(new TaskObserver);
-            
-            if (observer->prepObserver(L, 2, lua_gettop(L)))
-            {
-                tmc->addObserver(observer);
-                rv = 1;
-            }
-            else // prep task on failure returns 2 values:  nil, "errmsg"
-                rv = 2;
-    
-        }
-        catch (const std::exception& e)
-        {
-            rv = pushException(L, e);
-        }
-            }
-
-    return rv;
-}
-
-int TaskManagerContainer::lud_removeObserver(lua_State* L)
-{
-    int rv = 0;
-    luaL_checktype(L, 1, LUA_TTABLE);
-    luaL_checktype(L, 2, LUA_TLIGHTUSERDATA);
-    
-    if (getLightUserdataFromTable(L, 1, POCO_TASK_MANAGER_CONTAINER_METATABLE_NAME,
-        POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME))
-    {
-        TaskManagerContainer* tmc = static_cast<TaskManagerContainer*>(lua_touserdata(L, -1));
-        TaskObserver* observer = static_cast<TaskObserver*>(lua_touserdata(L, 2));
-        
-        tmc->removeObserver(observer);
-    }
-
-    return 0;
-}
 
 int TaskManagerContainer::lud_enableTaskQueue(lua_State* L)
 {
@@ -955,168 +794,36 @@ int TaskManagerContainer::lud_dequeueNotification(lua_State* L)
     return rv;
 }
 
-void TaskManagerContainer::getObserversOfType(
-        std::vector<Poco::AutoPtr<TaskObserver> >& observersToNotify,
-        int taskNotificationType)
-{
-    Poco::ScopedLock<Poco::FastMutex> lock(mObserverMutex);    
-    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = mObservers.begin();
-        observer != mObservers.end(); ++observer)
-    {
-        if ((*observer)->mNotificationTypes & taskNotificationType)
-        {
-            observersToNotify.push_back(*observer);
-        }
-    }
-}
-
-bool TaskManagerContainer::notifyObserver(
-        Poco::AutoPtr<TaskObserver>& observer,
-        Poco::Task* task,
-        const char* callbackName)
-{
-    bool result = false;
-
-    // LuaPoco's use of lua_States is to enable message passing, so lock all multithreaded access
-    // to individual states.
-    Poco::ScopedLock<Poco::FastMutex> lock(observer->mMutex);
-    int top = lua_gettop(observer->mState);
-
-    // replace the light userdata value in the Task table.
-    lua_pushlightuserdata(observer->mState, static_cast<void*>(task));
-    lua_setfield(observer->mState, 3, POCO_TASK_LUD_KEY_NAME);
-
-    // fetch the desired callback.
-    lua_getfield(observer->mState, 1, callbackName);
-    if (lua_isfunction(observer->mState, -1))
-    {
-        // Observer table
-        lua_pushvalue(observer->mState, 1);
-        // TaskManager table
-        lua_pushvalue(observer->mState, 2);
-        // Task table
-        lua_pushvalue(observer->mState, 3);
-        // extra parameters to callback
-        for (int extraValue = 4; extraValue <= top; ++extraValue)
-        {
-            lua_pushvalue(observer->mState, extraValue);
-        }
-
-        // 3 base arguments + extra params, expecting 0 return values, no error function.
-        // determine what to do on an error condition for observers.
-        int observerResult = lua_pcall(observer->mState, top, 0, 0);
-        if (observerResult == 0)
-        {
-            result = true;
-        }
-        else
-        {
-            // in the advent of a failure, the task will no longer accept notifications as the
-            // state is in an unknown condition except for the error message and code, which will
-            // be retrieved later.
-            observer->mNotificationTypes = 0;
-            // stack will stay in the state:
-            // -1 code
-            // -2 error message
-            lua_pushinteger(observer->mState, observerResult);
-            return false;
-        }
-    }
-
-    // reset observer's stack back to 3 values on stack
-    // 1. Observer table
-    // 2. TaskManager table
-    // 3. Task table
-    lua_settop(observer->mState, 3);
-
-    return result;
-}
-
-
 // Poco::Observer calls Poco::Notification::duplicate() prior to calling the callback
 // As such, it is safe to permit the AutoPtr here to assume "ownership" of the notification.
 void TaskManagerContainer::onTaskStarted(Poco::TaskStartedNotification* sn)
 {
     Poco::AutoPtr<Poco::TaskStartedNotification> tsn(sn);
-
     if (mQueueEnabled) { mQueue.enqueueNotification(tsn); }
-    
-    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
-    getObserversOfType(observersToNotify, TASK_NOTIFICATION_START);
-
-    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
-        observer != observersToNotify.end(); ++observer)
-    {
-        notifyObserver(*observer, tsn->task(), TASK_START_FUNCTION_NAME);
-    }
 }
 
 void TaskManagerContainer::onTaskCancelled(Poco::TaskCancelledNotification* cn)
 {
     Poco::AutoPtr<Poco::TaskCancelledNotification> tcn(cn);
-    
     if (mQueueEnabled) { mQueue.enqueueNotification(tcn); }
-    
-    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
-    getObserversOfType(observersToNotify, TASK_NOTIFICATION_CANCELLED);
-
-    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
-        observer != observersToNotify.end(); ++observer)
-    {
-        notifyObserver(*observer, tcn->task(), TASK_CANCEL_FUNCTION_NAME);
-    }
 }
 
 void TaskManagerContainer::onTaskFinished(Poco::TaskFinishedNotification* fn)
 {
     Poco::AutoPtr<Poco::TaskFinishedNotification> tfn(fn);
-    
     if (mQueueEnabled) { mQueue.enqueueNotification(tfn); }
-    
-    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
-    getObserversOfType(observersToNotify, TASK_NOTIFICATION_FINISHED);
-
-    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
-        observer != observersToNotify.end(); ++observer)
-    {
-        notifyObserver(*observer, tfn->task(), TASK_FINISH_FUNCTION_NAME);
-    }
 }
 
 void TaskManagerContainer::onTaskFailed(Poco::TaskFailedNotification* fn)
 {
     Poco::AutoPtr<Poco::TaskFailedNotification> tfn(fn);
-    
     if (mQueueEnabled) { mQueue.enqueueNotification(tfn); }
-    
-    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
-    getObserversOfType(observersToNotify, TASK_NOTIFICATION_FAILED);
-
-    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
-        observer != observersToNotify.end(); ++observer)
-    {
-        const Poco::Exception& e = tfn->reason();
-        lua_pushinteger((*observer)->mState, e.code());
-        lua_pushlstring((*observer)->mState, e.displayText().c_str(), e.displayText().size());
-        notifyObserver(*observer, tfn->task(), TASK_FAILURE_FUNCTION_NAME);
-    }
 }
 
 void TaskManagerContainer::onTaskProgress(Poco::TaskProgressNotification* pn)
 {
     Poco::AutoPtr<Poco::TaskProgressNotification> tpn(pn);
-    
     if (mQueueEnabled) { mQueue.enqueueNotification(tpn); }
-    
-    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
-    getObserversOfType(observersToNotify, TASK_NOTIFICATION_PROGRESS);
-
-    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
-        observer != observersToNotify.end(); ++observer)
-    {
-        lua_pushnumber((*observer)->mState, static_cast<lua_Number>(tpn->progress()));
-        notifyObserver(*observer, tpn->task(), TASK_PROGRESS_FUNCTION_NAME);
-    }
 }
 
 void TaskManagerContainer::onTaskCustom(Notification* n)
@@ -1135,22 +842,6 @@ void TaskManagerContainer::onTaskCustom(Notification* n)
         mQueue.enqueueNotification(cnDupe);
     }
     
-    int customTop = lua_gettop(cn->state);
-    Poco::Task* task = static_cast<Poco::Task*>(lua_touserdata(cn->state, customTop));
-    // remove the Poco::Task* from the stack to prepare for transfer.
-    lua_pop(cn->state, 1);
-    customTop = lua_gettop(cn->state);
-
-    std::vector<Poco::AutoPtr<TaskObserver> > observersToNotify;
-    getObserversOfType(observersToNotify, TASK_NOTIFICATION_CUSTOM);
-
-    for (std::vector<Poco::AutoPtr<TaskObserver> >::iterator observer = observersToNotify.begin();
-        observer != observersToNotify.end(); ++observer)
-    {
-        transferNotification((*observer)->mState, cn);
-        notifyObserver(*observer, task, TASK_CUSTOM_FUNCTION_NAME);
-    }
-
     mPool.returnObject(cn);
 }
 
@@ -1235,8 +926,6 @@ bool TaskManagerUserdata::registerTaskManager(lua_State* L)
         { "taskList", TaskManagerContainer::lud_taskList },
         { "cancelAll", TaskManagerContainer::lud_cancelAll },
         { "start", TaskManagerContainer::lud_start },
-        { "addObserver", TaskManagerContainer::lud_addObserver },
-        { "removeObserver", TaskManagerContainer::lud_removeObserver },
         { "enableTaskQueue", TaskManagerContainer::lud_enableTaskQueue },
         { "disableTaskQueue", TaskManagerContainer::lud_disableTaskQueue },
         { "dequeueNotification", TaskManagerContainer::lud_dequeueNotification },
@@ -1252,8 +941,6 @@ bool TaskManagerUserdata::registerTaskManager(lua_State* L)
         { "cancelAll", cancelAll },
         { "joinAll", joinAll },
         { "start", start },
-        { "addObserver", addObserver },
-        { "removeObserver", removeObserver },
         { "enableTaskQueue", enableTaskQueue },
         { "disableTaskQueue", disableTaskQueue },
         { "dequeueNotification", dequeueNotification },
@@ -1452,55 +1139,6 @@ int TaskManagerUserdata::start(lua_State* L)
     }
     
     return rv;
-}
-
-/// Adds an Observer table of callbacks that receive notifications from the TaskManager.
-// The observer functions are copied to their own Lua state, and are invoked on the TaskManager's threadpool.
-// @param observer table containing Lua Functions that are called when Notifications are received from the TaskManager.
-// @return observer_lightuserdata or nil. (error)
-// @return error message.
-// @function addObserver
-int TaskManagerUserdata::addObserver(lua_State* L)
-{
-    int rv = 0;
-    TaskManagerUserdata* tmud = checkPrivateUserdata<TaskManagerUserdata>(L, 1);
-    luaL_checktype(L, 2, LUA_TTABLE);
-    lua_pushlightuserdata(L, static_cast<void*>(tmud->mContainer.get()));
-    
-    try
-    {
-        Poco::AutoPtr<TaskObserver> observer(new TaskObserver);
-        
-        if (observer->prepObserver(L, 2, 3))
-        {
-            tmud->mContainer->addObserver(observer);
-            rv = 1;
-        }
-        else // prep task on failure returns 2 values:  nil, "errmsg"
-            rv = 2;
-
-    }
-    catch (const std::exception& e)
-    {
-        rv = pushException(L, e);
-    }
-    
-    return rv;
-}
-
-/// Removes an observer from the TaskManager
-// The observer functions are copied to their own Lua state, and are invoked on the TaskManager's threadpool.
-// @param observer_lightuserdata value returned from addObserver.
-// @function removeObserver
-int TaskManagerUserdata::removeObserver(lua_State* L)
-{
-    TaskManagerUserdata* tmud = checkPrivateUserdata<TaskManagerUserdata>(L, 1);
-    luaL_checktype(L, 2, LUA_TLIGHTUSERDATA);
-
-    TaskObserver* observer = static_cast<TaskObserver*>(lua_touserdata(L, 2));
-    
-    tmud->mContainer->removeObserver(observer);
-    return 0;
 }
 
 /// Enables receiving Task notifications via a queue inside the TaskManager.
