@@ -59,14 +59,6 @@ const char* POCO_TASK_PROTECTED_METATABLE_NAME = "Poco.Task.protected.metatable"
 
 const char* POCO_TASK_MANAGER_CONTAINER_LUD_KEY_NAME = "Poco.TaskManagerContainer.lightuserdata";
 const char* POCO_TASK_LUD_KEY_NAME = "Poco.Task.lightuserdata";
-
-const char* TASK_START_FUNCTION_NAME = "onStart";
-const char* TASK_CANCEL_FUNCTION_NAME = "onCancel";
-const char* TASK_FAILURE_FUNCTION_NAME = "onFailure";
-const char* TASK_FINISH_FUNCTION_NAME = "onFinish";
-const char* TASK_PROGRESS_FUNCTION_NAME = "onProgress";
-const char* TASK_CUSTOM_FUNCTION_NAME = "onCustom";
-
 const int NOTIFICATION_BORROW_TIMEOUT_MS = 1000;
 
 static bool getLightUserdataFromTable(lua_State* L, int tableIndex,
@@ -583,6 +575,9 @@ int TaskManagerContainer::waitDequeueNotification(lua_State* L, long millisecond
         {
             lua_pushlightuserdata(L, static_cast<void*>(taskNotification->task()));
             lua_setfield(L, top, "task");
+            const std::string& taskName = taskNotification->task()->name();
+            lua_pushlstring(L, taskName.c_str(), taskName.size());
+            lua_setfield(L, top, "name");
         }
         
         Poco::AutoPtr<Poco::TaskStartedNotification> startedNotification(n.cast<Poco::TaskStartedNotification>());
