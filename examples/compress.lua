@@ -4,9 +4,9 @@
 --]]
 
 -- the ostream could be other types, such as pipeostream, teeostream, memoryostream, etc.
-local fostream = assert(require("poco.fileostream"))
-local compress = assert(require("poco.zip.compress"))
-local path = assert(require("poco.path"))
+local fostream = require("poco.fileostream")
+local compress = require("poco.zip.compress")
+local path = require("poco.path")
 
 -- write the zip file to the output stream in the temp directory.
 local output_zip_path = path(path.temp())

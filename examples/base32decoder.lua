@@ -3,12 +3,12 @@
 --]]
 
 -- prerequisite modules
-local path = assert(require("poco.path"))
-local base32decoder = assert(require("poco.base32decoder"))
-local fileistream = assert(require("poco.fileistream"))
-local fileostream = assert(require("poco.fileostream"))
-local streamcopier = assert(require("poco.streamcopier"))
-local temporaryfile = assert(require("poco.temporaryfile"))
+local path = require("poco.path")
+local base32decoder = require("poco.base32decoder")
+local fileistream = require("poco.fileistream")
+local fileostream = require("poco.fileostream")
+local streamcopier = require("poco.streamcopier")
+local temporaryfile = require("poco.temporaryfile")
 
 -- filesystem locations
 -- re-use output file from base32encoder.lua

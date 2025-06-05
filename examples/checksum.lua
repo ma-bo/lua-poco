@@ -4,8 +4,8 @@ local checksum = assert(require("poco.checksum"))
 -- these are equivalent to the following:
 -- local adler = assert(checksum.new("Adler-32"))
 -- local crc = assert(checksum.new("CRC-32"))
-local adler = assert(checksum("ADLER32"))
-local crc = assert(checksum("CRC32"))
+local adler = checksum("ADLER32")
+local crc = checksum("CRC32")
 
 local hash_string = "hello world."
 print(string.format("hash_string:\t'%s'", hash_string))

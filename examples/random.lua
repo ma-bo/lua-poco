@@ -1,7 +1,7 @@
 --[[ random.lua
     This example shows how the random pseudo random number generator module is used.
 --]]
-local random = assert(require("poco.random"))
+local random = require("poco.random")
 
 -- explicit construction using state_size, and a seed value
 -- local prng = assert(random(256, os.time()))

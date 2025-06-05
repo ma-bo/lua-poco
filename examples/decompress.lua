@@ -3,9 +3,9 @@
     a compatible ostream.  Files and directories can be added via istreams and filesystem paths.
 --]]
 
-local decompress = assert(require("poco.zip.decompress"))
-local fileistream = assert(require("poco.fileistream"))
-local path = assert(require("poco.path"))
+local decompress = require("poco.zip.decompress")
+local fileistream = require("poco.fileistream")
+local path = require("poco.path")
 
 -- re-use the zip file from the compress.lua example.
 -- note: the istream does not have to be a file, it could be pipeistream, socketistream, memoryistream, etc.

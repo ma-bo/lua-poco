@@ -1,5 +1,5 @@
 -- load the poco.file module
-local file = assert(require("poco.file"))
+local file = require("poco.file")
 
 local example_file_name = "example.file.txt"
 print("\nexample_file_name: ", example_file_name)

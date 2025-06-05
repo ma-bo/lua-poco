@@ -6,10 +6,10 @@
 local lua_cmd = os.getenv("LUACMD") or "/bin/lua"
 
 -- require prerequisites.
-local process = assert(require("poco.process"))
-local pipe = assert(require("poco.pipe"))
-local path = assert(require("poco.path"))
-local pipeistream = assert(require("poco.pipeistream"))
+local process = require("poco.process")
+local pipe = require("poco.pipe")
+local path = require("poco.path")
+local pipeistream = require("poco.pipeistream")
 
 -- construct anonymous pipes to attach to the process.
 local read_pipe = assert(pipe())

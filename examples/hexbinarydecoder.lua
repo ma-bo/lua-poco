@@ -3,12 +3,12 @@
 --]]
 
 -- prerequisite modules
-local path = assert(require("poco.path"))
-local hexbinarydecoder = assert(require("poco.hexbinarydecoder"))
-local fileistream = assert(require("poco.fileistream"))
-local fileostream = assert(require("poco.fileostream"))
-local streamcopier = assert(require("poco.streamcopier"))
-local temporaryfile = assert(require("poco.temporaryfile"))
+local path = require("poco.path")
+local hexbinarydecoder = require("poco.hexbinarydecoder")
+local fileistream = require("poco.fileistream")
+local fileostream = require("poco.fileostream")
+local streamcopier = require("poco.streamcopier")
+local temporaryfile = require("poco.temporaryfile")
 
 -- filesystem locations
 -- re-use output file from hexbinaryencoder.lua

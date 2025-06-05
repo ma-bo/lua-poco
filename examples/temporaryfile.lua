@@ -5,7 +5,7 @@
     The temporaryfile userdata inherits all methods from the file module.
 --]]
 
-temporaryfile = assert(require("poco.temporaryfile"))
+temporaryfile = require("poco.temporaryfile")
 -- generate a temporary file.
 local tf1 = assert(temporaryfile())
 print("path: ", tf1:path())

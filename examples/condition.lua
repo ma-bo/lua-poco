@@ -25,11 +25,11 @@ local function thread_main(id, condition, mutex, data_file, quit_event)
 end
 
 -- prerequisite modules
-local thread = assert(require("poco.thread"))
-local fmutex = assert(require("poco.fastmutex"))
-local condition = assert(require("poco.condition"))
-local event = assert(require("poco.event"))
-local temporaryfile = assert(require("poco.temporaryfile"))
+local thread = require("poco.thread")
+local fmutex = require("poco.fastmutex")
+local condition = require("poco.condition")
+local event = require("poco.event")
+local temporaryfile = require("poco.temporaryfile")
 
 -- module instances
 local worker_thread1 = assert(thread())

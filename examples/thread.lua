@@ -9,7 +9,7 @@
 -- are not preserved in the new Lua state which hosts the thread, only the values
 -- passed as arguments.
 local function worker_thread(output_file)
-    local env = assert(require("poco.environment"))
+    local env = require("poco.environment")
     local of = assert(io.open(output_file, "w"))
     of:write("osName: ", env.osName(), "\n")
     of:write("osArchitecture: ", env.osArchitecture(), "\n")
@@ -23,8 +23,8 @@ end
 -- Main code that spawns the thread to do some work, then waits for it to complete.
 -- Add a local namespace for poco modules.
 local poco = {}
-poco.path = assert(require("poco.path"))
-poco.thread = assert(require("poco.thread"))
+poco.path = require("poco.path")
+poco.thread = require("poco.thread")
 
 -- Construct a new thread
 local wt = assert(poco.thread())

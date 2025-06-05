@@ -9,8 +9,8 @@
 --]]
 
 -- require modules needed for the main thread.
-local notificationqueue = assert(require("poco.notificationqueue"))
-local thread = assert(require("poco.thread"))
+local notificationqueue = require("poco.notificationqueue")
+local thread = require("poco.thread")
 
 -- function to be run in another thread and separate lua_State.
 function worker(notification_queue)

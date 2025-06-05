@@ -1,5 +1,5 @@
 -- load the environment module from the poco library.
-local environment = assert(require("poco.environment"))
+local environment = require("poco.environment")
 
 -- print out environment attributes
 print("\npoco.environment functions:\n")

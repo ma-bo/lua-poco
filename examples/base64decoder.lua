@@ -3,12 +3,12 @@
 --]]
 
 -- prerequisite modules
-local path = assert(require("poco.path"))
-local base64decoder = assert(require("poco.base64decoder"))
-local fileistream = assert(require("poco.fileistream"))
-local fileostream = assert(require("poco.fileostream"))
-local streamcopier = assert(require("poco.streamcopier"))
-local temporaryfile = assert(require("poco.temporaryfile"))
+local path = require("poco.path")
+local base64decoder = require("poco.base64decoder")
+local fileistream = require("poco.fileistream")
+local fileostream = require("poco.fileostream")
+local streamcopier = require("poco.streamcopier")
+local temporaryfile = require("poco.temporaryfile")
 
 -- filesystem locations
 -- re-use output file from base64encoder.lua

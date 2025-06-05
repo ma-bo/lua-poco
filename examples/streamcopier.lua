@@ -4,10 +4,10 @@
 --]]
 
 -- require modules needed for this task.
-local fileostream = assert(require("poco.fileostream"))
-local fileistream = assert(require("poco.fileistream"))
-local deflatingostream = assert(require("poco.deflatingostream"))
-local streamcopier = assert(require("poco.streamcopier"))
+local fileostream = require("poco.fileostream")
+local fileistream = require("poco.fileistream")
+local deflatingostream = require("poco.deflatingostream")
+local streamcopier = require("poco.streamcopier")
 
 -- construct a source istream, destination ostream, and deflating ostream filter to be used in
 -- front of the destination.

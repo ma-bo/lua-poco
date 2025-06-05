@@ -5,9 +5,9 @@
 --]]
 
 -- load prerequisite modules.
-local sharedmemory = assert(require("poco.sharedmemory"))
-local namedmutex = assert(require("poco.namedmutex"))
-local namedevent = assert(require("poco.namedevent"))
+local sharedmemory = require("poco.sharedmemory")
+local namedmutex = require("poco.namedmutex")
+local namedevent = require("poco.namedevent")
 
 local data_memory_name = "sharedmemory_data_example"
 local data_event_name = "sharedmemory_event"
@@ -15,7 +15,7 @@ local data_mutex_name = "sharedmemory_mutex"
 local filename = "sharedmemory.lua"
 local shared_memory_size = 10000
 -- local lua_interpreter_path = "/usr/bin/lua"
-local lua_interpreter_path = "c:/msys64/mingw64/bin/lua.exe"
+local lua_interpreter_path = "u:/msys64/ucrt64/bin/lua.exe"
 
 -- construct synchronization mechanisms.
 local data_event = assert(namedevent(data_event_name))

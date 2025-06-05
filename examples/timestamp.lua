@@ -7,7 +7,7 @@
 --]]
 
 -- load the poco.timestamp module.
-local timestamp = assert(require("poco.timestamp"))
+local timestamp = require("poco.timestamp")
 
 -- capture the current timestamp.
 local ts1 = timestamp()
